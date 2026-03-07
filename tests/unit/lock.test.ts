@@ -17,7 +17,7 @@ describe('Lock API', () => {
     purchaseIntentToken: 'test_pit',
     influenceIntentToken: 'test_intent_key',
     purchaseIntentToken: 'test_pit_key',
-    cookieMaxAge: 86400,
+    cookieExpireDays: 30,
   };
 
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe('Lock API', () => {
       purchaseIntentToken: testConfig.purchaseIntentToken,
       influenceIntentToken: testConfig.influenceIntentToken,
       purchaseIntentToken: testConfig.purchaseIntentToken,
-      cookieMaxAge: testConfig.cookieMaxAge,
+      cookieExpireDays: testConfig.cookieExpireDays,
     });
 
     // Initialize config
@@ -53,7 +53,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       const result = await lockIntent();
@@ -70,7 +70,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Mock fetch to simulate slow response
@@ -106,7 +106,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Mock fetch to return already_locked
@@ -145,7 +145,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Mock successful fetch response
@@ -177,7 +177,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Mock HTTP error
@@ -202,7 +202,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Mock network error
@@ -223,7 +223,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Mock response without purchase_token
@@ -249,7 +249,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       const mockResponse = {
@@ -290,7 +290,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       const mockResponse = {
@@ -320,7 +320,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       const mockResponse1 = {
@@ -342,7 +342,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       // Re-store IIT since clearAllTokens clears both
@@ -351,7 +351,7 @@ describe('Lock API', () => {
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieMaxAge: testConfig.cookieMaxAge,
+        cookieExpireDays: testConfig.cookieExpireDays,
       });
 
       resetState();

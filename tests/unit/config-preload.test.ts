@@ -103,7 +103,7 @@ describe('Token Helpers', () => {
   const testConfig = {
     influenceIntentToken: 'test_intent',
     purchaseIntentToken: 'test_pit',
-    cookieMaxAge: 86400,
+    cookieExpireDays: 30,
   };
 
   beforeEach(() => {

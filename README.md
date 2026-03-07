@@ -81,8 +81,8 @@ init({
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
 
-  // Cookie max age in seconds (default: 24 hours)
-  cookieMaxAge: 86400,
+  // Cookie expiration in days (default: 30 days)
+  cookieExpireDays: 30,
 });
 ```
 

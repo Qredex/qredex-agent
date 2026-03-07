@@ -69,7 +69,7 @@ function shouldAttemptLock(): boolean {
   const intentToken = getIntentToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
-    cookieMaxAge: config.cookieMaxAge,
+    cookieExpireDays: config.cookieExpireDays,
   });
 
   if (!intentToken) {
@@ -82,7 +82,7 @@ function shouldAttemptLock(): boolean {
     hasPurchaseToken({
       influenceIntentToken: config.influenceIntentToken,
       purchaseIntentToken: config.purchaseIntentToken,
-      cookieMaxAge: config.cookieMaxAge,
+      cookieExpireDays: config.cookieExpireDays,
     })
   ) {
     debug('Purchase token already exists, skipping lock');
@@ -112,7 +112,7 @@ async function tryLockIntent(): Promise<void> {
       storePurchaseToken(response.purchaseToken, {
         influenceIntentToken: config.influenceIntentToken,
         purchaseIntentToken: config.purchaseIntentToken,
-        cookieMaxAge: config.cookieMaxAge,
+        cookieExpireDays: config.cookieExpireDays,
       });
 
       if (response.alreadyLocked) {

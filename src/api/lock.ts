@@ -2,11 +2,11 @@
  * Lock API for communicating with Qredex's public lock endpoint.
  */
 
-import {debug, info, warn} from '../utils/log.js';
-import {getConfig} from '../bootstrap/config.js';
-import {getIntentToken, getPurchaseToken, storePurchaseToken} from '../storage/tokens.js';
-import {endLock, isLockInProgress, startLock} from '../core/state.js';
-import type {LockRequest, LockResponse, LockResult} from './types.js';
+import { debug, info, warn } from '../utils/log.js';
+import { getConfig } from '../bootstrap/config.js';
+import { getIntentToken, getPurchaseToken, storePurchaseToken } from '../storage/tokens.js';
+import { endLock, isLockInProgress, startLock } from '../core/state.js';
+import type { LockRequest, LockResponse, LockResult } from './types.js';
 
 // Track the in-flight lock promise for idempotency
 let inFlightPromise: Promise<LockResult> | null = null;
@@ -25,7 +25,7 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
   const existingPit = getPurchaseToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
-    cookieMaxAge: config.cookieMaxAge,
+    cookieExpireDays: config.cookieExpireDays,
   });
 
   if (existingPit) {
@@ -64,7 +64,7 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
       const intentToken = getIntentToken({
         influenceIntentToken: config.influenceIntentToken,
         purchaseIntentToken: config.purchaseIntentToken,
-        cookieMaxAge: config.cookieMaxAge,
+        cookieExpireDays: config.cookieExpireDays,
       });
 
       if (!intentToken) {
@@ -125,7 +125,7 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
           storePurchaseToken(data.purchase_token, {
             influenceIntentToken: config.influenceIntentToken,
             purchaseIntentToken: config.purchaseIntentToken,
-            cookieMaxAge: config.cookieMaxAge,
+            cookieExpireDays: config.cookieExpireDays,
           });
         }
         return {
@@ -141,7 +141,7 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
         storePurchaseToken(data.purchase_token, {
           influenceIntentToken: config.influenceIntentToken,
           purchaseIntentToken: config.purchaseIntentToken,
-          cookieMaxAge: config.cookieMaxAge,
+          cookieExpireDays: config.cookieExpireDays,
         });
 
         info('Intent locked successfully');
