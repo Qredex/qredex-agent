@@ -81,7 +81,7 @@ describe('Token Storage', () => {
   const testConfig = {
     cookieNameIntent: 'test_intent',
     cookieNamePurchase: 'test_pit',
-    storageKeyIntent: 'test_intent_key',
+    storageKeyInfluence: 'test_intent_key',
     storageKeyPurchase: 'test_pit_key',
     cookieMaxAge: 86400,
   };
@@ -115,7 +115,7 @@ describe('Token Storage', () => {
     const sessionToken = 'session_token';
     const cookieToken = 'cookie_token';
 
-    setSession(testConfig.storageKeyIntent, sessionToken);
+    setSession(testConfig.storageKeyInfluence, sessionToken);
     setCookie(testConfig.cookieNameIntent, cookieToken, { path: '/', maxAge: 86400 });
 
     const retrieved = getIntentToken(testConfig);

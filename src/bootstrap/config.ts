@@ -30,25 +30,25 @@ export interface AgentConfig {
 
   /**
    * Cookie name for intent token.
-   * @default 'qdx_intent'
+   * @default '__qdx_iit'
    */
   cookieNameIntent?: string;
 
   /**
    * Cookie name for purchase intent token.
-   * @default 'qdx_pit'
+   * @default '__qdx_pit'
    */
   cookieNamePurchase?: string;
 
   /**
-   * SessionStorage key for intent token.
-   * @default 'intent_token'
+   * SessionStorage key for influence intent token.
+   * @default '__qdx_iit'
    */
-  storageKeyIntent?: string;
+  storageKeyInfluence?: string;
 
   /**
    * SessionStorage key for purchase intent token.
-   * @default 'purchase_token'
+   * @default '__qdx_pit'
    */
   storageKeyPurchase?: string;
 
@@ -72,10 +72,10 @@ const DEFAULT_CONFIG: Required<AgentConfig> = {
   lockEndpoint: 'https://api.qredex.com/agent/lock',
   debug: false,
   autoDetect: true,
-  cookieNameIntent: 'qdx_intent',
-  cookieNamePurchase: 'qdx_pit',
-  storageKeyIntent: 'intent_token',
-  storageKeyPurchase: 'purchase_token',
+  cookieNameIntent: '__qdx_iit',
+  cookieNamePurchase: '__qdx_pit',
+  storageKeyInfluence: '__qdx_iit',
+  storageKeyPurchase: '__qdx_pit',
   cookieMaxAge: 86400,
 };
 
@@ -134,8 +134,8 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
       config.cookieNamePurchase = userConfig.cookieNamePurchase;
     }
 
-    if (isNonEmptyString(userConfig.storageKeyIntent)) {
-      config.storageKeyIntent = userConfig.storageKeyIntent;
+    if (isNonEmptyString(userConfig.storageKeyInfluence)) {
+      config.storageKeyInfluence = userConfig.storageKeyInfluence;
     }
 
     if (isNonEmptyString(userConfig.storageKeyPurchase)) {

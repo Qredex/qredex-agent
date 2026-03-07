@@ -69,7 +69,7 @@ function shouldAttemptLock(): boolean {
   const intentToken = getIntentToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyIntent: config.storageKeyIntent,
+    storageKeyInfluence: config.storageKeyInfluence,
     storageKeyPurchase: config.storageKeyPurchase,
     cookieMaxAge: config.cookieMaxAge,
   });
@@ -84,7 +84,7 @@ function shouldAttemptLock(): boolean {
     hasPurchaseToken({
       cookieNameIntent: config.cookieNameIntent,
       cookieNamePurchase: config.cookieNamePurchase,
-      storageKeyIntent: config.storageKeyIntent,
+      storageKeyInfluence: config.storageKeyInfluence,
       storageKeyPurchase: config.storageKeyPurchase,
       cookieMaxAge: config.cookieMaxAge,
     })
@@ -116,7 +116,7 @@ async function tryLockIntent(): Promise<void> {
       storePurchaseToken(response.purchaseToken, {
         cookieNameIntent: config.cookieNameIntent,
         cookieNamePurchase: config.cookieNamePurchase,
-        storageKeyIntent: config.storageKeyIntent,
+        storageKeyInfluence: config.storageKeyInfluence,
         storageKeyPurchase: config.storageKeyPurchase,
         cookieMaxAge: config.cookieMaxAge,
       });

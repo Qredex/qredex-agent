@@ -78,12 +78,12 @@ init({
   autoDetect: true,
 
   // Cookie names
-  cookieNameIntent: 'qdx_intent',
-  cookieNamePurchase: 'qdx_pit',
+  cookieNameIntent: '__qdx_iit',
+  cookieNamePurchase: '__qdx_pit',
 
-  // SessionStorage keys
-  storageKeyIntent: 'intent_token',
-  storageKeyPurchase: 'purchase_token',
+  // SessionStorage keys (same as cookie names)
+  storageKeyInfluence: '__qdx_iit',
+  storageKeyPurchase: '__qdx_pit',
 
   // Cookie max age in seconds (default: 24 hours)
   cookieMaxAge: 86400,

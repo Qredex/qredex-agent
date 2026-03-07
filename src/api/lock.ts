@@ -25,7 +25,7 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
   const existingPit = getPurchaseToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyIntent: config.storageKeyIntent,
+    storageKeyInfluence: config.storageKeyInfluence,
     storageKeyPurchase: config.storageKeyPurchase,
     cookieMaxAge: config.cookieMaxAge,
   });
@@ -66,7 +66,7 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
       const intentToken = getIntentToken({
         cookieNameIntent: config.cookieNameIntent,
         cookieNamePurchase: config.cookieNamePurchase,
-        storageKeyIntent: config.storageKeyIntent,
+        storageKeyInfluence: config.storageKeyInfluence,
         storageKeyPurchase: config.storageKeyPurchase,
         cookieMaxAge: config.cookieMaxAge,
       });
@@ -129,7 +129,7 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
           storePurchaseToken(data.purchase_token, {
             cookieNameIntent: config.cookieNameIntent,
             cookieNamePurchase: config.cookieNamePurchase,
-            storageKeyIntent: config.storageKeyIntent,
+            storageKeyInfluence: config.storageKeyInfluence,
             storageKeyPurchase: config.storageKeyPurchase,
             cookieMaxAge: config.cookieMaxAge,
           });
@@ -147,7 +147,7 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
         storePurchaseToken(data.purchase_token, {
           cookieNameIntent: config.cookieNameIntent,
           cookieNamePurchase: config.cookieNamePurchase,
-          storageKeyIntent: config.storageKeyIntent,
+          storageKeyInfluence: config.storageKeyInfluence,
           storageKeyPurchase: config.storageKeyPurchase,
           cookieMaxAge: config.cookieMaxAge,
         });

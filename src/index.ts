@@ -68,7 +68,7 @@ export function getIntentToken(): string | null {
   return getStoredIntentToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyIntent: config.storageKeyIntent,
+    storageKeyInfluence: config.storageKeyInfluence,
     storageKeyPurchase: config.storageKeyPurchase,
     cookieMaxAge: config.cookieMaxAge,
   });
@@ -85,7 +85,7 @@ export function getPurchaseIntentToken(): string | null {
   return getStoredPurchaseToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyIntent: config.storageKeyIntent,
+    storageKeyInfluence: config.storageKeyInfluence,
     storageKeyPurchase: config.storageKeyPurchase,
     cookieMaxAge: config.cookieMaxAge,
   });
@@ -101,7 +101,7 @@ export function hasIntentToken(): boolean {
   return hasStoredIntentToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyIntent: config.storageKeyIntent,
+    storageKeyInfluence: config.storageKeyInfluence,
     storageKeyPurchase: config.storageKeyPurchase,
     cookieMaxAge: config.cookieMaxAge,
   });
@@ -117,7 +117,7 @@ export function hasPurchaseIntentToken(): boolean {
   return hasStoredPurchaseToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyIntent: config.storageKeyIntent,
+    storageKeyInfluence: config.storageKeyInfluence,
     storageKeyPurchase: config.storageKeyPurchase,
     cookieMaxAge: config.cookieMaxAge,
   });

@@ -11,16 +11,16 @@ import { isValidToken } from '../utils/guards.js';
 export interface TokenStorageConfig {
   cookieNameIntent: string;
   cookieNamePurchase: string;
-  storageKeyIntent: string;
+  storageKeyInfluence: string;
   storageKeyPurchase: string;
   cookieMaxAge: number;
 }
 
 const DEFAULT_CONFIG: TokenStorageConfig = {
-  cookieNameIntent: 'qdx_intent',
-  cookieNamePurchase: 'qdx_pit',
-  storageKeyIntent: 'intent_token',
-  storageKeyPurchase: 'purchase_token',
+  cookieNameIntent: '__qdx_iit',
+  cookieNamePurchase: '__qdx_pit',
+  storageKeyInfluence: '__qdx_iit',
+  storageKeyPurchase: '__qdx_pit',
   cookieMaxAge: 86400, // 24 hours
 };
 
@@ -32,7 +32,7 @@ export function storeIntentToken(token: string, config: TokenStorageConfig = DEF
     return;
   }
 
-  setSession(config.storageKeyIntent, token);
+  setSession(config.storageKeyInfluence, token);
   setCookie(config.cookieNameIntent, token, {
     maxAge: config.cookieMaxAge,
     path: '/',
@@ -47,7 +47,7 @@ export function storeIntentToken(token: string, config: TokenStorageConfig = DEF
  */
 export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
   // Try sessionStorage first
-  const sessionToken = getSession(config.storageKeyIntent);
+  const sessionToken = getSession(config.storageKeyInfluence);
   if (isValidToken(sessionToken)) {
     debug('Intent token retrieved from sessionStorage');
     return sessionToken;
@@ -67,7 +67,7 @@ export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): str
  * Remove the intent token from both storage layers.
  */
 export function removeIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
-  removeSession(config.storageKeyIntent);
+  removeSession(config.storageKeyInfluence);
   removeCookie(config.cookieNameIntent, { path: '/' });
   debug('Intent token removed');
 }

@@ -24,9 +24,9 @@ export default defineConfig(({ mode }) => ({
       },
       formats: ['es', 'umd'],
     },
-    // Always minify for production builds
-    minify: mode === 'development' ? false : 'terser',
-    sourcemap: mode !== 'development',
+    // Always minify with terser
+    minify: 'terser',
+    sourcemap: true,
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
@@ -38,10 +38,9 @@ export default defineConfig(({ mode }) => ({
     },
     terserOptions: {
       compress: {
-        // Drop console.debug in production
-        pure_funcs: ['console.log', 'console.info', 'console.warn', 'console.error'],
-        drop_console: true,
-        drop_debugger: true,
+        // Only drop console in production mode
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
       },
       format: {
         comments: false,

@@ -5,8 +5,6 @@
 import { debug, warn } from '../utils/log.js';
 import { isStorageAvailable } from '../utils/guards.js';
 
-const STORAGE_KEY_PREFIX = 'qredex_';
-
 /**
  * Check if sessionStorage is available.
  */
@@ -24,7 +22,7 @@ export function setSession(key: string, value: string): void {
   }
 
   try {
-    sessionStorage.setItem(`${STORAGE_KEY_PREFIX}${key}`, value);
+    sessionStorage.setItem(key, value);
     debug('SessionStorage set:', key);
   } catch (err) {
     warn('Failed to set sessionStorage:', key, err);
@@ -40,7 +38,7 @@ export function getSession(key: string): string | null {
   }
 
   try {
-    const value = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}${key}`);
+    const value = sessionStorage.getItem(key);
     return value;
   } catch (err) {
     warn('Failed to get sessionStorage:', key, err);
@@ -57,7 +55,7 @@ export function removeSession(key: string): void {
   }
 
   try {
-    sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}${key}`);
+    sessionStorage.removeItem(key);
     debug('SessionStorage removed:', key);
   } catch (err) {
     warn('Failed to remove sessionStorage:', key, err);
@@ -76,8 +74,8 @@ export function getAllSessionKeys(): string[] {
     const keys: string[] = [];
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
-      if (key && key.startsWith(STORAGE_KEY_PREFIX)) {
-        keys.push(key.substring(STORAGE_KEY_PREFIX.length));
+      if (key && key.startsWith('__qdx_')) {
+        keys.push(key);
       }
     }
     return keys;
@@ -98,7 +96,7 @@ export function clearQredexSession(): void {
   try {
     const keys = getAllSessionKeys();
     for (const key of keys) {
-      sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}${key}`);
+      sessionStorage.removeItem(key);
     }
     debug('Cleared all qredex sessionStorage');
   } catch (err) {

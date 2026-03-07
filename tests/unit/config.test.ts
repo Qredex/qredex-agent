@@ -2,8 +2,8 @@
  * Unit tests for configuration.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initConfig, getConfig, getConfigValue, resetConfig, isConfigInitialized } from '../../src/bootstrap/config.js';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {getConfig, getConfigValue, initConfig, isConfigInitialized, resetConfig} from '../../src/bootstrap/config.js';
 
 describe('Configuration', () => {
   beforeEach(() => {
@@ -17,8 +17,10 @@ describe('Configuration', () => {
     expect(config.lockEndpoint).toBe('https://api.qredex.com/agent/lock');
     expect(config.debug).toBe(false);
     expect(config.autoDetect).toBe(true);
-    expect(config.cookieNameIntent).toBe('qdx_intent');
-    expect(config.cookieNamePurchase).toBe('qdx_pit');
+    expect(config.cookieNameIntent).toBe('__qdx_iit');
+    expect(config.cookieNamePurchase).toBe('__qdx_pit');
+    expect(config.storageKeyInfluence).toBe('__qdx_iit');
+    expect(config.storageKeyPurchase).toBe('__qdx_pit');
   });
 
   it('should merge user config with defaults', () => {

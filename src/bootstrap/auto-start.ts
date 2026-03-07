@@ -59,7 +59,7 @@ export function captureIntentToken(): boolean {
   const existingToken = getIntentToken({
     cookieNameIntent: getConfigValue('cookieNameIntent'),
     cookieNamePurchase: getConfigValue('cookieNamePurchase'),
-    storageKeyIntent: getConfigValue('storageKeyIntent'),
+    storageKeyInfluence: getConfigValue('storageKeyInfluence'),
     storageKeyPurchase: getConfigValue('storageKeyPurchase'),
     cookieMaxAge: getConfigValue('cookieMaxAge'),
   });
@@ -80,7 +80,7 @@ export function captureIntentToken(): boolean {
   storeIntentToken(token, {
     cookieNameIntent: getConfigValue('cookieNameIntent'),
     cookieNamePurchase: getConfigValue('cookieNamePurchase'),
-    storageKeyIntent: getConfigValue('storageKeyIntent'),
+    storageKeyInfluence: getConfigValue('storageKeyInfluence'),
     storageKeyPurchase: getConfigValue('storageKeyPurchase'),
     cookieMaxAge: getConfigValue('cookieMaxAge'),
   });
