@@ -1,7 +1,26 @@
 /**
+ *    ▄▄▄▄
+ *  ▄█▀▀███▄▄              █▄
+ *  ██    ██ ▄             ██
+ *  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+ *  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+ *   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+ *        ▀█
+ *
+ *  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+ *
+ *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ *  This is proprietary and confidential. Unauthorized copying, redistributing
+ *  and/or modification of this file via any medium is inexorably prohibited.
+ *
+ *  If you need additional information or have any questions, please email: copyright@qredex.com
+ */
+
+/**
  * Bun build script for qredex-agent.
  * Produces minified ESM and UMD bundles with type definitions.
- * 
+ *
  * Usage:
  *   bun run build:bun         # Production build
  *   bun run build:bun:dev     # Development build (keeps console)
@@ -68,18 +87,18 @@ if (isProduction) {
   console.log('Stripping console statements for production...');
   const umdPath = join(distDir, 'qredex-agent.umd.cjs');
   const esmPath = join(distDir, 'qredex-agent.js');
-  
+
   // Simple regex to remove console.* calls
   const stripConsole = (code: string) => {
     return code.replace(/console\.(log|info|warn|error|debug)\([^)]*\)/g, '');
   };
-  
+
   const umdContent = readFileSync(umdPath, 'utf-8');
   const esmContent = readFileSync(esmPath, 'utf-8');
-  
+
   writeFileSync(umdPath, stripConsole(umdContent), 'utf-8');
   writeFileSync(esmPath, stripConsole(esmContent), 'utf-8');
-  
+
   console.log('Console stripped: ✓');
 }
 
