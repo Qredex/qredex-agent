@@ -111,7 +111,7 @@ export function storePurchaseToken(
 /**
  * Get the purchase intent token (PIT) from sessionStorage first, then cookie fallback.
  */
-export function getPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
+export const getPurchaseToken = (config: TokenStorageConfig = DEFAULT_CONFIG): string | null => {
   // Try sessionStorage first
   const sessionToken = getSession(config.purchaseIntentToken);
   if (isValidToken(sessionToken)) {
@@ -127,16 +127,16 @@ export function getPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): s
   }
 
   return null;
-}
+};
 
 /**
  * Remove the purchase token from both storage layers.
  */
-export function removePurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
+export const removePurchaseToken = (config: TokenStorageConfig = DEFAULT_CONFIG): void => {
   removeSession(config.purchaseIntentToken);
   removeCookie(config.purchaseIntentToken, { path: '/' });
   debug('Purchase token removed');
-}
+};
 
 /**
  * Check if a purchase token already exists.
