@@ -22,17 +22,17 @@
  * Listens for clicks on elements that look like add-to-cart buttons.
  */
 
-import { debug } from '../utils/log.js';
-import { isAddToCartElement } from '../utils/dom.js';
-import { emitAddToCart } from './pipeline.js';
-import type { AddToCartMeta } from './types.js';
+import {debug, warn} from '../utils/log.js';
+import {isAddToCartElement} from '../utils/dom.js';
+import {emitAddToCart} from './pipeline.js';
+import type {AddToCartMeta} from './types.js';
 
 let clickListenerAttached = false;
 
 /**
  * Extract product information from the page context.
  */
-function extractProductInfo(element: Element): Partial<AddToCartMeta> {
+const extractProductInfo = (element: Element): Partial<AddToCartMeta> => {
   const meta: Partial<AddToCartMeta> = {};
 
   // Try to find product ID from data attributes
@@ -88,12 +88,12 @@ function extractProductInfo(element: Element): Partial<AddToCartMeta> {
   }
 
   return meta;
-}
+};
 
 /**
  * Handle click events and detect add-to-cart actions.
  */
-function handleClick(event: MouseEvent): void {
+const handleClick = (event: MouseEvent): void => {
   const target = event.target as Element | null;
 
   if (!target) return;
@@ -118,28 +118,31 @@ function handleClick(event: MouseEvent): void {
       timestamp: Date.now(),
       source: 'click',
       meta,
+    }).then(r => {
+      debug('Add-to-cart event handled', r);
+    }).catch(err => {
+      warn('Error handling add-to-cart event', err);
     });
   }
-}
+};
 
 /**
  * Enable click-based add-to-cart detection.
  */
-export function enableClickDetection(): void {
+export const enableClickDetection = (): void => {
   if (clickListenerAttached) {
     return;
   }
 
   document.addEventListener('click', handleClick, { capture: true });
   clickListenerAttached = true;
-
   debug('Click detection enabled');
-}
+};
 
 /**
  * Disable click-based add-to-cart detection.
  */
-export function disableClickDetection(): void {
+export const disableClickDetection = (): void => {
   if (!clickListenerAttached) {
     return;
   }
@@ -148,11 +151,9 @@ export function disableClickDetection(): void {
   clickListenerAttached = false;
 
   debug('Click detection disabled');
-}
+};
 
 /**
  * Check if click detection is currently enabled.
  */
-export function isClickDetectionEnabled(): boolean {
-  return clickListenerAttached;
-}
+export const isClickDetectionEnabled = (): boolean => clickListenerAttached;
