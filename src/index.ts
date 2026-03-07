@@ -224,7 +224,7 @@ export function getStatus(): {
 /**
  * Export types for TypeScript consumers.
  */
-export type { AgentConfig } from './bootstrap/config.js';
+export type { AgentConfig, Environment } from './bootstrap/config.js';
 export type { AddToCartMeta, AddToCartHandler, AddToCartEvent } from './detect/types.js';
 export type { LockResult, LockRequest, LockResponse } from './api/types.js';
 
