@@ -66,10 +66,8 @@ export function init(config?: AgentConfig): void {
 export function getIntentToken(): string | null {
   const config = getConfig();
   return getStoredIntentToken({
-    cookieNameIntent: config.cookieNameIntent,
-    cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyInfluence: config.storageKeyInfluence,
-    storageKeyPurchase: config.storageKeyPurchase,
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
     cookieMaxAge: config.cookieMaxAge,
   });
 }
@@ -83,10 +81,8 @@ export function getIntentToken(): string | null {
 export function getPurchaseIntentToken(): string | null {
   const config = getConfig();
   return getStoredPurchaseToken({
-    cookieNameIntent: config.cookieNameIntent,
-    cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyInfluence: config.storageKeyInfluence,
-    storageKeyPurchase: config.storageKeyPurchase,
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
     cookieMaxAge: config.cookieMaxAge,
   });
 }
@@ -99,10 +95,8 @@ export function getPurchaseIntentToken(): string | null {
 export function hasIntentToken(): boolean {
   const config = getConfig();
   return hasStoredIntentToken({
-    cookieNameIntent: config.cookieNameIntent,
-    cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyInfluence: config.storageKeyInfluence,
-    storageKeyPurchase: config.storageKeyPurchase,
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
     cookieMaxAge: config.cookieMaxAge,
   });
 }
@@ -115,10 +109,8 @@ export function hasIntentToken(): boolean {
 export function hasPurchaseIntentToken(): boolean {
   const config = getConfig();
   return hasStoredPurchaseToken({
-    cookieNameIntent: config.cookieNameIntent,
-    cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyInfluence: config.storageKeyInfluence,
-    storageKeyPurchase: config.storageKeyPurchase,
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
     cookieMaxAge: config.cookieMaxAge,
   });
 }

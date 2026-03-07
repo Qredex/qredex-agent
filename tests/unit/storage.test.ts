@@ -81,7 +81,7 @@ describe('Token Storage', () => {
   const testConfig = {
     cookieNameIntent: 'test_intent',
     cookieNamePurchase: 'test_pit',
-    storageKeyInfluence: 'test_intent_key',
+    storageKeyIntent: 'test_intent_key',
     storageKeyPurchase: 'test_pit_key',
     cookieMaxAge: 86400,
   };
@@ -115,8 +115,8 @@ describe('Token Storage', () => {
     const sessionToken = 'session_token';
     const cookieToken = 'cookie_token';
 
-    setSession(testConfig.storageKeyInfluence, sessionToken);
-    setCookie(testConfig.cookieNameIntent, cookieToken, { path: '/', maxAge: 86400 });
+    setSession(testConfig.influenceIntentToken, sessionToken);
+    setCookie(testConfig.influenceIntentToken, cookieToken, { path: '/', maxAge: 86400 });
 
     const retrieved = getIntentToken(testConfig);
     expect(retrieved).toBe(sessionToken);
@@ -124,7 +124,7 @@ describe('Token Storage', () => {
 
   it('should fall back to cookie when sessionStorage is empty', () => {
     const cookieToken = 'cookie_fallback_token';
-    setCookie(testConfig.cookieNameIntent, cookieToken, { path: '/', maxAge: 86400 });
+    setCookie(testConfig.influenceIntentToken, cookieToken, { path: '/', maxAge: 86400 });
 
     const retrieved = getIntentToken(testConfig);
     expect(retrieved).toBe(cookieToken);

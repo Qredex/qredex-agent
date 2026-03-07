@@ -29,28 +29,16 @@ export interface AgentConfig {
   autoDetect?: boolean;
 
   /**
-   * Cookie name for intent token.
+   * Key name for influence intent token (used for both cookie and sessionStorage).
    * @default '__qdx_iit'
    */
-  cookieNameIntent?: string;
+  influenceIntentToken?: string;
 
   /**
-   * Cookie name for purchase intent token.
+   * Key name for purchase intent token (used for both cookie and sessionStorage).
    * @default '__qdx_pit'
    */
-  cookieNamePurchase?: string;
-
-  /**
-   * SessionStorage key for influence intent token.
-   * @default '__qdx_iit'
-   */
-  storageKeyInfluence?: string;
-
-  /**
-   * SessionStorage key for purchase intent token.
-   * @default '__qdx_pit'
-   */
-  storageKeyPurchase?: string;
+  purchaseIntentToken?: string;
 
   /**
    * Cookie max age in seconds.
@@ -72,10 +60,8 @@ const DEFAULT_CONFIG: Required<AgentConfig> = {
   lockEndpoint: 'https://api.qredex.com/agent/lock',
   debug: false,
   autoDetect: true,
-  cookieNameIntent: '__qdx_iit',
-  cookieNamePurchase: '__qdx_pit',
-  storageKeyInfluence: '__qdx_iit',
-  storageKeyPurchase: '__qdx_pit',
+  influenceIntentToken: '__qdx_iit',
+  purchaseIntentToken: '__qdx_pit',
   cookieMaxAge: 86400,
 };
 
@@ -125,21 +111,13 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
       config.autoDetect = userConfig.autoDetect;
     }
 
-    // Validate and merge string options
-    if (isNonEmptyString(userConfig.cookieNameIntent)) {
-      config.cookieNameIntent = userConfig.cookieNameIntent;
+    // Validate and merge token key options
+    if (isNonEmptyString(userConfig.influenceIntentToken)) {
+      config.influenceIntentToken = userConfig.influenceIntentToken;
     }
 
-    if (isNonEmptyString(userConfig.cookieNamePurchase)) {
-      config.cookieNamePurchase = userConfig.cookieNamePurchase;
-    }
-
-    if (isNonEmptyString(userConfig.storageKeyInfluence)) {
-      config.storageKeyInfluence = userConfig.storageKeyInfluence;
-    }
-
-    if (isNonEmptyString(userConfig.storageKeyPurchase)) {
-      config.storageKeyPurchase = userConfig.storageKeyPurchase;
+    if (isNonEmptyString(userConfig.purchaseIntentToken)) {
+      config.purchaseIntentToken = userConfig.purchaseIntentToken;
     }
 
     // Validate and merge numeric options

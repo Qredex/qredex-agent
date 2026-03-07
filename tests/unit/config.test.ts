@@ -17,10 +17,8 @@ describe('Configuration', () => {
     expect(config.lockEndpoint).toBe('https://api.qredex.com/agent/lock');
     expect(config.debug).toBe(false);
     expect(config.autoDetect).toBe(true);
-    expect(config.cookieNameIntent).toBe('__qdx_iit');
-    expect(config.cookieNamePurchase).toBe('__qdx_pit');
-    expect(config.storageKeyInfluence).toBe('__qdx_iit');
-    expect(config.storageKeyPurchase).toBe('__qdx_pit');
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
+    expect(config.purchaseIntentToken).toBe('__qdx_pit');
   });
 
   it('should merge user config with defaults', () => {
@@ -37,7 +35,7 @@ describe('Configuration', () => {
   it('should respect pre-load global config', () => {
     window.QredexAgentConfig = {
       debug: true,
-      cookieNameIntent: 'custom_intent',
+      influenceIntentToken: 'custom_intent',
     };
 
     const config = initConfig({
@@ -45,7 +43,7 @@ describe('Configuration', () => {
     });
 
     expect(config.debug).toBe(true);
-    expect(config.cookieNameIntent).toBe('custom_intent');
+    expect(config.influenceIntentToken).toBe('custom_intent');
   });
 
   it('should validate URL config values', () => {

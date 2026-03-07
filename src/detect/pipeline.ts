@@ -67,10 +67,8 @@ function shouldAttemptLock(): boolean {
   // Check if IIT exists
   const config = getConfig();
   const intentToken = getIntentToken({
-    cookieNameIntent: config.cookieNameIntent,
-    cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyInfluence: config.storageKeyInfluence,
-    storageKeyPurchase: config.storageKeyPurchase,
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
     cookieMaxAge: config.cookieMaxAge,
   });
 
@@ -82,10 +80,8 @@ function shouldAttemptLock(): boolean {
   // Check if PIT already exists
   if (
     hasPurchaseToken({
-      cookieNameIntent: config.cookieNameIntent,
-      cookieNamePurchase: config.cookieNamePurchase,
-      storageKeyInfluence: config.storageKeyInfluence,
-      storageKeyPurchase: config.storageKeyPurchase,
+      influenceIntentToken: config.influenceIntentToken,
+      purchaseIntentToken: config.purchaseIntentToken,
       cookieMaxAge: config.cookieMaxAge,
     })
   ) {
@@ -114,10 +110,8 @@ async function tryLockIntent(): Promise<void> {
     if (response.success && response.purchaseToken) {
       // Store the purchase token (also done in lockIntent, but double-check)
       storePurchaseToken(response.purchaseToken, {
-        cookieNameIntent: config.cookieNameIntent,
-        cookieNamePurchase: config.cookieNamePurchase,
-        storageKeyInfluence: config.storageKeyInfluence,
-        storageKeyPurchase: config.storageKeyPurchase,
+        influenceIntentToken: config.influenceIntentToken,
+        purchaseIntentToken: config.purchaseIntentToken,
         cookieMaxAge: config.cookieMaxAge,
       });
 

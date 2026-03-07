@@ -101,10 +101,8 @@ describe('Config Pre-load', () => {
 
 describe('Token Helpers', () => {
   const testConfig = {
-    cookieNameIntent: 'test_intent',
-    cookieNamePurchase: 'test_pit',
-    storageKeyIntent: 'test_intent_key',
-    storageKeyPurchase: 'test_pit_key',
+    influenceIntentToken: 'test_intent',
+    purchaseIntentToken: 'test_pit',
     cookieMaxAge: 86400,
   };
 
@@ -125,10 +123,10 @@ describe('Token Helpers', () => {
     it('should return true when token exists in cookie', () => {
       // Clear sessionStorage to force cookie fallback
       sessionStorage.clear();
-      
+
       // Directly set cookie (storeIntentToken sets both)
-      document.cookie = `${testConfig.cookieNameIntent}=test_iit_cookie; path=/; max-age=86400`;
-      
+      document.cookie = `${testConfig.influenceIntentToken}=test_iit_cookie; path=/; max-age=86400`;
+
       expect(hasIntentToken(testConfig)).toBe(true);
     });
 
@@ -152,10 +150,10 @@ describe('Token Helpers', () => {
     it('should return true when token exists in cookie', () => {
       // Clear sessionStorage to force cookie fallback
       sessionStorage.clear();
-      
+
       // Directly set cookie
-      document.cookie = `${testConfig.cookieNamePurchase}=test_pit_cookie; path=/; max-age=86400`;
-      
+      document.cookie = `${testConfig.purchaseIntentToken}=test_pit_cookie; path=/; max-age=86400`;
+
       expect(hasPurchaseToken(testConfig)).toBe(true);
     });
 

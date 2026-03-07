@@ -77,13 +77,9 @@ init({
   // Enable automatic add-to-cart detection
   autoDetect: true,
 
-  // Cookie names
-  cookieNameIntent: '__qdx_iit',
-  cookieNamePurchase: '__qdx_pit',
-
-  // SessionStorage keys (same as cookie names)
-  storageKeyInfluence: '__qdx_iit',
-  storageKeyPurchase: '__qdx_pit',
+  // Token key names (used for both cookie and sessionStorage)
+  influenceIntentToken: '__qdx_iit',
+  purchaseIntentToken: '__qdx_pit',
 
   // Cookie max age in seconds (default: 24 hours)
   cookieMaxAge: 86400,

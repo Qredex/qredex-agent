@@ -9,18 +9,14 @@ import { debug } from '../utils/log.js';
 import { isValidToken } from '../utils/guards.js';
 
 export interface TokenStorageConfig {
-  cookieNameIntent: string;
-  cookieNamePurchase: string;
-  storageKeyInfluence: string;
-  storageKeyPurchase: string;
+  influenceIntentToken: string;
+  purchaseIntentToken: string;
   cookieMaxAge: number;
 }
 
 const DEFAULT_CONFIG: TokenStorageConfig = {
-  cookieNameIntent: '__qdx_iit',
-  cookieNamePurchase: '__qdx_pit',
-  storageKeyInfluence: '__qdx_iit',
-  storageKeyPurchase: '__qdx_pit',
+  influenceIntentToken: '__qdx_iit',
+  purchaseIntentToken: '__qdx_pit',
   cookieMaxAge: 86400, // 24 hours
 };
 
@@ -32,8 +28,8 @@ export function storeIntentToken(token: string, config: TokenStorageConfig = DEF
     return;
   }
 
-  setSession(config.storageKeyInfluence, token);
-  setCookie(config.cookieNameIntent, token, {
+  setSession(config.influenceIntentToken, token);
+  setCookie(config.influenceIntentToken, token, {
     maxAge: config.cookieMaxAge,
     path: '/',
     sameSite: 'Strict',
@@ -47,14 +43,14 @@ export function storeIntentToken(token: string, config: TokenStorageConfig = DEF
  */
 export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
   // Try sessionStorage first
-  const sessionToken = getSession(config.storageKeyInfluence);
+  const sessionToken = getSession(config.influenceIntentToken);
   if (isValidToken(sessionToken)) {
     debug('Intent token retrieved from sessionStorage');
     return sessionToken;
   }
 
   // Fallback to cookie
-  const cookieToken = getCookie(config.cookieNameIntent);
+  const cookieToken = getCookie(config.influenceIntentToken);
   if (isValidToken(cookieToken)) {
     debug('Intent token retrieved from cookie');
     return cookieToken;
@@ -67,8 +63,8 @@ export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): str
  * Remove the intent token from both storage layers.
  */
 export function removeIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
-  removeSession(config.storageKeyInfluence);
-  removeCookie(config.cookieNameIntent, { path: '/' });
+  removeSession(config.influenceIntentToken);
+  removeCookie(config.influenceIntentToken, { path: '/' });
   debug('Intent token removed');
 }
 
@@ -83,8 +79,8 @@ export function storePurchaseToken(
     return;
   }
 
-  setSession(config.storageKeyPurchase, token);
-  setCookie(config.cookieNamePurchase, token, {
+  setSession(config.purchaseIntentToken, token);
+  setCookie(config.purchaseIntentToken, token, {
     maxAge: config.cookieMaxAge,
     path: '/',
     sameSite: 'Strict',
@@ -98,14 +94,14 @@ export function storePurchaseToken(
  */
 export function getPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
   // Try sessionStorage first
-  const sessionToken = getSession(config.storageKeyPurchase);
+  const sessionToken = getSession(config.purchaseIntentToken);
   if (isValidToken(sessionToken)) {
     debug('Purchase token retrieved from sessionStorage');
     return sessionToken;
   }
 
   // Fallback to cookie
-  const cookieToken = getCookie(config.cookieNamePurchase);
+  const cookieToken = getCookie(config.purchaseIntentToken);
   if (isValidToken(cookieToken)) {
     debug('Purchase token retrieved from cookie');
     return cookieToken;
@@ -118,8 +114,8 @@ export function getPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): s
  * Remove the purchase token from both storage layers.
  */
 export function removePurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
-  removeSession(config.storageKeyPurchase);
-  removeCookie(config.cookieNamePurchase, { path: '/' });
+  removeSession(config.purchaseIntentToken);
+  removeCookie(config.purchaseIntentToken, { path: '/' });
   debug('Purchase token removed');
 }
 

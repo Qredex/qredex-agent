@@ -13,20 +13,20 @@ describe('Lock API', () => {
     lockEndpoint: 'https://api.qredex.com/agent/lock',
     debug: false,
     autoDetect: false,
-    cookieNameIntent: 'test_intent',
-    cookieNamePurchase: 'test_pit',
-    storageKeyIntent: 'test_intent_key',
-    storageKeyPurchase: 'test_pit_key',
+    influenceIntentToken: 'test_intent',
+    purchaseIntentToken: 'test_pit',
+    influenceIntentToken: 'test_intent_key',
+    purchaseIntentToken: 'test_pit_key',
     cookieMaxAge: 86400,
   };
 
   beforeEach(() => {
     // Clear storage
     clearAllTokens({
-      cookieNameIntent: testConfig.cookieNameIntent,
-      cookieNamePurchase: testConfig.cookieNamePurchase,
-      storageKeyIntent: testConfig.storageKeyIntent,
-      storageKeyPurchase: testConfig.storageKeyPurchase,
+      influenceIntentToken: testConfig.influenceIntentToken,
+      purchaseIntentToken: testConfig.purchaseIntentToken,
+      influenceIntentToken: testConfig.influenceIntentToken,
+      purchaseIntentToken: testConfig.purchaseIntentToken,
       cookieMaxAge: testConfig.cookieMaxAge,
     });
 
@@ -49,10 +49,10 @@ describe('Lock API', () => {
     it('should return cached PIT if already exists locally', async () => {
       // Store a PIT first
       storePurchaseToken('existing_pit_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -66,10 +66,10 @@ describe('Lock API', () => {
     it('should return same promise for concurrent calls', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -102,10 +102,10 @@ describe('Lock API', () => {
     it('should handle already_locked response from server', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -141,10 +141,10 @@ describe('Lock API', () => {
     it('should successfully lock intent', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -173,10 +173,10 @@ describe('Lock API', () => {
     it('should handle HTTP errors', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -198,10 +198,10 @@ describe('Lock API', () => {
     it('should handle network errors', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -219,10 +219,10 @@ describe('Lock API', () => {
     it('should handle invalid response without purchase_token', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -245,10 +245,10 @@ describe('Lock API', () => {
     it('should include metadata in request', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -286,10 +286,10 @@ describe('Lock API', () => {
     it('should reset in-flight state after completion', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -316,10 +316,10 @@ describe('Lock API', () => {
     it('should allow new lock after state reset', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
@@ -338,19 +338,19 @@ describe('Lock API', () => {
 
       // Clear PIT to simulate fresh state (but keep IIT)
       clearAllTokens({
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 
       // Re-store IIT since clearAllTokens clears both
       storeIntentToken('test_intent_12345', {
-        cookieNameIntent: testConfig.cookieNameIntent,
-        cookieNamePurchase: testConfig.cookieNamePurchase,
-        storageKeyIntent: testConfig.storageKeyIntent,
-        storageKeyPurchase: testConfig.storageKeyPurchase,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
+        influenceIntentToken: testConfig.influenceIntentToken,
+        purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieMaxAge: testConfig.cookieMaxAge,
       });
 

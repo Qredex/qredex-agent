@@ -20,13 +20,16 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:dev": "tsc && vite build --mode development",
+    "build:bun": "bun run build-bun.ts",
+    "build:bun:dev": "BUN_MODE=development bun run build-bun.ts",
     "preview": "vite preview",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*.ts\" \"examples/**/*.html\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"examples/**/*.html\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:bun": "bun test"
   },
   "keywords": [
     "qredex",
@@ -37,6 +40,7 @@
   "author": "Qredex",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^25.3.5",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "@vitest/ui": "^1.3.1",

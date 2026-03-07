@@ -23,10 +23,8 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
 
   // Check if PIT already exists locally - idempotent fast path
   const existingPit = getPurchaseToken({
-    cookieNameIntent: config.cookieNameIntent,
-    cookieNamePurchase: config.cookieNamePurchase,
-    storageKeyInfluence: config.storageKeyInfluence,
-    storageKeyPurchase: config.storageKeyPurchase,
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
     cookieMaxAge: config.cookieMaxAge,
   });
 
@@ -64,10 +62,8 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
     try {
       // Get the intent token
       const intentToken = getIntentToken({
-        cookieNameIntent: config.cookieNameIntent,
-        cookieNamePurchase: config.cookieNamePurchase,
-        storageKeyInfluence: config.storageKeyInfluence,
-        storageKeyPurchase: config.storageKeyPurchase,
+        influenceIntentToken: config.influenceIntentToken,
+        purchaseIntentToken: config.purchaseIntentToken,
         cookieMaxAge: config.cookieMaxAge,
       });
 
@@ -127,10 +123,8 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
         if (data.purchase_token) {
           // Store the returned PIT for future use
           storePurchaseToken(data.purchase_token, {
-            cookieNameIntent: config.cookieNameIntent,
-            cookieNamePurchase: config.cookieNamePurchase,
-            storageKeyInfluence: config.storageKeyInfluence,
-            storageKeyPurchase: config.storageKeyPurchase,
+            influenceIntentToken: config.influenceIntentToken,
+            purchaseIntentToken: config.purchaseIntentToken,
             cookieMaxAge: config.cookieMaxAge,
           });
         }
@@ -145,10 +139,8 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
       if (data.success && data.purchase_token) {
         // Store the PIT for future use
         storePurchaseToken(data.purchase_token, {
-          cookieNameIntent: config.cookieNameIntent,
-          cookieNamePurchase: config.cookieNamePurchase,
-          storageKeyInfluence: config.storageKeyInfluence,
-          storageKeyPurchase: config.storageKeyPurchase,
+          influenceIntentToken: config.influenceIntentToken,
+          purchaseIntentToken: config.purchaseIntentToken,
           cookieMaxAge: config.cookieMaxAge,
         });
 
