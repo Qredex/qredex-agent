@@ -47,6 +47,9 @@ export interface LockResponse {
   /** The purchase intent token (PIT) if successful */
   purchase_token?: string;
 
+  /** Whether the intent was already locked (idempotent response) */
+  already_locked?: boolean;
+
   /** Error message if failed */
   error?: string;
 
@@ -62,7 +65,10 @@ export interface LockResult {
   success: boolean;
 
   /** The purchase intent token if successful */
-  purchaseToken?: string;
+  purchaseToken: string | null;
+
+  /** Whether the intent was already locked (idempotent response) */
+  alreadyLocked: boolean;
 
   /** Error message if failed */
   error?: string;

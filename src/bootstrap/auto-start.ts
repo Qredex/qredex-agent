@@ -7,7 +7,7 @@ import { debug, info, warn } from '../utils/log.js';
 import { storeIntentToken, getIntentToken } from '../storage/tokens.js';
 import { getConfigValue } from './config.js';
 
-const INTENT_PARAM = 'qdx_intent';
+const INFLUENCE_INTENT_TOKEN_PARAM = 'qdx_intent';
 
 /**
  * Extract the qdx_intent token from the current URL.
@@ -15,7 +15,7 @@ const INTENT_PARAM = 'qdx_intent';
 export function extractIntentFromUrl(): string | null {
   try {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get(INTENT_PARAM);
+    const token = params.get(INFLUENCE_INTENT_TOKEN_PARAM);
 
     if (token) {
       debug('Found qdx_intent in URL');
@@ -37,8 +37,8 @@ export function cleanUrl(): void {
   try {
     const params = new URLSearchParams(window.location.search);
 
-    if (params.has(INTENT_PARAM)) {
-      params.delete(INTENT_PARAM);
+    if (params.has(INFLUENCE_INTENT_TOKEN_PARAM)) {
+      params.delete(INFLUENCE_INTENT_TOKEN_PARAM);
 
       const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}${window.location.hash}`;
 

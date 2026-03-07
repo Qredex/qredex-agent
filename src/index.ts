@@ -20,6 +20,8 @@ import {
 import {
   getIntentToken as getStoredIntentToken,
   getPurchaseToken as getStoredPurchaseToken,
+  hasIntentToken as hasStoredIntentToken,
+  hasPurchaseToken as hasStoredPurchaseToken,
 } from './storage/tokens.js';
 import { lockIntent as apiLockIntent } from './api/lock.js';
 import { triggerAddToCart } from './detect/manual.js';
@@ -81,6 +83,38 @@ export function getIntentToken(): string | null {
 export function getPurchaseIntentToken(): string | null {
   const config = getConfig();
   return getStoredPurchaseToken({
+    cookieNameIntent: config.cookieNameIntent,
+    cookieNamePurchase: config.cookieNamePurchase,
+    storageKeyIntent: config.storageKeyIntent,
+    storageKeyPurchase: config.storageKeyPurchase,
+    cookieMaxAge: config.cookieMaxAge,
+  });
+}
+
+/**
+ * Check if an intent token (IIT) exists.
+ *
+ * @returns true if an intent token is available, false otherwise
+ */
+export function hasIntentToken(): boolean {
+  const config = getConfig();
+  return hasStoredIntentToken({
+    cookieNameIntent: config.cookieNameIntent,
+    cookieNamePurchase: config.cookieNamePurchase,
+    storageKeyIntent: config.storageKeyIntent,
+    storageKeyPurchase: config.storageKeyPurchase,
+    cookieMaxAge: config.cookieMaxAge,
+  });
+}
+
+/**
+ * Check if a purchase intent token (PIT) exists.
+ *
+ * @returns true if a purchase token is available, false otherwise
+ */
+export function hasPurchaseIntentToken(): boolean {
+  const config = getConfig();
+  return hasStoredPurchaseToken({
     cookieNameIntent: config.cookieNameIntent,
     cookieNamePurchase: config.cookieNamePurchase,
     storageKeyIntent: config.storageKeyIntent,
@@ -181,6 +215,8 @@ if (typeof window !== 'undefined') {
     init,
     getIntentToken,
     getPurchaseIntentToken,
+    hasIntentToken,
+    hasPurchaseIntentToken,
     lockIntent,
     handleAddToCart,
     onAddToCart,

@@ -112,7 +112,7 @@ async function tryLockIntent(): Promise<void> {
     const response = await lockIntent();
 
     if (response.success && response.purchaseToken) {
-      // Store the purchase token
+      // Store the purchase token (also done in lockIntent, but double-check)
       storePurchaseToken(response.purchaseToken, {
         cookieNameIntent: config.cookieNameIntent,
         cookieNamePurchase: config.cookieNamePurchase,
@@ -121,7 +121,11 @@ async function tryLockIntent(): Promise<void> {
         cookieMaxAge: config.cookieMaxAge,
       });
 
-      info('Intent locked successfully');
+      if (response.alreadyLocked) {
+        info('Intent was already locked');
+      } else {
+        info('Intent locked successfully');
+      }
     } else {
       console.warn('[QredexAgent] Lock request failed:', response.error);
     }

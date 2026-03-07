@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     dts({
       rollupTypes: true,
@@ -24,8 +24,9 @@ export default defineConfig({
       },
       formats: ['es', 'umd'],
     },
-    minify: 'terser',
-    sourcemap: true,
+    // Always minify for production builds
+    minify: mode === 'development' ? false : 'terser',
+    sourcemap: mode !== 'development',
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
@@ -37,8 +38,10 @@ export default defineConfig({
     },
     terserOptions: {
       compress: {
-        drop_console: false,
-        pure_funcs: ['console.debug'],
+        // Drop console.debug in production
+        pure_funcs: ['console.log', 'console.info', 'console.warn', 'console.error'],
+        drop_console: true,
+        drop_debugger: true,
       },
       format: {
         comments: false,
@@ -46,7 +49,7 @@ export default defineConfig({
     },
   },
   define: {
-    __DEV__: 'true',
+    __DEV__: mode === 'development' ? 'true' : 'false',
     __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
   },
-});
+}));

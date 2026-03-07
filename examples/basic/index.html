@@ -290,10 +290,14 @@
 window.QredexAgent.getIntentToken()
 window.QredexAgent.getPurchaseIntentToken()
 
+// Check token existence
+window.QredexAgent.hasIntentToken()
+window.QredexAgent.hasPurchaseIntentToken()
+
 // Manual trigger
 window.QredexAgent.handleAddToCart({ productId: 'xxx', quantity: 2 })
 
-// Lock intent
+// Lock intent (idempotent)
 window.QredexAgent.lockIntent()
 
 // Status
@@ -307,6 +311,8 @@ window.QredexAgent.getStatus()</code></pre>
         init,
         getIntentToken,
         getPurchaseIntentToken,
+        hasIntentToken,
+        hasPurchaseIntentToken,
         handleAddToCart,
         lockIntent,
         isInitialized,
@@ -319,6 +325,8 @@ window.QredexAgent.getStatus()</code></pre>
         init,
         getIntentToken,
         getPurchaseIntentToken,
+        hasIntentToken,
+        hasPurchaseIntentToken,
         handleAddToCart,
         lockIntent,
         isInitialized,

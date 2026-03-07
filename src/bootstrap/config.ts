@@ -83,6 +83,24 @@ let currentConfig: Required<AgentConfig> = { ...DEFAULT_CONFIG };
 let isInitialized = false;
 
 /**
+ * Ensure configuration is initialized from pre-load global config if available.
+ * This is called automatically on first access to ensure pre-load config is respected.
+ */
+function ensureConfigInitialized(): void {
+  if (isInitialized) {
+    return;
+  }
+
+  // Check for pre-load global config
+  const preloadConfig = window.QredexAgentConfig;
+  if (preloadConfig) {
+    currentConfig = mergeConfig(preloadConfig);
+    isInitialized = true;
+    debug('Configuration initialized from pre-load global config');
+  }
+}
+
+/**
  * Merge user config with defaults, validating known fields.
  */
 function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
@@ -157,9 +175,7 @@ export function initConfig(userConfig?: AgentConfig): Required<AgentConfig> {
  * Get the current configuration.
  */
 export function getConfig(): Required<AgentConfig> {
-  if (!isInitialized) {
-    return { ...DEFAULT_CONFIG };
-  }
+  ensureConfigInitialized();
   return { ...currentConfig };
 }
 
@@ -169,6 +185,7 @@ export function getConfig(): Required<AgentConfig> {
 export function getConfigValue<K extends keyof Required<AgentConfig>>(
   key: K
 ): Required<AgentConfig>[K] {
+  ensureConfigInitialized();
   return currentConfig[key] ?? DEFAULT_CONFIG[key];
 }
 

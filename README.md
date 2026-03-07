@@ -124,7 +124,10 @@ if (pit) {
 
 ### `lockIntent(meta?)`
 
-Manually trigger a lock request to exchange IIT for PIT.
+Manually trigger a lock request to exchange IIT for PIT. This function is **idempotent**:
+- If PIT already exists locally, returns it immediately with `alreadyLocked: true`
+- If a lock is already in flight, returns the same promise
+- If backend indicates already locked, treats it as success
 
 ```javascript
 const result = await QredexAgent.lockIntent({
@@ -133,9 +136,34 @@ const result = await QredexAgent.lockIntent({
 });
 
 if (result.success) {
-  console.log('Locked! PIT:', result.purchaseToken);
+  console.log('PIT:', result.purchaseToken);
+  console.log('Was already locked:', result.alreadyLocked);
 } else {
   console.error('Lock failed:', result.error);
+}
+```
+
+### `hasIntentToken()`
+
+Check if an Intent Token (IIT) exists.
+
+```javascript
+if (QredexAgent.hasIntentToken()) {
+  console.log('Intent token is available');
+} else {
+  console.log('No intent token found');
+}
+```
+
+### `hasPurchaseIntentToken()`
+
+Check if a Purchase Intent Token (PIT) exists.
+
+```javascript
+if (QredexAgent.hasPurchaseIntentToken()) {
+  console.log('Purchase token is available - ready for checkout');
+} else {
+  console.log('No purchase token yet');
 }
 ```
 

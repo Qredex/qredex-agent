@@ -131,6 +131,13 @@ export function hasPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): b
 }
 
 /**
+ * Check if an intent token already exists.
+ */
+export function hasIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): boolean {
+  return getIntentToken(config) !== null;
+}
+
+/**
  * Clear all tokens from storage.
  */
 export function clearAllTokens(config: TokenStorageConfig = DEFAULT_CONFIG): void {
