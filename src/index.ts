@@ -177,6 +177,14 @@ export function destroy(): void {
 }
 
 /**
+ * Stop the agent and clean up all resources.
+ * Alias for destroy() - provided for API clarity.
+ */
+export function stop(): void {
+  destroyLifecycle();
+}
+
+/**
  * Check if the agent is currently initialized and running.
  */
 export function isInitialized(): boolean {
@@ -216,6 +224,7 @@ if (typeof window !== 'undefined') {
     enableDetection,
     disableDetection,
     destroy,
+    stop,
     isInitialized,
     getStatus,
   };

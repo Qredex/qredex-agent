@@ -14,7 +14,7 @@ describe('Configuration', () => {
   it('should use default values when no config provided', () => {
     const config = initConfig();
 
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/agent/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(false);
     expect(config.autoDetect).toBe(true);
     expect(config.influenceIntentToken).toBe('__qdx_iit');
@@ -52,7 +52,7 @@ describe('Configuration', () => {
     });
 
     // Should fall back to default for invalid URL
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/agent/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
   });
 
   it('should provide getConfigValue for individual values', () => {

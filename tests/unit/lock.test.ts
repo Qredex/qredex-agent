@@ -10,7 +10,7 @@ import { resetState } from '../../src/core/state.js';
 
 describe('Lock API', () => {
   const testConfig = {
-    lockEndpoint: 'https://api.qredex.com/agent/lock',
+    lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
     debug: false,
     autoDetect: false,
     influenceIntentToken: 'test_intent',

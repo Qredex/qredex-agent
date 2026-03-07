@@ -33,7 +33,7 @@ describe('Config Pre-load', () => {
   it('should use default config when no pre-load config', () => {
     const config = getConfig();
 
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/agent/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(false);
     expect(config.autoDetect).toBe(true);
   });
@@ -83,7 +83,7 @@ describe('Config Pre-load', () => {
     const config = getConfig();
 
     // Invalid URL should fall back to default
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/agent/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     // Valid values should be applied
     expect(config.debug).toBe(true);
   });

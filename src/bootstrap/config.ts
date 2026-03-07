@@ -57,7 +57,7 @@ declare global {
 }
 
 const DEFAULT_CONFIG: Required<AgentConfig> = {
-  lockEndpoint: 'https://api.qredex.com/agent/lock',
+  lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
   autoDetect: true,
   influenceIntentToken: '__qdx_iit',

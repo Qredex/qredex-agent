@@ -77,6 +77,14 @@ export function destroy(): void {
 }
 
 /**
+ * Stop the agent and clean up all resources.
+ * Alias for destroy() - provided for API clarity.
+ */
+export function stop(): void {
+  destroy();
+}
+
+/**
  * Reset the agent to initial state.
  * Useful for testing or re-initialization scenarios.
  */

@@ -15,16 +15,16 @@ export default defineConfig(({ mode }) => ({
       name: 'QredexAgent',
       fileName: (format) => {
         if (format === 'es') {
-          return 'qredex-agent.js';
+          return 'qredex-agent.es.js';
         }
-        if (format === 'umd') {
-          return 'qredex-agent.umd.cjs';
+        if (format === 'iife') {
+          return 'qredex-agent.iife.js';
         }
         return 'qredex-agent.js';
       },
-      formats: ['es', 'umd'],
+      formats: ['es', 'iife'],
     },
-    // Always minify with terser
+    // Always minify with terser for production builds
     minify: 'terser',
     sourcemap: true,
     outDir: 'dist',
@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         globals: {
-          // No external dependencies, but this ensures proper UMD wrapping
+          // No external dependencies
         },
       },
     },

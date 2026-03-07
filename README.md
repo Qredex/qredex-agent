@@ -12,13 +12,30 @@ The Qredex Agent is designed to be embedded on any storefront website. Its prima
 4. **Detect** likely add-to-cart events using multiple strategies
 5. **Lock** the intent automatically by calling Qredex's public lock endpoint
 
+## Build Formats
+
+This library ships **ESM + IIFE only**. UMD is intentionally excluded.
+
+| Format | File | Use Case |
+|--------|------|----------|
+| **ESM** | `qredex-agent.es.js` | Modern bundlers, `import` statements |
+| **IIFE** | `qredex-agent.iife.js` | Direct `<script>` tag, `window.QredexAgent` |
+| **IIFE Minified** | `qredex-agent.iife.min.js` | Production CDN delivery |
+
+**Why no UMD?**
+
+- The primary install path is a hosted versioned browser script
+- Modern applications use ESM imports
+- Legacy multi-loader compatibility is not a goal
+- IIFE provides cleaner global attachment (`window.QredexAgent`)
+
 ## Installation
 
 ### Via Script Tag (Recommended)
 
 ```html
 <!-- Add to your page before </body> -->
-<script src="https://cdn.qredex.com/agent/qredex-agent.umd.cjs"></script>
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
 ### Via NPM
@@ -33,6 +50,47 @@ import { init, getIntentToken, handleAddToCart } from 'qredex-agent';
 // Optional: initialize with config
 init({ debug: true });
 ```
+
+## CDN Versioning Strategy
+
+The library is designed for hosted script delivery using versioned paths.
+
+### Path Formats
+
+```
+/agent/v1/qredex-agent.iife.min.js       # Major version (auto-updates within v1.x.x)
+/agent/v1.0.0/qredex-agent.iife.min.js   # Pinned version (immutable)
+```
+
+### Versioning Rules
+
+| Path Type | Example | Behavior | Caching |
+|-----------|---------|----------|---------|
+| **Major alias** | `/v1/` | Auto-updates to latest v1.x.x | Short cache, revalidate |
+| **Pinned** | `/v1.0.0/` | Immutable, never changes | Long cache (1 year) |
+
+### Caching Recommendations
+
+**Pinned versions (`/v1.0.0/`):**
+```
+Cache-Control: public, max-age=31536000, immutable
+```
+
+**Major alias (`/v1/`):**
+```
+Cache-Control: public, max-age=3600, must-revalidate
+```
+
+## Storage Keys
+
+The agent uses standardized keys for browser storage:
+
+| Storage | Key | Purpose |
+|---------|-----|---------|
+| Cookie + sessionStorage | `__qdx_iit` | Influence Intent Token (IIT) |
+| Cookie + sessionStorage | `__qdx_pit` | Purchase Intent Token (PIT) |
+
+**Note for merchants:** Your backend may need to read `__qdx_pit` from cookies to associate orders with attributed intent.
 
 ## Auto-Start Behavior
 
@@ -59,7 +117,7 @@ Set configuration before the script loads:
     autoDetect: true,
   };
 </script>
-<script src="qredex-agent.umd.cjs"></script>
+<script src="qredex-agent.iife.min.js"></script>
 ```
 
 ### Programmatic Config
@@ -377,7 +435,7 @@ The project produces two bundles:
 | File | Format | Use Case |
 |------|--------|----------|
 | `qredex-agent.js` | ESM | Modern bundlers, `<script type="module">` |
-| `qredex-agent.umd.cjs` | UMD/IIFE | Direct `<script>` tag, `window.QredexAgent` |
+| `qredex-agent.iife.min.js` | UMD/IIFE | Direct `<script>` tag, `window.QredexAgent` |
 
 Both bundles are minified for production.
 
