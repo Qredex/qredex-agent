@@ -11,13 +11,13 @@ import { isValidToken } from '../utils/guards.js';
 export interface TokenStorageConfig {
   influenceIntentToken: string;
   purchaseIntentToken: string;
-  cookieMaxAge: number;
+  cookieExpireDays: number;
 }
 
 const DEFAULT_CONFIG: TokenStorageConfig = {
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
-  cookieMaxAge: 86400, // 24 hours
+  cookieExpireDays: 30,
 };
 
 /**
@@ -30,7 +30,7 @@ export function storeIntentToken(token: string, config: TokenStorageConfig = DEF
 
   setSession(config.influenceIntentToken, token);
   setCookie(config.influenceIntentToken, token, {
-    maxAge: config.cookieMaxAge,
+    maxAge: config.cookieExpireDays * 86400, // Convert days to seconds
     path: '/',
     sameSite: 'Strict',
   });
@@ -69,7 +69,7 @@ export function removeIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): 
 }
 
 /**
- * Store the purchase intent token (PIT) in both sessionStorage and cookie.
+ * Get the purchase intent token (PIT) in both sessionStorage and cookie.
  */
 export function storePurchaseToken(
   token: string,
@@ -81,7 +81,7 @@ export function storePurchaseToken(
 
   setSession(config.purchaseIntentToken, token);
   setCookie(config.purchaseIntentToken, token, {
-    maxAge: config.cookieMaxAge,
+    maxAge: config.cookieExpireDays * 86400, // Convert days to seconds
     path: '/',
     sameSite: 'Strict',
   });

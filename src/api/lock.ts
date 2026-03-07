@@ -2,11 +2,11 @@
  * Lock API for communicating with Qredex's public lock endpoint.
  */
 
-import { debug, warn, info } from '../utils/log.js';
-import { getConfig } from '../bootstrap/config.js';
-import { getIntentToken, getPurchaseToken, storePurchaseToken } from '../storage/tokens.js';
-import { startLock, endLock, isLockInProgress } from '../core/state.js';
-import type { LockRequest, LockResponse, LockResult } from './types.js';
+import {debug, info, warn} from '../utils/log.js';
+import {getConfig} from '../bootstrap/config.js';
+import {getIntentToken, getPurchaseToken, storePurchaseToken} from '../storage/tokens.js';
+import {endLock, isLockInProgress, startLock} from '../core/state.js';
+import type {LockRequest, LockResponse, LockResult} from './types.js';
 
 // Track the in-flight lock promise for idempotency
 let inFlightPromise: Promise<LockResult> | null = null;
@@ -18,7 +18,7 @@ let inFlightPromise: Promise<LockResult> | null = null;
  * - If a lock is already in flight, return the same promise
  * - If backend indicates already locked, treat it as success
  */
-export async function lockIntent(meta?: Record<string, unknown>): Promise<LockResult> {
+export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockResult> => {
   const config = getConfig();
 
   // Check if PIT already exists locally - idempotent fast path
@@ -172,4 +172,4 @@ export async function lockIntent(meta?: Record<string, unknown>): Promise<LockRe
   })();
 
   return inFlightPromise;
-}
+};

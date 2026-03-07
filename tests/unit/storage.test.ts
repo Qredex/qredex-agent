@@ -2,7 +2,7 @@
  * Unit tests for storage utilities.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { setCookie, getCookie, removeCookie } from '../../src/storage/cookie.js';
 import { setSession, getSession, removeSession, sessionAvailable } from '../../src/storage/session.js';
 import {
@@ -79,10 +79,8 @@ describe('Session Storage', () => {
 
 describe('Token Storage', () => {
   const testConfig = {
-    cookieNameIntent: 'test_intent',
-    cookieNamePurchase: 'test_pit',
-    storageKeyIntent: 'test_intent_key',
-    storageKeyPurchase: 'test_pit_key',
+    influenceIntentToken: 'test_intent',
+    purchaseIntentToken: 'test_pit',
     cookieMaxAge: 86400,
   };
 

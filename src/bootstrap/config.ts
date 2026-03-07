@@ -41,10 +41,10 @@ export interface AgentConfig {
   purchaseIntentToken?: string;
 
   /**
-   * Cookie max age in seconds.
-   * @default 86400 (24 hours)
+   * Cookie expiration in days.
+   * @default 30
    */
-  cookieMaxAge?: number;
+  cookieExpireDays?: number;
 }
 
 /**
@@ -62,7 +62,7 @@ const DEFAULT_CONFIG: Required<AgentConfig> = {
   autoDetect: true,
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
-  cookieMaxAge: 86400,
+  cookieExpireDays: 30,
 };
 
 let currentConfig: Required<AgentConfig> = { ...DEFAULT_CONFIG };
@@ -121,8 +121,8 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
     }
 
     // Validate and merge numeric options
-    if (typeof userConfig.cookieMaxAge === 'number' && userConfig.cookieMaxAge > 0) {
-      config.cookieMaxAge = userConfig.cookieMaxAge;
+    if (typeof userConfig.cookieExpireDays === 'number' && userConfig.cookieExpireDays > 0) {
+      config.cookieExpireDays = userConfig.cookieExpireDays;
     }
   }
 

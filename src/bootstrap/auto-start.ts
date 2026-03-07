@@ -61,7 +61,7 @@ export function captureIntentToken(): boolean {
   const existingToken = getIntentToken({
     influenceIntentToken: getConfigValue('influenceIntentToken'),
     purchaseIntentToken: getConfigValue('purchaseIntentToken'),
-    cookieMaxAge: getConfigValue('cookieMaxAge'),
+    cookieExpireDays: getConfigValue('cookieExpireDays'),
   });
 
   if (existingToken) {
@@ -80,7 +80,7 @@ export function captureIntentToken(): boolean {
   storeIntentToken(token, {
     influenceIntentToken: getConfigValue('influenceIntentToken'),
     purchaseIntentToken: getConfigValue('purchaseIntentToken'),
-    cookieMaxAge: getConfigValue('cookieMaxAge'),
+    cookieExpireDays: getConfigValue('cookieExpireDays'),
   });
 
   // Clean the URL

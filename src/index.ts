@@ -68,7 +68,7 @@ export function getIntentToken(): string | null {
   return getStoredIntentToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
-    cookieMaxAge: config.cookieMaxAge,
+    cookieExpireDays: config.cookieExpireDays,
   });
 }
 
@@ -83,7 +83,7 @@ export function getPurchaseIntentToken(): string | null {
   return getStoredPurchaseToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
-    cookieMaxAge: config.cookieMaxAge,
+    cookieExpireDays: config.cookieExpireDays,
   });
 }
 
@@ -97,7 +97,7 @@ export function hasIntentToken(): boolean {
   return hasStoredIntentToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
-    cookieMaxAge: config.cookieMaxAge,
+    cookieExpireDays: config.cookieExpireDays,
   });
 }
 
@@ -111,7 +111,7 @@ export function hasPurchaseIntentToken(): boolean {
   return hasStoredPurchaseToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
-    cookieMaxAge: config.cookieMaxAge,
+    cookieExpireDays: config.cookieExpireDays,
   });
 }
 
