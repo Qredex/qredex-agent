@@ -3,9 +3,9 @@
  * Provides a first-class public method for explicit add-to-cart signaling.
  */
 
-import { debug } from '../utils/log.js';
-import { emitAddToCart } from './pipeline.js';
-import type { AddToCartMeta } from './types.js';
+import {debug, warn} from '../utils/log.js';
+import {emitAddToCart} from './pipeline.js';
+import type {AddToCartMeta} from './types.js';
 
 /**
  * Manually trigger an add-to-cart event.
@@ -20,7 +20,13 @@ export function triggerAddToCart(meta: AddToCartMeta = {}): void {
     timestamp: Date.now(),
     source: 'manual',
     meta,
+  }).then(r => {
+    debug('Add-to-cart event handled', r);
+  }).catch(err => {
+    warn('Error handling add-to-cart event', err);
   });
+
+
 }
 
 /**

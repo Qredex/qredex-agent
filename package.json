@@ -29,7 +29,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:bun": "bun test"
+    "test:bun": "bun test",
+    "link": "bun link",
+    "unlink": "bun unlink"
   },
   "keywords": [
     "qredex",
