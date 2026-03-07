@@ -1,0 +1,192 @@
+/**
+ * Centralized runtime state management for the Qredex Agent.
+ * Maintains explicit state for lock operations and lifecycle.
+ */
+
+import { debug } from '../utils/log.js';
+
+/**
+ * Agent lifecycle states.
+ */
+export type AgentState = 'idle' | 'running' | 'locking' | 'destroyed';
+
+/**
+ * Internal runtime state object.
+ */
+export interface RuntimeState {
+  /** Current lifecycle state */
+  state: AgentState;
+
+  /** Whether a lock request is currently in flight */
+  lockInProgress: boolean;
+
+  /** Timestamp of last lock attempt (for rate limiting) */
+  lastLockAttempt: number | null;
+
+  /** Number of lock attempts */
+  lockAttempts: number;
+
+  /** Whether the agent has been initialized */
+  initialized: boolean;
+
+  /** Whether auto-detection is enabled */
+  autoDetectEnabled: boolean;
+
+  /** Event listener cleanup functions */
+  cleanupFns: Array<() => void>;
+}
+
+const initialState: RuntimeState = {
+  state: 'idle',
+  lockInProgress: false,
+  lastLockAttempt: null,
+  lockAttempts: 0,
+  initialized: false,
+  autoDetectEnabled: true,
+  cleanupFns: [],
+};
+
+let state: RuntimeState = { ...initialState };
+
+/**
+ * Get the current runtime state (read-only copy).
+ */
+export function getState(): Readonly<RuntimeState> {
+  return { ...state };
+}
+
+/**
+ * Get the current lifecycle state.
+ */
+export function getAgentState(): AgentState {
+  return state.state;
+}
+
+/**
+ * Check if the agent is in a runnable state.
+ */
+export function isRunning(): boolean {
+  return state.state === 'running';
+}
+
+/**
+ * Check if the agent has been destroyed.
+ */
+export function isDestroyed(): boolean {
+  return state.state === 'destroyed';
+}
+
+/**
+ * Set the lifecycle state.
+ */
+export function setAgentState(newState: AgentState): void {
+  state.state = newState;
+  debug(`State changed: ${newState}`);
+}
+
+/**
+ * Mark that a lock request has started.
+ */
+export function startLock(): boolean {
+  if (state.lockInProgress) {
+    debug('Lock already in progress, skipping');
+    return false;
+  }
+
+  state.lockInProgress = true;
+  state.lastLockAttempt = Date.now();
+  state.lockAttempts++;
+  state.state = 'locking';
+
+  debug('Lock started');
+  return true;
+}
+
+/**
+ * Mark that a lock request has completed.
+ */
+export function endLock(): void {
+  state.lockInProgress = false;
+  if (state.state === 'locking') {
+    state.state = 'running';
+  }
+  debug('Lock completed');
+}
+
+/**
+ * Check if a lock is currently in progress.
+ */
+export function isLockInProgress(): boolean {
+  return state.lockInProgress;
+}
+
+/**
+ * Get the number of lock attempts.
+ */
+export function getLockAttempts(): number {
+  return state.lockAttempts;
+}
+
+/**
+ * Register a cleanup function to be called on destroy.
+ */
+export function registerCleanup(fn: () => void): void {
+  state.cleanupFns.push(fn);
+}
+
+/**
+ * Mark the agent as initialized.
+ */
+export function markInitialized(): void {
+  state.initialized = true;
+  state.state = 'running';
+  debug('Agent initialized');
+}
+
+/**
+ * Check if auto-detection is enabled.
+ */
+export function isAutoDetectEnabled(): boolean {
+  return state.autoDetectEnabled;
+}
+
+/**
+ * Set auto-detection enabled state.
+ */
+export function setAutoDetectEnabled(enabled: boolean): void {
+  state.autoDetectEnabled = enabled;
+  debug(`Auto-detection ${enabled ? 'enabled' : 'disabled'}`);
+}
+
+/**
+ * Reset state to initial values (for testing or re-initialization).
+ */
+export function resetState(): void {
+  // Call cleanup functions first
+  for (const fn of state.cleanupFns) {
+    try {
+      fn();
+    } catch {
+      // Ignore cleanup errors
+    }
+  }
+
+  state = { ...initialState };
+  debug('State reset');
+}
+
+/**
+ * Destroy the agent state and run cleanup.
+ */
+export function destroyState(): void {
+  for (const fn of state.cleanupFns) {
+    try {
+      fn();
+    } catch {
+      // Ignore cleanup errors
+    }
+  }
+
+  state = { ...initialState, state: 'destroyed', initialized: true };
+  debug('Agent destroyed');
+}

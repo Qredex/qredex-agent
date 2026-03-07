@@ -1,0 +1,22 @@
+# Source files (npm package only includes dist)
+src/
+tests/
+examples/
+
+# Config files
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
+vitest.config.ts
+eslint.config.js
+.prettierrc
+.editorconfig
+
+# Dev-only files
+.idea/
+.vscode/
+.gitignore
+.npmignore
+
+# Test outputs
+coverage/

@@ -38,5 +38,3 @@ coverage/
 # Misc
 *.bak
 *.tmp
-/bun.lock
-/package-lock.json

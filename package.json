@@ -1,0 +1,57 @@
+{
+  "name": "qredex-agent",
+  "version": "1.0.0",
+  "description": "Lightweight browser agent for Qredex intent capture and locking",
+  "type": "module",
+  "main": "./dist/qredex-agent.umd.cjs",
+  "module": "./dist/qredex-agent.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/qredex-agent.js",
+      "require": "./dist/qredex-agent.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src",
+    "format": "prettier --write \"src/**/*.ts\" \"examples/**/*.html\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"examples/**/*.html\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [
+    "qredex",
+    "browser-agent",
+    "intent",
+    "ecommerce"
+  ],
+  "author": "Qredex",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/ui": "^1.3.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "happy-dom": "^13.3.8",
+    "prettier": "^3.2.5",
+    "terser": "^5.46.0",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.56.1",
+    "vite": "^5.1.4",
+    "vite-plugin-dts": "^3.7.3",
+    "vitest": "^1.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,107 @@
+/**
+ * SessionStorage utilities with defensive error handling.
+ */
+
+import { debug, warn } from '../utils/log.js';
+import { isStorageAvailable } from '../utils/guards.js';
+
+const STORAGE_KEY_PREFIX = 'qredex_';
+
+/**
+ * Check if sessionStorage is available.
+ */
+export function sessionAvailable(): boolean {
+  return isStorageAvailable('sessionStorage');
+}
+
+/**
+ * Set a value in sessionStorage with the given key.
+ */
+export function setSession(key: string, value: string): void {
+  if (!sessionAvailable()) {
+    warn('sessionStorage not available');
+    return;
+  }
+
+  try {
+    sessionStorage.setItem(`${STORAGE_KEY_PREFIX}${key}`, value);
+    debug('SessionStorage set:', key);
+  } catch (err) {
+    warn('Failed to set sessionStorage:', key, err);
+  }
+}
+
+/**
+ * Get a value from sessionStorage by key.
+ */
+export function getSession(key: string): string | null {
+  if (!sessionAvailable()) {
+    return null;
+  }
+
+  try {
+    const value = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}${key}`);
+    return value;
+  } catch (err) {
+    warn('Failed to get sessionStorage:', key, err);
+    return null;
+  }
+}
+
+/**
+ * Remove a value from sessionStorage by key.
+ */
+export function removeSession(key: string): void {
+  if (!sessionAvailable()) {
+    return;
+  }
+
+  try {
+    sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}${key}`);
+    debug('SessionStorage removed:', key);
+  } catch (err) {
+    warn('Failed to remove sessionStorage:', key, err);
+  }
+}
+
+/**
+ * Get all qredex-prefixed keys from sessionStorage.
+ */
+export function getAllSessionKeys(): string[] {
+  if (!sessionAvailable()) {
+    return [];
+  }
+
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith(STORAGE_KEY_PREFIX)) {
+        keys.push(key.substring(STORAGE_KEY_PREFIX.length));
+      }
+    }
+    return keys;
+  } catch (err) {
+    warn('Failed to get sessionStorage keys', err);
+    return [];
+  }
+}
+
+/**
+ * Clear all qredex-prefixed values from sessionStorage.
+ */
+export function clearQredexSession(): void {
+  if (!sessionAvailable()) {
+    return;
+  }
+
+  try {
+    const keys = getAllSessionKeys();
+    for (const key of keys) {
+      sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}${key}`);
+    }
+    debug('Cleared all qredex sessionStorage');
+  } catch (err) {
+    warn('Failed to clear sessionStorage', err);
+  }
+}
