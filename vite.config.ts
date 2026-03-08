@@ -57,8 +57,9 @@ export default defineConfig(({ mode }) => ({
     },
     terserOptions: {
       compress: {
-        // Only drop console in production mode
-        drop_console: mode === 'production',
+        // Don't strip console - runtime guard handles it
+        // This allows debug logging in production when enabled via config
+        drop_console: false,
         drop_debugger: mode === 'production',
       },
       format: {

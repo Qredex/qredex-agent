@@ -36,26 +36,30 @@ export function setDebugMode(enabled: boolean): void {
  */
 export function debug(...args: unknown[]): void {
   if (!debugEnabled) return;
+  if (typeof console === 'undefined') return;
   console.debug('[QredexAgent]', ...args);
 }
 
 /**
- * Log an info message. Always outputs.
+ * Log an info message. Always outputs if console exists.
  */
 export function info(...args: unknown[]): void {
+  if (typeof console === 'undefined') return;
   console.info('[QredexAgent]', ...args);
 }
 
 /**
- * Log a warning message. Always outputs.
+ * Log a warning message. Always outputs if console exists.
  */
 export function warn(...args: unknown[]): void {
+  if (typeof console === 'undefined') return;
   console.warn('[QredexAgent]', ...args);
 }
 
 /**
- * Log an error message. Always outputs.
+ * Log an error message. Always outputs if console exists.
  */
 export function error(...args: unknown[]): void {
+  if (typeof console === 'undefined') return;
   console.error('[QredexAgent]', ...args);
 }
