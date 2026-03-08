@@ -1,25 +1,180 @@
-# Qredex Agent - React Example
+# Qredex Agent - React/Next.js Example
 
-This example shows how to integrate Qredex Agent with React/Next.js.
+Complete example of Qredex Agent integration with React and Next.js.
+
+---
 
 ## Quick Start
 
+### 1. Install Dependencies
+
 ```bash
+cd examples/react
 npm install
+```
+
+### 2. Run Development Server
+
+```bash
 npm run dev
 ```
 
-## Usage
+### 3. Open in Browser
 
-### 1. Create Custom Hook
+Navigate to `http://localhost:3000`
 
-```jsx
-// hooks/useQredexAgent.js
+---
+
+## Project Structure
+
+```
+examples/react/
+├── app/
+│   ├── layout.tsx    # Root layout with Qredex Agent script
+│   ├── page.tsx      # Main demo page
+│   └── globals.css   # Global styles
+├── next.config.js    # Next.js configuration
+├── package.json      # Dependencies
+└── tsconfig.json     # TypeScript configuration
+```
+
+---
+
+## Key Integration Points
+
+### 1. Load Agent Script (layout.tsx)
+
+```tsx
+import Script from 'next/script';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <Script
+          src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"
+          strategy="afterInteractive"
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+### 2. Initialize and Listen (page.tsx)
+
+```tsx
+'use client';
+
 import { useEffect } from 'react';
 
-export function useQredexAgent() {
+export default function Home() {
   useEffect(() => {
-    // Optional: listen for agent events
+    const agent = window.QredexAgent;
+    if (!agent) return;
+
+    // Initialize
+    agent.init({ debug: true });
+
+    // Register event listeners
+    agent.onLocked(({ purchaseToken, alreadyLocked }) => {
+      console.log('Locked:', purchaseToken, alreadyLocked);
+    });
+
+    agent.onCleared(() => {
+      console.log('Cleared');
+    });
+
+    agent.onError(({ error, context }) => {
+      console.error('Error:', context, error);
+    });
+
+    // Cleanup
+    return () => {
+      agent.offLocked(handleLocked);
+      agent.offCleared(handleCleared);
+      agent.offError(handleError);
+    };
+  }, []);
+
+  // ... rest of component
+}
+```
+
+### 3. Handle Cart Events
+
+```tsx
+const addToCart = async (product) => {
+  // Your cart API call
+  await fetch('/api/cart', {
+    method: 'POST',
+    body: JSON.stringify(product),
+  });
+
+  // Tell Qredex agent (auto-locks IIT → PIT)
+  window.QredexAgent.handleCartAdd({
+    productId: product.id,
+    quantity: 1,
+    price: product.price,
+  });
+};
+
+const clearCart = () => {
+  // Your cart clear logic
+  setCartItems([]);
+
+  // Tell Qredex agent (auto-clears PIT)
+  window.QredexAgent.handleCartEmpty();
+};
+
+const checkout = async (order) => {
+  // Get PIT for backend
+  const pit = window.QredexAgent.getPurchaseIntentToken();
+
+  // Submit order with PIT
+  await fetch('/api/orders', {
+    method: 'POST',
+    body: JSON.stringify({
+      ...order,
+      qredex_pit: pit,
+    }),
+  });
+
+  // Tell Qredex agent (auto-clears PIT)
+  window.QredexAgent.handlePaymentSuccess({
+    orderId: order.id,
+    amount: order.total,
+    currency: 'USD',
+  });
+};
+```
+
+---
+
+## Custom Hook (Optional)
+
+Create a reusable hook for Qredex Agent:
+
+```tsx
+// hooks/useQredexAgent.ts
+import { useEffect, useCallback } from 'react';
+
+interface QredexAgentAPI {
+  addToCart: (product: Product) => Promise<void>;
+  clearCart: () => void;
+  checkout: (order: Order) => Promise<void>;
+  getPurchaseToken: () => string | null;
+  hasPurchaseToken: () => boolean;
+}
+
+export function useQredexAgent(): QredexAgentAPI {
+  useEffect(() => {
+    const agent = window.QredexAgent;
+    if (!agent) return;
+
+    agent.init({ debug: true });
+
     const handleLocked = ({ purchaseToken, alreadyLocked }) => {
       console.log('Qredex locked:', { purchaseToken, alreadyLocked });
     };
@@ -32,86 +187,80 @@ export function useQredexAgent() {
       console.error('Qredex error:', context, error);
     };
 
-    QredexAgent.onLocked(handleLocked);
-    QredexAgent.onCleared(handleCleared);
-    QredexAgent.onError(handleError);
+    agent.onLocked(handleLocked);
+    agent.onCleared(handleCleared);
+    agent.onError(handleError);
 
     return () => {
-      QredexAgent.offLocked(handleLocked);
-      QredexAgent.offCleared(handleCleared);
-      QredexAgent.offError(handleError);
+      agent.offLocked(handleLocked);
+      agent.offCleared(handleCleared);
+      agent.offError(handleError);
     };
   }, []);
 
-  const addToCart = async (product) => {
-    // Your cart API call
+  const addToCart = useCallback(async (product: Product) => {
     await fetch('/api/cart', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(product),
     });
 
-    // Tell Qredex agent (auto-locks IIT → PIT)
-    QredexAgent.handleCartAdd({
+    window.QredexAgent.handleCartAdd({
       productId: product.id,
       quantity: product.quantity || 1,
       price: product.price,
     });
-  };
+  }, []);
 
-  const clearCart = () => {
-    // Your cart clear logic
-    // ...
+  const clearCart = useCallback(() => {
+    window.QredexAgent.handleCartEmpty();
+  }, []);
 
-    // Tell Qredex agent (auto-clears PIT)
-    QredexAgent.handleCartEmpty();
-  };
+  const checkout = useCallback(async (order: Order) => {
+    const pit = window.QredexAgent.getPurchaseIntentToken();
 
-  const checkout = async (order) => {
-    // Get PIT for backend
-    const pit = QredexAgent.getPurchaseIntentToken();
-
-    // Submit order with PIT
     const response = await fetch('/api/orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...order,
         qredex_pit: pit,
       }),
     });
 
-    // Tell Qredex agent (auto-clears PIT)
-    QredexAgent.handlePaymentSuccess({
+    window.QredexAgent.handlePaymentSuccess({
       orderId: order.id,
       amount: order.total,
       currency: order.currency || 'USD',
     });
 
     return response;
-  };
+  }, []);
 
-  return { addToCart, clearCart, checkout };
+  return {
+    addToCart,
+    clearCart,
+    checkout,
+    getPurchaseToken: () => window.QredexAgent?.getPurchaseIntentToken() ?? null,
+    hasPurchaseToken: () => window.QredexAgent?.hasPurchaseIntentToken() ?? false,
+  };
 }
 ```
 
-### 2. Use in Components
+### Use Hook in Components
 
-```jsx
-// components/AddToCartButton.jsx
-import { useQredexAgent } from '../hooks/useQredexAgent';
+```tsx
+// components/AddToCartButton.tsx
+import { useQredexAgent } from '@/hooks/useQredexAgent';
 
-export function AddToCartButton({ product }) {
+interface AddToCartButtonProps {
+  product: Product;
+}
+
+export function AddToCartButton({ product }: AddToCartButtonProps) {
   const { addToCart } = useQredexAgent();
 
   const handleClick = async () => {
     try {
-      await addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-      });
+      await addToCart(product);
       alert('Added to cart!');
     } catch (error) {
       console.error('Failed to add to cart:', error);
@@ -126,12 +275,16 @@ export function AddToCartButton({ product }) {
 }
 ```
 
-```jsx
-// components/CheckoutButton.jsx
+```tsx
+// components/CheckoutButton.tsx
 import { useState } from 'react';
-import { useQredexAgent } from '../hooks/useQredexAgent';
+import { useQredexAgent } from '@/hooks/useQredexAgent';
 
-export function CheckoutButton({ cart }) {
+interface CheckoutButtonProps {
+  cart: Cart;
+}
+
+export function CheckoutButton({ cart }: CheckoutButtonProps) {
   const { checkout } = useQredexAgent();
   const [loading, setLoading] = useState(false);
 
@@ -165,70 +318,140 @@ export function CheckoutButton({ cart }) {
   };
 
   return (
-    <button onClick={handleClick} disabled={loading}>
+    <button onClick={handleClick} disabled={loading || cart.items.length === 0}>
       {loading ? 'Processing...' : `Checkout - $${cart.total}`}
     </button>
   );
 }
 ```
 
+---
+
 ## Next.js App Router
 
-```jsx
-// app/layout.js
-import Script from 'next/script';
+For Next.js 13+ App Router, ensure client components:
 
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <head>
-        <Script
-          src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"
-          strategy="afterInteractive"
-        />
-      </head>
-      <body>{children}</body>
-    </html>
-  );
+```tsx
+// app/page.tsx
+'use client';  // Required for browser APIs
+
+import { useEffect } from 'react';
+
+export default function Home() {
+  useEffect(() => {
+    // Access window.QredexAgent here
+  }, []);
+
+  return <div>...</div>;
 }
 ```
+
+---
 
 ## TypeScript Support
 
+The example includes TypeScript types. For better type safety:
+
 ```tsx
-// hooks/useQredexAgent.ts
-import { useEffect } from 'react';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  quantity?: number;
+// types/qredex-agent.d.ts
+declare global {
+  interface Window {
+    QredexAgent: {
+      init(config?: AgentConfig): void;
+      getIntentToken(): string | null;
+      getPurchaseIntentToken(): string | null;
+      hasIntentToken(): boolean;
+      hasPurchaseIntentToken(): boolean;
+      lockIntent(meta?: LockMeta): Promise<LockResult>;
+      clearTokens(): void;
+      handleCartAdd(event?: CartAddEvent): void;
+      handleCartEmpty(event?: CartEmptyEvent): void;
+      handlePaymentSuccess(event: PaymentSuccessEvent): void;
+      onLocked(handler: LockedHandler): void;
+      onCleared(handler: ClearedHandler): void;
+      onError(handler: ErrorHandler): void;
+      offLocked(handler: LockedHandler): void;
+      offCleared(handler: ClearedHandler): void;
+      offError(handler: ErrorHandler): void;
+      isInitialized(): boolean;
+      getStatus(): AgentStatus;
+      destroy(): void;
+      stop(): void;
+    };
+  }
 }
 
-interface Order {
-  id: string;
-  total: number;
-  currency: string;
-  items: Product[];
-}
-
-export function useQredexAgent() {
-  useEffect(() => {
-    // ... same as above
-  }, []);
-
-  const addToCart = async (product: Product): Promise<void> => {
-    // ... implementation
-  };
-
-  const checkout = async (order: Order): Promise<Response> => {
-    // ... implementation
-  };
-
-  return { addToCart, clearCart, checkout };
-}
+export {};
 ```
+
+---
+
+## Testing
+
+### Manual Testing
+
+1. **Initial State**: Verify no tokens present
+2. **Simulate Intent**: Navigate with `?qdx_intent=test123`
+3. **Add to Cart**: Click add, verify PIT locked
+4. **Checkout**: Complete order, verify PIT cleared
+5. **Clear Cart**: Empty cart, verify PIT cleared
+
+### Console Testing
+
+Open browser console and run:
+
+```javascript
+// Check status
+QredexAgent.getStatus()
+
+// Get tokens
+QredexAgent.getIntentToken()
+QredexAgent.getPurchaseIntentToken()
+
+// Manual operations
+await QredexAgent.lockIntent()
+QredexAgent.clearTokens()
+```
+
+---
+
+## Common Issues
+
+### Issue: "QredexAgent is not defined"
+
+**Solution:** Ensure script loaded before component mounts:
+
+```tsx
+<Script
+  src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"
+  strategy="afterInteractive"
+/>
+```
+
+### Issue: Tokens not persisting across pages
+
+**Solution:** Agent uses sessionStorage + cookies. Ensure:
+- Cookies not blocked
+- sessionStorage available (not private browsing)
+
+### Issue: Lock fails silently
+
+**Solution:** Check:
+1. IIT exists before lock: `QredexAgent.hasIntentToken()`
+2. Network tab for API errors
+3. CORS configuration on backend
+
+---
+
+## Related Examples
+
+| Example | Description |
+|---------|-------------|
+| [../basic/](../basic/) | Comprehensive demo with testing UI |
+| [../vanilla/](../vanilla/) | Vanilla JS e-commerce demo |
+| [../vue/](../vue/) | Vue/Nuxt integration |
+
+---
 
 ## License
 

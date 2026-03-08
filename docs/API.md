@@ -9,7 +9,8 @@ Complete reference for the Qredex Agent public API.
 - [Initialization](#initialization)
 - [Token Access](#token-access)
 - [Lock Operations](#lock-operations)
-- [Cart Detection](#cart-detection)
+- [Event Handlers (Merchant → Agent)](#event-handlers-merchant--agent)
+- [Event Listeners (Agent → Merchant)](#event-listeners-agent--merchant)
 - [Lifecycle](#lifecycle)
 - [Types](#types)
 
@@ -29,15 +30,27 @@ function init(config?: AgentConfig): void
 **Parameters:**
 - `config` (optional) - Configuration options
 
+**Configuration Options:**
+```typescript
+interface AgentConfig {
+  lockEndpoint?: string;           // Default: '/api/v1/agent/intents/lock'
+  debug?: boolean;                 // Default: false
+  autoDetect?: boolean;            // Default: true (not currently used)
+  influenceIntentToken?: string;   // Default: '__qdx_iit'
+  purchaseIntentToken?: string;    // Default: '__qdx_pit'
+  cookieExpireDays?: number;       // Default: 30
+}
+```
+
 **Example:**
 ```javascript
-QredexAgent.init({ 
+QredexAgent.init({
   debug: true,
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock'
 });
 ```
 
-**Note:** Usually not needed - agent auto-starts on script load.
+**Note:** Usually not needed - agent auto-starts on script load with default configuration.
 
 ---
 
@@ -169,119 +182,319 @@ if (result.success) {
 - Returns same promise if lock in flight
 - Safe to call multiple times
 
+**Request Format:**
+```typescript
+// POST /api/v1/agent/intents/lock
+{
+  "token": "IIT_VALUE"
+}
+
+// Response
+{
+  "token": "PIT_VALUE",
+  "expiresAt": "2026-04-07T12:00:00Z",
+  "lockedAt": "2026-03-08T12:00:00Z"
+}
+```
+
 ---
 
-## Cart Detection
+### `clearTokens()`
 
-### `handleAddToCart(meta?)`
-
-Manually trigger add-to-cart event.
+Clear all tokens (IIT and PIT) from storage.
 
 **Signature:**
 ```typescript
-function handleAddToCart(meta?: AddToCartMeta): void
+function clearTokens(): void
 ```
-
-**Parameters:**
-- `meta` (optional) - Cart event metadata
 
 **Example:**
 ```javascript
-// Custom integration
-button.addEventListener('click', () => {
-  QredexAgent.handleAddToCart({
-    productId: 'widget-001',
-    productName: 'Premium Widget',
-    quantity: 2,
-    price: 99.99,
+// After successful checkout
+QredexAgent.clearTokens();
+```
+
+**What it clears:**
+- sessionStorage IIT
+- sessionStorage PIT
+- Cookie IIT
+- Cookie PIT
+
+**When to call:**
+- After successful checkout
+- When cart is emptied
+- When user logs out
+
+---
+
+## Event Handlers (Merchant → Agent)
+
+Tell the agent when important events happen.
+
+### `handleCartAdd(event?)`
+
+Tell the agent that a cart add event happened. Automatically locks IIT → PIT.
+
+**Signature:**
+```typescript
+function handleCartAdd(event?: {
+  productId?: string;
+  quantity?: number;
+  price?: number;
+}): void
+```
+
+**Parameters:**
+- `event` (optional) - Cart add event data
+
+**Example:**
+```javascript
+// After adding to cart
+async function addToCart(product) {
+  await api.post('/cart', product);
+
+  QredexAgent.handleCartAdd({
+    productId: product.id,
+    quantity: 1,
+    price: product.price,
   });
-});
+}
 ```
 
-**Use Cases:**
-- Non-standard cart implementations
-- AJAX cart additions
-- Custom checkout flows
+**What happens:**
+1. Checks if IIT exists
+2. Calls lock API to exchange IIT → PIT
+3. Emits `onLocked` event if successful
+4. Emits `onError` event if failed
 
 ---
 
-### `onAddToCart(handler)`
+### `handleCartEmpty()`
 
-Register add-to-cart event handler.
+Tell the agent that the cart was emptied. Automatically clears PIT.
 
 **Signature:**
 ```typescript
-function onAddToCart(handler: AddToCartHandler): void
+function handleCartEmpty(event?: { timestamp?: number }): void
 ```
 
 **Parameters:**
-- `handler` - Callback function
+- `event` (optional) - Cart empty event data
 
 **Example:**
 ```javascript
-QredexAgent.onAddToCart((event) => {
-  console.log('Cart event:', event.source);  // 'click' | 'form' | 'manual'
-  console.log('Product:', event.meta);
-  
-  // Send to analytics
-  analytics.track('Add to Cart', event.meta);
+function clearCart() {
+  cart.clear();
+  QredexAgent.handleCartEmpty();
+}
+```
+
+**What happens:**
+1. Clears IIT from storage
+2. Clears PIT from storage
+3. Emits `onCleared` event
+
+---
+
+### `handleCartChange(event)`
+
+Tell the agent that the cart state changed. Optional tracking.
+
+**Signature:**
+```typescript
+function handleCartChange(event: {
+  itemCount: number;
+  previousCount: number;
+  timestamp?: number;
+}): void
+```
+
+**Parameters:**
+- `event` - Cart change event data
+
+**Example:**
+```javascript
+QredexAgent.handleCartChange({
+  itemCount: 5,
+  previousCount: 3,
+});
+```
+
+**Note:** This is for optional tracking only. No automatic actions are taken.
+
+---
+
+### `handlePaymentSuccess(event)`
+
+Tell the agent that payment succeeded. Automatically clears PIT.
+
+**Signature:**
+```typescript
+function handlePaymentSuccess(event: {
+  orderId: string;
+  amount: number;
+  currency: string;
+  timestamp?: number;
+}): void
+```
+
+**Parameters:**
+- `event` - Payment success event data
+
+**Example:**
+```javascript
+async function checkout(order) {
+  const pit = QredexAgent.getPurchaseIntentToken();
+
+  await api.post('/orders', {
+    ...order,
+    qredex_pit: pit,
+  });
+
+  QredexAgent.handlePaymentSuccess({
+    orderId: order.id,
+    amount: order.total,
+    currency: 'USD',
+  });
+}
+```
+
+**What happens:**
+1. Clears IIT from storage
+2. Clears PIT from storage
+3. Emits `onCleared` event
+
+---
+
+## Event Listeners (Agent → Merchant)
+
+Listen for agent state changes.
+
+### `onLocked(handler)`
+
+Listen for successful lock events.
+
+**Signature:**
+```typescript
+function onLocked(handler: (event: {
+  purchaseToken: string;
+  alreadyLocked: boolean;
+  timestamp: number;
+}) => void): void
+```
+
+**Example:**
+```javascript
+QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
+  console.log('✅ Locked:', purchaseToken);
+  console.log('Already locked:', alreadyLocked);
+
+  // Update UI
+  showNotification('Attribution locked!');
 });
 ```
 
 ---
 
-### `offAddToCart(handler)`
+### `onCleared(handler)`
 
-Unregister add-to-cart handler.
+Listen for cleared state events.
 
 **Signature:**
 ```typescript
-function offAddToCart(handler: AddToCartHandler): void
+function onCleared(handler: (event: {
+  timestamp: number;
+}) => void): void
 ```
 
 **Example:**
 ```javascript
-const handler = (event) => {
-  console.log('Cart:', event);
+QredexAgent.onCleared(() => {
+  console.log('🗑️ Cleared');
+  showNotification('Attribution cleared');
+});
+```
+
+---
+
+### `onError(handler)`
+
+Listen for agent error events.
+
+**Signature:**
+```typescript
+function onError(handler: (event: {
+  error: string;
+  context?: string;
+}) => void): void
+```
+
+**Example:**
+```javascript
+QredexAgent.onError(({ error, context }) => {
+  console.error('❌ Error in', context, ':', error);
+  showNotification('Error: ' + error, 'error');
+});
+```
+
+---
+
+### `offLocked(handler)`
+
+Unregister a locked handler.
+
+**Signature:**
+```typescript
+function offLocked(handler: (event: any) => void): void
+```
+
+**Example:**
+```javascript
+const handler = ({ purchaseToken }) => {
+  console.log('Locked:', purchaseToken);
 };
 
-QredexAgent.onAddToCart(handler);
+QredexAgent.onLocked(handler);
 // ... later
-QredexAgent.offAddToCart(handler);
+QredexAgent.offLocked(handler);
 ```
 
 ---
 
-### `enableDetection()`
+### `offCleared(handler)`
 
-Enable automatic add-to-cart detection.
+Unregister a cleared handler.
 
 **Signature:**
 ```typescript
-function enableDetection(): void
+function offCleared(handler: (event: any) => void): void
 ```
 
 **Example:**
 ```javascript
-// Re-enable after disabling
-QredexAgent.enableDetection();
+const handler = () => console.log('Cleared');
+QredexAgent.onCleared(handler);
+// ... later
+QredexAgent.offCleared(handler);
 ```
 
 ---
 
-### `disableDetection()`
+### `offError(handler)`
 
-Disable automatic add-to-cart detection.
+Unregister an error handler.
 
 **Signature:**
 ```typescript
-function disableDetection(): void
+function offError(handler: (event: any) => void): void
 ```
 
 **Example:**
 ```javascript
-// Disable auto-detection, use manual only
-QredexAgent.disableDetection();
+const handler = ({ error }) => console.error(error);
+QredexAgent.onError(handler);
+// ... later
+QredexAgent.offError(handler);
 ```
 
 ---
@@ -290,7 +503,7 @@ QredexAgent.disableDetection();
 
 ### `destroy()`
 
-Destroy agent and cleanup resources.
+Destroy the agent and clean up all resources.
 
 **Signature:**
 ```typescript
@@ -299,13 +512,13 @@ function destroy(): void
 
 **Example:**
 ```javascript
-// Cleanup on SPA route change
+// Cleanup on SPA route change or unmount
 QredexAgent.destroy();
 ```
 
 **What it does:**
-- Removes event listeners
-- Resets state
+- Removes all event listeners
+- Resets internal state
 - Clears timers
 
 ---
@@ -344,112 +557,147 @@ if (QredexAgent.isInitialized()) {
 
 ---
 
-### `getStatus()`
-
-Get detailed agent status.
-
-**Signature:**
-```typescript
-function getStatus(): AgentStatus
-```
-
-**Returns:**
-```typescript
-{
-  initialized: boolean;
-  running: boolean;
-  destroyed: boolean;
-}
-```
-
-**Example:**
-```javascript
-const status = QredexAgent.getStatus();
-console.log(status);
-// { initialized: true, running: true, destroyed: false }
-```
-
----
-
 ## Types
 
 ### AgentConfig
 
 ```typescript
 interface AgentConfig {
+  /** API endpoint for lock requests */
   lockEndpoint?: string;
+
+  /** Enable debug logging */
   debug?: boolean;
+
+  /** Enable automatic detection (not currently used) */
   autoDetect?: boolean;
+
+  /** sessionStorage/cookie key for IIT */
   influenceIntentToken?: string;
+
+  /** sessionStorage/cookie key for PIT */
   purchaseIntentToken?: string;
+
+  /** Cookie expiration in days */
   cookieExpireDays?: number;
 }
 ```
+
+**Defaults:**
+```typescript
+{
+  lockEndpoint: '/api/v1/agent/intents/lock',
+  debug: false,
+  autoDetect: true,
+  influenceIntentToken: '__qdx_iit',
+  purchaseIntentToken: '__qdx_pit',
+  cookieExpireDays: 30,
+}
+```
+
+---
 
 ### LockMeta
 
 ```typescript
 interface LockMeta {
+  /** Product ID if available */
   productId?: string;
+
+  /** Product name if available */
   productName?: string;
+
+  /** Quantity if available */
   quantity?: number;
+
+  /** Price if available */
   price?: number;
+
+  /** Additional custom fields */
   [key: string]: unknown;
 }
 ```
+
+---
 
 ### LockResult
 
 ```typescript
-type LockResult = 
-  | { 
-      success: true; 
-      purchaseToken: string; 
+type LockResult =
+  | {
+      /** Lock was successful */
+      success: true;
+
+      /** The purchase intent token (PIT) */
+      purchaseToken: string;
+
+      /** Whether the intent was already locked (idempotent) */
       alreadyLocked: boolean;
     }
-  | { 
-      success: false; 
-      purchaseToken: null; 
+  | {
+      /** Lock failed */
+      success: false;
+
+      /** No PIT available */
+      purchaseToken: null;
+
+      /** Was not already locked */
       alreadyLocked: false;
+
+      /** Error message */
       error: string;
     };
 ```
 
-### AddToCartMeta
+---
+
+### Event Types
 
 ```typescript
-interface AddToCartMeta {
+/** Cart add event (Merchant → Agent) */
+interface CartAddEvent {
   productId?: string;
-  productName?: string;
   quantity?: number;
   price?: number;
-  [key: string]: unknown;
+  timestamp?: number;
 }
-```
 
-### AddToCartEvent
+/** Cart empty event (Merchant → Agent) */
+interface CartEmptyEvent {
+  timestamp?: number;
+}
 
-```typescript
-interface AddToCartEvent {
-  source: 'click' | 'form' | 'manual';
-  meta: AddToCartMeta;
+/** Cart change event (Merchant → Agent) */
+interface CartChangeEvent {
+  itemCount: number;
+  previousCount: number;
+  timestamp?: number;
+}
+
+/** Payment success event (Merchant → Agent) */
+interface PaymentSuccessEvent {
+  orderId: string;
+  amount: number;
+  currency: string;
+  timestamp?: number;
+}
+
+/** Locked event (Agent → Merchant) */
+interface LockedEvent {
+  purchaseToken: string;
+  alreadyLocked: boolean;
   timestamp: number;
 }
-```
 
-### AddToCartHandler
+/** Cleared event (Agent → Merchant) */
+interface ClearedEvent {
+  timestamp: number;
+}
 
-```typescript
-type AddToCartHandler = (event: AddToCartEvent) => void;
-```
-
-### AgentStatus
-
-```typescript
-interface AgentStatus {
-  initialized: boolean;
-  running: boolean;
-  destroyed: boolean;
+/** Error event (Agent → Merchant) */
+interface ErrorEvent {
+  error: string;
+  context?: string;
 }
 ```
 
@@ -457,31 +705,36 @@ interface AgentStatus {
 
 ## Quick Reference
 
-| Method | Purpose | Returns |
-|--------|---------|---------|
-| `init(config?)` | Initialize with config | `void` |
-| `getIntentToken()` | Get IIT | `string \| null` |
-| `getPurchaseIntentToken()` | Get PIT | `string \| null` |
-| `hasIntentToken()` | Check IIT exists | `boolean` |
-| `hasPurchaseIntentToken()` | Check PIT exists | `boolean` |
-| `lockIntent(meta?)` | Lock IIT → PIT | `Promise<LockResult>` |
-| `handleAddToCart(meta?)` | Trigger cart event | `void` |
-| `onAddToCart(handler)` | Register handler | `void` |
-| `offAddToCart(handler)` | Unregister handler | `void` |
-| `enableDetection()` | Enable auto-detect | `void` |
-| `disableDetection()` | Disable auto-detect | `void` |
-| `destroy()` | Cleanup | `void` |
-| `stop()` | Alias for destroy | `void` |
-| `isInitialized()` | Check initialized | `boolean` |
-| `getStatus()` | Get status | `AgentStatus` |
+| Method | Category | Returns | Description |
+|--------|----------|---------|-------------|
+| `init(config?)` | Lifecycle | `void` | Initialize with config |
+| `getIntentToken()` | Token Access | `string \| null` | Get IIT |
+| `getPurchaseIntentToken()` | Token Access | `string \| null` | Get PIT |
+| `hasIntentToken()` | Token Access | `boolean` | Check IIT exists |
+| `hasPurchaseIntentToken()` | Token Access | `boolean` | Check PIT exists |
+| `lockIntent(meta?)` | Lock | `Promise<LockResult>` | Lock IIT → PIT |
+| `clearTokens()` | Lock | `void` | Clear all tokens |
+| `handleCartAdd(event?)` | Event Handler | `void` | Cart add |
+| `handleCartEmpty(event?)` | Event Handler | `void` | Cart empty |
+| `handleCartChange(event)` | Event Handler | `void` | Cart change |
+| `handlePaymentSuccess(event)` | Event Handler | `void` | Payment success |
+| `onLocked(handler)` | Event Listener | `void` | Listen for lock |
+| `onCleared(handler)` | Event Listener | `void` | Listen for clear |
+| `onError(handler)` | Event Listener | `void` | Listen for errors |
+| `offLocked(handler)` | Event Listener | `void` | Unregister lock listener |
+| `offCleared(handler)` | Event Listener | `void` | Unregister clear listener |
+| `offError(handler)` | Event Listener | `void` | Unregister error listener |
+| `destroy()` | Lifecycle | `void` | Cleanup |
+| `stop()` | Lifecycle | `void` | Alias for destroy |
+| `isInitialized()` | Lifecycle | `boolean` | Check initialized |
 
 ---
 
 ## Related Documentation
 
 - **[Installation](./INSTALLATION.md)** - Setup guide
-- **[Lock Flow](./LOCK_FLOW.md)** - How locking works
-- **[Detection](./DETECTION.md)** - Cart detection strategies
+- **[Integration Model](./INTEGRATION_MODEL.md)** - Complete integration guide
+- **[Cart Empty Policy](./CART_EMPTY_POLICY.md)** - Attribution clearing rationale
 
 ---
 

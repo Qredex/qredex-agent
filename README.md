@@ -23,7 +23,7 @@
 // When user adds to cart
 async function addToCart(product) {
   await api.post('/cart', product);
-  
+
   // Tell agent (auto-locks IIT → PIT)
   QredexAgent.handleCartAdd({
     productId: product.id,
@@ -35,7 +35,7 @@ async function addToCart(product) {
 // When cart is emptied
 function clearCart() {
   cart.clear();
-  
+
   // Tell agent (auto-clears PIT)
   QredexAgent.handleCartEmpty();
 }
@@ -43,12 +43,12 @@ function clearCart() {
 // When payment succeeds
 async function checkout(order) {
   const pit = QredexAgent.getPurchaseIntentToken();
-  
+
   await api.post('/orders', {
     ...order,
     qredex_pit: pit,  // Send PIT to backend
   });
-  
+
   // Tell agent (auto-clears PIT)
   QredexAgent.handlePaymentSuccess({
     orderId: order.id,
@@ -105,9 +105,9 @@ QredexAgent.onError(handler)           // Listen for errors
 
 | Document | Description |
 |----------|-------------|
-| **[Integration Model](docs/INTEGRATION_MODEL.md)** | Complete integration guide |
-| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
+| **[Integration Model](docs/INTEGRATION_MODEL.md)** | Complete integration guide with 2 paths |
 | **[API Reference](docs/API.md)** | Full API documentation |
+| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
 | **[AGENTS.md](AGENTS.md)** | Development guidelines |
 
 ---
@@ -127,10 +127,10 @@ npm install qredex-agent
 ```
 
 ```javascript
-import { 
-  handleCartAdd, 
-  handleCartEmpty, 
-  getPurchaseIntentToken 
+import {
+  handleCartAdd,
+  handleCartEmpty,
+  getPurchaseIntentToken
 } from 'qredex-agent';
 ```
 
@@ -150,21 +150,23 @@ function useQredexAgent() {
       console.log('Locked:', purchaseToken);
     });
   }, []);
-  
+
   const addToCart = async (product) => {
     await api.post('/cart', product);
     QredexAgent.handleCartAdd(product);
   };
-  
+
   const checkout = async (order) => {
     const pit = QredexAgent.getPurchaseIntentToken();
     await api.post('/orders', { ...order, qredex_pit: pit });
     QredexAgent.handlePaymentSuccess(order);
   };
-  
+
   return { addToCart, checkout };
 }
 ```
+
+**See:** [examples/react/](examples/react/) for complete React/Next.js example.
 
 ### Vanilla JS
 
@@ -175,14 +177,92 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
     id: e.target.dataset.productId,
     price: parseFloat(e.target.dataset.price),
   };
-  
+
   await fetch('/api/cart', {
     method: 'POST',
     body: JSON.stringify(product),
   });
-  
+
   QredexAgent.handleCartAdd(product);
 });
+```
+
+**See:** [examples/vanilla/](examples/vanilla/) for complete vanilla JS example.
+
+### Vue/Nuxt
+
+```vue
+<script setup>
+import { onMounted } from 'vue';
+
+onMounted(() => {
+  // Optional: listen for agent events
+  QredexAgent.onLocked(({ purchaseToken }) => {
+    console.log('Locked:', purchaseToken);
+  });
+});
+
+const addToCart = async (product) => {
+  await $api.post('/cart', product);
+  QredexAgent.handleCartAdd(product);
+};
+
+const checkout = async (order) => {
+  const pit = QredexAgent.getPurchaseIntentToken();
+  await $api.post('/orders', { ...order, qredex_pit: pit });
+  QredexAgent.handlePaymentSuccess(order);
+};
+</script>
+```
+
+**See:** [examples/vue/](examples/vue/) for complete Vue/Nuxt example.
+
+---
+
+## How It Works
+
+```
+1. User lands with ?qdx_intent=xxx
+   → Agent captures IIT, stores in sessionStorage + cookie
+
+2. User adds first item to cart
+   → handleCartAdd() locks IIT → PIT via API
+   → PIT stored, IIT cleared
+
+3. User continues shopping
+   → PIT persists through additional cart adds
+
+4. User empties cart OR completes checkout
+   → handleCartEmpty() or handlePaymentSuccess() clears PIT
+
+5. Next purchase requires new Qredex link (new IIT)
+```
+
+**See:** [docs/INTEGRATION_MODEL.md](docs/INTEGRATION_MODEL.md) for complete flow diagram.
+
+---
+
+## Configuration
+
+Optional configuration via `window.QredexAgentConfig`:
+
+```javascript
+window.QredexAgentConfig = {
+  debug: true,                    // Enable debug logging
+  lockEndpoint: '/api/v1/...',   // Lock API endpoint
+  cookieExpireDays: 30,           // Cookie expiration
+};
+```
+
+**Defaults:**
+```typescript
+{
+  debug: false,
+  lockEndpoint: '/api/v1/agent/intents/lock',
+  influenceIntentToken: '__qdx_iit',
+  purchaseIntentToken: '__qdx_pit',
+  cookieExpireDays: 30,
+}
 ```
 
 ---
@@ -195,6 +275,41 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
 - Edge (latest)
 
 Requires ES2020+ support.
+
+---
+
+## Examples Directory
+
+| Example | Description |
+|---------|-------------|
+| [examples/basic/](examples/basic/) | Comprehensive demo with testing UI |
+| [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo |
+| [examples/react/](examples/react/) | React/Next.js integration |
+| [examples/vue/](examples/vue/) | Vue/Nuxt integration |
+
+---
+
+## Testing Examples
+
+Each example includes a testing UI to verify agent functionality:
+
+### Basic Example (Recommended for Testing)
+
+```bash
+# Serve the basic example
+cd examples/basic
+npx serve ..
+```
+
+Then open `http://localhost:3000/basic/` and:
+
+1. **Simulate Intent URL** - Add `?qdx_intent=test_token_123` to URL
+2. **Add to Cart** - Click "Add to Cart" button
+3. **Verify PIT** - Check PIT token appears
+4. **Empty Cart** - Clear cart, verify PIT cleared
+5. **Checkout Flow** - Complete full checkout flow
+
+**See:** [examples/basic/TESTING.md](examples/basic/TESTING.md) for complete testing guide.
 
 ---
 

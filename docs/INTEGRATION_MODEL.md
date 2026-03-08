@@ -1,7 +1,7 @@
 # Qredex Agent - Integration Guide
 
 **Document Type:** Implementation Guide  
-**Status:** Ready for Implementation  
+**Status:** Complete  
 **Version:** 1.0 (Final)
 
 ---
@@ -51,7 +51,7 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ 1. USER LANDS ON SITE                                                  │
-│    URL: https://store.com? qdx_intent=abc123                           │
+│    URL: https://store.com?qdx_intent=abc123                            │
 │    → Agent captures IIT (Influence Intent Token)                       │
 │    → Stores IIT in sessionStorage + cookie                             │
 │    → Cleans URL (removes qdx_intent param)                             │
@@ -72,17 +72,17 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ 3b. USER CLICKS ANOTHER QREDEX LINK (new IIT)                          │
-│    → New IIT captured from URL                                         │
-│    → BUT PIT already exists → IGNORE new IIT                           │
-│    → Original PIT preserved (first-touch attribution)                  │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────┐
-│ 3c. USER EMPTIES CART                                                  │
+│ 3b. USER EMPTIES CART                                                  │
 │    → Merchant calls: handleCartEmpty()                                 │
 │    → Agent clears PIT from sessionStorage + cookie                     │
 │    → User must start flow over (new IIT from new Qredex link)          │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 3c. USER CLICKS ANOTHER QREDEX LINK (new IIT)                          │
+│    → New IIT captured from URL                                         │
+│    → BUT PIT already exists → IGNORE new IIT                           │
+│    → Original PIT preserved (first-touch attribution)                  │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -202,10 +202,10 @@ function useQredexAgent() {
       console.log('PIT locked:', purchaseToken);
     });
   }, []);
-  
+
   const addToCart = async (product) => {
     await api.post('/cart', { productId: product.id });
-    
+
     // Tell agent cart add happened (auto-locks)
     QredexAgent.handleCartAdd({
       productId: product.id,
@@ -213,24 +213,24 @@ function useQredexAgent() {
       price: product.price,
     });
   };
-  
+
   const completeCheckout = async (orderData) => {
     const pit = QredexAgent.getPurchaseIntentToken();
-    
+
     const result = await api.post('/orders', {
       ...orderData,
       qredex_pit: pit,
     });
-    
+
     // Tell agent payment succeeded (auto-clears)
     QredexAgent.handlePaymentSuccess({
       orderId: result.orderId,
       amount: orderData.total,
     });
-    
+
     return result;
   };
-  
+
   return { addToCart, completeCheckout };
 }
 ```
@@ -261,9 +261,9 @@ function useQredexAgent() {
 const iit = QredexAgent.getIntentToken();
 
 // Backend calls its own capture API
-await fetch('/api/capture-iit', { 
-    method: 'POST', 
-    body: JSON.stringify({ iit }) 
+await fetch('/api/capture-iit', {
+    method: 'POST',
+    body: JSON.stringify({ iit })
 });
 ```
 
@@ -442,6 +442,9 @@ type ErrorHandler = (event: ErrorEvent) => void;
 | `onLocked(handler)` | Hook | Listen for successful lock |
 | `onCleared(handler)` | Hook | Listen for cleared state |
 | `onError(handler)` | Hook | Listen for agent errors |
+| `offLocked(handler)` | Hook | Unregister lock listener |
+| `offCleared(handler)` | Hook | Unregister clear listener |
+| `offError(handler)` | Hook | Unregister error listener |
 
 **Both approaches work!** Choose what fits your codebase:
 - **Event handlers** (`handleCartAdd`) for auto-lock convenience
@@ -452,26 +455,28 @@ type ErrorHandler = (event: ErrorEvent) => void;
 ## Implementation Plan
 
 ### Phase 1: Core Agent (~150 lines)
-- [ ] IIT capture from URL (auto-start)
-- [ ] PIT storage (sessionStorage + cookie)
-- [ ] Lock logic (IIT → PIT via `/api/v1/agent/intents/lock`)
-- [ ] Clear logic (IIT/PIT cleanup)
-- [ ] Basic APIs: `getIntentToken()`, `getPurchaseIntentToken()`, `lockIntent({ token })`, `clearTokens()`
+- [x] IIT capture from URL (auto-start)
+- [x] PIT storage (sessionStorage + cookie)
+- [x] Lock logic (IIT → PIT via `/api/v1/agent/intents/lock`)
+- [x] Clear logic (IIT/PIT cleanup)
+- [x] Basic APIs: `getIntentToken()`, `getPurchaseIntentToken()`, `lockIntent({ token })`, `clearTokens()`
 
 ### Phase 2: Event Handlers
-- [ ] `handleCartAdd()` implementation + auto-lock
-- [ ] `handleCartEmpty()` implementation + auto-clear
-- [ ] `handleCartChange()` implementation (optional tracking)
-- [ ] `handlePaymentSuccess()` implementation + auto-clear
-- [ ] `onLocked()` listener registration
-- [ ] `onCleared()` listener registration
-- [ ] `onError()` listener registration
-- [ ] Listener unregistration (`off*` functions)
+- [x] `handleCartAdd()` implementation + auto-lock
+- [x] `handleCartEmpty()` implementation + auto-clear
+- [x] `handleCartChange()` implementation (optional tracking)
+- [x] `handlePaymentSuccess()` implementation + auto-clear
+- [x] `onLocked()` listener registration
+- [x] `onCleared()` listener registration
+- [x] `onError()` listener registration
+- [x] Listener unregistration (`off*` functions)
 
 ### Phase 3: Documentation
-- [ ] React/Next.js examples
-- [ ] Troubleshooting guide
-- [ ] Migration guide (from Shopify tracker)
+- [x] React/Next.js examples
+- [x] Vanilla JS examples
+- [x] Vue/Nuxt examples
+- [x] Troubleshooting guide
+- [x] Migration guide (from Shopify tracker)
 
 ### Phase 4: Testing
 - [ ] React/Next.js storefront (Path 1)
