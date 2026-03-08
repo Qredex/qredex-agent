@@ -1,412 +1,101 @@
-<!--
-    ▄▄▄▄
-  ▄█▀▀███▄▄              █▄
-  ██    ██ ▄             ██
-  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
-  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
-   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
-        ▀█
-
-  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
-
-  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-
-  This is proprietary and confidential. Unauthorized copying, redistributing
-  and/or modification of this file via any medium is inexorably prohibited.
-
-  If you need additional information or have any questions, please email: copyright@qredex.com
--->
-
 # Qredex Agent
 
 A lightweight, framework-agnostic browser agent for Qredex that captures intent tokens from URLs, persists them safely, detects add-to-cart events, and automatically locks intent through Qredex's API.
 
-## Overview
+---
 
-The Qredex Agent is designed to be embedded on any storefront website. Its primary purposes are:
+## Quick Start
 
-1. **Capture** the `qdx_intent` token from the page URL
-2. **Persist** the token in sessionStorage (with cookie fallback)
-3. **Expose** safe global access to the token via `window.QredexAgent`
-4. **Detect** likely add-to-cart events using multiple strategies
-5. **Lock** the intent automatically by calling Qredex's public lock endpoint
-
-## Build Formats
-
-This library ships **ESM + IIFE only**. UMD is intentionally excluded.
-
-| Format | File | Use Case |
-|--------|------|----------|
-| **ESM** | `qredex-agent.es.js` | Modern bundlers, `import` statements |
-| **IIFE** | `qredex-agent.iife.js` | Direct `<script>` tag, `window.QredexAgent` |
-| **IIFE Minified** | `qredex-agent.iife.min.js` | Production CDN delivery |
-
-**Why no UMD?**
-
-- The primary install path is a hosted versioned browser script
-- Modern applications use ESM imports
-- Legacy multi-loader compatibility is not a goal
-- IIFE provides cleaner global attachment (`window.QredexAgent`)
-
-## Installation
-
-### Via Script Tag (Recommended)
+Add this single line before `</body>`:
 
 ```html
-<!-- Add to your page before </body> -->
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-### Via NPM
+**That's it.** The agent auto-starts and begins capturing intent tokens.
 
-```bash
-npm install qredex-agent
-```
+---
 
-```javascript
-import { init, getIntentToken, handleAddToCart } from 'qredex-agent';
+## What It Does
 
-// Optional: initialize with config
-init({ debug: true });
-```
+1. **Captures** `qdx_intent` token from URL
+2. **Stores** token in sessionStorage + cookie
+3. **Detects** add-to-cart events automatically
+4. **Locks** intent (IIT → PIT) when cart action occurs
+5. **Exposes** global `window.QredexAgent` API
 
-## CDN Versioning Strategy
+---
 
-The library is designed for hosted script delivery using versioned paths.
+## Configuration (Optional)
 
-### Path Formats
-
-```
-/agent/v1/qredex-agent.iife.min.js       # Major version (auto-updates within v1.x.x)
-/agent/v1.0.0/qredex-agent.iife.min.js   # Pinned version (immutable)
-```
-
-### Versioning Rules
-
-| Path Type | Example | Behavior | Caching |
-|-----------|---------|----------|---------|
-| **Major alias** | `/v1/` | Auto-updates to latest v1.x.x | Short cache, revalidate |
-| **Pinned** | `/v1.0.0/` | Immutable, never changes | Long cache (1 year) |
-
-### Caching Recommendations
-
-**Pinned versions (`/v1.0.0/`):**
-```
-Cache-Control: public, max-age=31536000, immutable
-```
-
-**Major alias (`/v1/`):**
-```
-Cache-Control: public, max-age=3600, must-revalidate
-```
-
-## Storage Keys
-
-The agent uses standardized keys for browser storage:
-
-| Storage | Key | Purpose |
-|---------|-----|---------|
-| Cookie + sessionStorage | `__qdx_iit` | Influence Intent Token (IIT) |
-| Cookie + sessionStorage | `__qdx_pit` | Purchase Intent Token (PIT) |
-
-**Note for merchants:** Your backend may need to read `__qdx_pit` from cookies to associate orders with attributed intent.
-
-## Auto-Start Behavior
-
-The agent **automatically starts** when the script loads:
-
-- Immediately captures `qdx_intent` from the URL if present
-- Stores the token in sessionStorage and cookie
-- Cleans the URL using `history.replaceState`
-- Begins listening for add-to-cart events (unless disabled)
-
-**No manual initialization is required** for basic functionality.
-
-## Configuration
-
-### Pre-Load Global Config
-
-Set configuration before the script loads:
+Set config **before** the script loads:
 
 ```html
 <script>
   window.QredexAgentConfig = {
-    debug: true,
-    lockEndpoint: 'https://api.qredex.com/agent/lock',
-    autoDetect: true,
+    debug: false,  // Enable for troubleshooting
   };
 </script>
-<script src="qredex-agent.iife.min.js"></script>
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-### Programmatic Config
+See **[Installation Guide](docs/INSTALLATION.md)** for full configuration options.
 
-```javascript
-import { init } from 'qredex-agent';
-
-init({
-  // Lock endpoint URL
-  lockEndpoint: 'https://api.qredex.com/agent/lock',
-
-  // Enable debug logging
-  debug: false,
-
-  // Enable automatic add-to-cart detection
-  autoDetect: true,
-
-  // Token key names (used for both cookie and sessionStorage)
-  influenceIntentToken: '__qdx_iit',
-  purchaseIntentToken: '__qdx_pit',
-
-  // Cookie expiration in days (default: 30 days)
-  cookieExpireDays: 30,
-});
-```
+---
 
 ## Public API
 
-### `init(config?)`
-
-Initialize the agent with optional configuration. Usually not needed due to auto-start.
+Access via `window.QredexAgent`:
 
 ```javascript
-QredexAgent.init({ debug: true });
-```
+// Check token status
+QredexAgent.hasIntentToken();
+QredexAgent.hasPurchaseIntentToken();
 
-### `getIntentToken()`
+// Get tokens
+QredexAgent.getIntentToken();
+QredexAgent.getPurchaseIntentToken();
 
-Get the current Intent Token (IIT). Checks sessionStorage first, then cookie fallback.
+// Manual operations
+await QredexAgent.lockIntent({ productId: '123' });
+QredexAgent.handleAddToCart({ productId: '123', quantity: 1 });
 
-```javascript
-const token = QredexAgent.getIntentToken();
-if (token) {
-  console.log('Intent token:', token);
-}
-```
-
-### `getPurchaseIntentToken()`
-
-Get the current Purchase Intent Token (PIT). Returns `null` if not yet locked.
-
-```javascript
-const pit = QredexAgent.getPurchaseIntentToken();
-if (pit) {
-  console.log('Purchase token:', pit);
-}
-```
-
-### `lockIntent(meta?)`
-
-Manually trigger a lock request to exchange IIT for PIT. This function is **idempotent**:
-- If PIT already exists locally, returns it immediately with `alreadyLocked: true`
-- If a lock is already in flight, returns the same promise
-- If backend indicates already locked, treats it as success
-
-```javascript
-const result = await QredexAgent.lockIntent({
-  productId: 'widget-001',
-  quantity: 2,
-});
-
-if (result.success) {
-  console.log('PIT:', result.purchaseToken);
-  console.log('Was already locked:', result.alreadyLocked);
-} else {
-  console.error('Lock failed:', result.error);
-}
-```
-
-### `hasIntentToken()`
-
-Check if an Intent Token (IIT) exists.
-
-```javascript
-if (QredexAgent.hasIntentToken()) {
-  console.log('Intent token is available');
-} else {
-  console.log('No intent token found');
-}
-```
-
-### `hasPurchaseIntentToken()`
-
-Check if a Purchase Intent Token (PIT) exists.
-
-```javascript
-if (QredexAgent.hasPurchaseIntentToken()) {
-  console.log('Purchase token is available - ready for checkout');
-} else {
-  console.log('No purchase token yet');
-}
-```
-
-### `handleAddToCart(meta?)`
-
-Manually trigger an add-to-cart event. This is a first-class API for explicit integration.
-
-```javascript
-QredexAgent.handleAddToCart({
-  productId: 'widget-001',
-  productName: 'Premium Widget',
-  quantity: 2,
-  price: 99.99,
-});
-```
-
-### `onAddToCart(handler)`
-
-Register a handler for add-to-cart events.
-
-```javascript
-QredexAgent.onAddToCart((event) => {
-  console.log('Add-to-cart detected:', event.source);
-  console.log('Product:', event.meta.productId);
-});
-```
-
-### `destroy()`
-
-Destroy the agent and clean up all resources (event listeners, state).
-
-```javascript
+// Lifecycle
 QredexAgent.destroy();
+QredexAgent.isInitialized();
 ```
 
-### `isInitialized()`
+See **[API Reference](docs/API.md)** for complete documentation.
 
-Check if the agent is currently initialized and running.
+---
 
-```javascript
-if (QredexAgent.isInitialized()) {
-  // Agent is ready
-}
-```
+## Documentation
 
-### `getStatus()`
+| Document | Description |
+|----------|-------------|
+| **[Installation](docs/INSTALLATION.md)** | Setup, CDN versioning, Shopify/WooCommerce integration |
+| **[API Reference](docs/API.md)** | Complete public API documentation |
+| **[Lock Flow](docs/LOCK_FLOW.md)** | How IIT → PIT locking works |
+| **[Detection](docs/DETECTION.md)** | Add-to-cart detection strategies |
+| **[AGENTS.md](AGENTS.md)** | Development guidelines |
 
-Get detailed status about the agent's state.
-
-```javascript
-const status = QredexAgent.getStatus();
-// { initialized: true, running: true, destroyed: false }
-```
-
-## Detection Strategy
-
-The agent uses a **layered detection strategy** for add-to-cart events:
-
-### 1. Click Detection
-
-Listens for clicks on elements that match common add-to-cart patterns:
-
-- Elements with `data-add-to-cart` attribute
-- Elements with `.add-to-cart` class
-- Buttons with `name="add"` or `name="add-to-cart"`
-- Buttons containing "Add to Cart" text
-
-### 2. Form Detection
-
-Listens for form submissions that look like add-to-cart actions:
-
-- Forms with cart-related actions or IDs
-- Forms containing add-to-cart submit buttons
-- Forms with product/quantity inputs
-
-### 3. Manual Trigger
-
-Explicit API call for guaranteed detection:
-
-```javascript
-QredexAgent.handleAddToCart({ productId: 'xxx' });
-```
-
-### Shared Pipeline
-
-All detection methods flow through a **shared pipeline** that:
-
-1. Receives the add-to-cart event
-2. Calls registered handlers
-3. Checks if locking conditions are met:
-   - IIT exists
-   - PIT does not already exist
-   - No lock request in flight
-4. Automatically calls the lock endpoint if conditions are met
-
-## Lock Flow
-
-```
-┌─────────────────┐
-│ Add-to-Cart     │
-│ Detected        │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Check: IIT      │──── No ──► Skip
-│ Exists?         │
-└────────┬────────┘
-         │ Yes
-         ▼
-┌─────────────────┐
-│ Check: PIT      │──── Yes ──► Skip
-│ Exists?         │
-└────────┬────────┘
-         │ No
-         ▼
-┌─────────────────┐
-│ Check: Lock     │──── Yes ──► Skip
-│ In Progress?    │
-└────────┬────────┘
-         │ No
-         ▼
-┌─────────────────┐
-│ Call Lock       │
-│ Endpoint        │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Store PIT       │
-│ in Storage      │
-└─────────────────┘
-```
+---
 
 ## Development
-
-### Prerequisites
-
-- Node.js >= 18.0.0
-- npm or yarn
 
 ### Setup
 
 ```bash
-npm install
+npm install  # Install development dependencies
 ```
 
-### Scripts
+### Commands
 
 ```bash
-# Development with hot reload
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Run linter
-npm run lint
-
-# Format code
-npm run format
-
-# Run tests
-npm run test
-
-# Run tests in watch mode
-npm run test:watch
+npm run dev      # Development server
+npm run build    # Production build
+npm run test     # Run tests
+npm run lint     # Lint code
 ```
 
 ### Project Structure
@@ -414,61 +103,19 @@ npm run test:watch
 ```
 qredex-agent/
 ├── src/
-│   ├── index.ts              # Main entry point, public API
-│   ├── bootstrap/
-│   │   ├── auto-start.ts     # URL token capture on load
-│   │   └── config.ts         # Configuration management
-│   ├── core/
-│   │   ├── state.ts          # Centralized runtime state
-│   │   └── lifecycle.ts      # Init/destroy lifecycle
-│   ├── storage/
-│   │   ├── cookie.ts         # Cookie storage utilities
-│   │   ├── session.ts        # SessionStorage utilities
-│   │   └── tokens.ts         # Token storage coordination
-│   ├── detect/
-│   │   ├── types.ts          # Detection type definitions
-│   │   ├── click.ts          # Click-based detection
-│   │   ├── form.ts           # Form-based detection
-│   │   ├── manual.ts         # Manual trigger API
-│   │   └── pipeline.ts       # Shared detection pipeline
-│   ├── api/
-│   │   ├── types.ts          # API type definitions
-│   │   └── lock.ts           # Lock endpoint client
-│   └── utils/
-│       ├── log.ts            # Debug logger
-│       ├── dom.ts            # DOM utilities
-│       └── guards.ts         # Type guards
-├── examples/
-│   └── basic/
-│       └── index.html        # Demo page
+│   ├── index.ts           # Main entry, public API
+│   ├── bootstrap/         # Auto-start, config
+│   ├── core/              # State, lifecycle
+│   ├── storage/           # sessionStorage, cookies
+│   ├── detect/            # Click, form, manual detection
+│   ├── api/               # Lock endpoint client
+│   └── utils/             # Logging, DOM, guards
 ├── tests/
-│   ├── unit/                 # Unit tests
-│   └── browser/              # Browser tests (scaffold)
-└── dist/                     # Build output
+│   └── unit/              # Unit tests
+└── dist/                  # Build output
 ```
 
-## Build Output
-
-The project produces two bundles:
-
-| File | Format | Use Case |
-|------|--------|----------|
-| `qredex-agent.js` | ESM | Modern bundlers, `<script type="module">` |
-| `qredex-agent.iife.min.js` | UMD/IIFE | Direct `<script>` tag, `window.QredexAgent` |
-
-Both bundles are minified for production.
-
-## Limitations & Caveats
-
-1. **Add-to-cart detection is best-effort** - Not all e-commerce implementations follow standard patterns. The manual trigger API should be used for guaranteed detection.
-
-2. **Storage access may be restricted** - In private browsing modes or with strict cookie policies, storage may be unavailable. The agent handles this gracefully.
-
-3. **No fetch/XHR interception** - Network interception is not enabled by default to avoid compatibility issues. Detection relies on DOM events.
-
-4. **Single intent per session** - The agent is designed for single-intent flows. Multiple intents are not supported.
-
-5. **Browser-only** - This is a browser library. No Node.js or server-side support.
+---
 
 ## Browser Support
 
@@ -479,6 +126,14 @@ Both bundles are minified for production.
 
 Requires ES2020+ support.
 
+---
+
 ## License
 
 MIT
+
+---
+
+## Support
+
+For questions: support@qredex.com

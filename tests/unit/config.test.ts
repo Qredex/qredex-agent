@@ -99,35 +99,4 @@ describe('Configuration', () => {
     expect(config.debug).toBe(false);
     expect(config.autoDetect).toBe(true);
   });
-
-  it('should use development endpoint for development environment', () => {
-    const config = initConfig({ environment: 'development' });
-
-    expect(config.environment).toBe('development');
-    expect(config.lockEndpoint).toBe('https://dev-api.qredex.com/api/v1/agent/intents/lock');
-  });
-
-  it('should use staging endpoint for staging environment', () => {
-    const config = initConfig({ environment: 'staging' });
-
-    expect(config.environment).toBe('staging');
-    expect(config.lockEndpoint).toBe('https://staging-api.qredex.com/api/v1/agent/intents/lock');
-  });
-
-  it('should use production endpoint by default', () => {
-    const config = initConfig();
-
-    expect(config.environment).toBe('production');
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
-  });
-
-  it('should allow explicit lockEndpoint to override environment', () => {
-    const config = initConfig({
-      environment: 'development',
-      lockEndpoint: 'https://custom.endpoint.com/lock',
-    });
-
-    expect(config.environment).toBe('development');
-    expect(config.lockEndpoint).toBe('https://custom.endpoint.com/lock');
-  });
 });

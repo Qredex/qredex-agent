@@ -26,25 +26,12 @@ import { debug, warn } from '../utils/log.js';
 import { isObject, isNonEmptyString, isValidUrl } from '../utils/guards.js';
 
 /**
- * Environment type for endpoint configuration.
- */
-export type Environment = 'development' | 'staging' | 'production';
-
-/**
  * Configuration options for the Qredex Agent.
  */
 export interface AgentConfig {
   /**
-   * The environment to use for endpoint configuration.
-   * This will set the lockEndpoint automatically.
-   * @default 'production'
-   */
-  environment?: Environment;
-
-  /**
    * The lock endpoint URL.
-   * If provided, this overrides the environment-based endpoint.
-   * @default 'https://api.qredex.com/api/v1/agent/intents/lock' (production)
+   * @default 'https://api.qredex.com/api/v1/agent/intents/lock'
    */
   lockEndpoint?: string;
 
@@ -89,7 +76,6 @@ declare global {
 }
 
 const DEFAULT_CONFIG: Required<AgentConfig> = {
-  environment: 'production',
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
   autoDetect: true,
@@ -97,18 +83,6 @@ const DEFAULT_CONFIG: Required<AgentConfig> = {
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
 };
-
-/**
- * Get the lock endpoint URL based on environment.
- */
-function getEndpointForEnvironment(env: Environment): string {
-  const endpoints: Record<Environment, string> = {
-    development: 'https://dev-api.qredex.com/api/v1/agent/intents/lock',
-    staging: 'https://staging-api.qredex.com/api/v1/agent/intents/lock',
-    production: 'https://api.qredex.com/api/v1/agent/intents/lock',
-  };
-  return endpoints[env];
-}
 
 let currentConfig: Required<AgentConfig> = { ...DEFAULT_CONFIG };
 let isInitialized = false;
@@ -138,22 +112,13 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
   const config: Required<AgentConfig> = { ...DEFAULT_CONFIG };
 
   if (isObject(userConfig)) {
-    // Validate and merge environment
-    if (userConfig.environment === 'development' || userConfig.environment === 'staging' || userConfig.environment === 'production') {
-      config.environment = userConfig.environment;
-    }
-
-    // Validate and merge lockEndpoint (overrides environment if provided)
+    // Validate and merge lockEndpoint
     if (userConfig.lockEndpoint !== undefined && isNonEmptyString(userConfig.lockEndpoint)) {
       if (isValidUrl(userConfig.lockEndpoint)) {
         config.lockEndpoint = userConfig.lockEndpoint;
       } else {
         warn('Invalid lockEndpoint URL, using default');
       }
-    } else if (userConfig.environment && userConfig.environment !== 'production') {
-      // Use environment-based endpoint if not production and no explicit lockEndpoint
-      const env: Environment = userConfig.environment as Environment;
-      config.lockEndpoint = getEndpointForEnvironment(env);
     }
 
     // Validate and merge boolean options
