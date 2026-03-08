@@ -191,7 +191,7 @@ export function hasPurchaseIntentToken(): boolean {
  * }
  * ```
  *
- * @see {@link handleCartAdd} - Automatically locks on cart add
+ * @see {@link handleCartChange} - Automatically locks/clears on cart state change
  * @see {@link clearTokens} - Clear tokens after checkout
  */
 export async function lockIntent(meta?: LockMeta): Promise<LockResult> {
@@ -216,7 +216,7 @@ export async function lockIntent(meta?: LockMeta): Promise<LockResult> {
  * }
  * ```
  *
- * @see {@link handleCartEmpty} - Automatically clears on cart empty
+ * @see {@link handleCartChange} - Automatically clears on cart empty
  * @see {@link handlePaymentSuccess} - Automatically clears on payment success
  */
 export function clearTokens(): void {
@@ -234,162 +234,128 @@ export function clearTokens(): void {
 // ============================================
 
 /**
- * Tell the agent that a cart add event happened.
- *
- * This will automatically trigger the lock flow to exchange IIT → PIT by calling
- * the lock API. Only locks if IIT exists and PIT doesn't already exist.
- *
- * @param event - Optional cart add event data (product info, quantity, price)
- *
- * @example
- * ```typescript
- * // After adding to cart
- * async function addToCart(product) {
- *   await api.post('/cart', product);
- *
- *   QredexAgent.handleCartAdd({
- *     productId: product.id,
- *     quantity: 1,
- *     price: product.price,
- *   });
- * }
- * ```
- *
- * @emits `onLocked` - If lock is successful
- * @emits `onError` - If lock fails
- *
- * @see {@link lockIntent} - Manual lock operation
- * @see {@link onLocked} - Listen for lock events
- * @see {@link handleCartEmpty} - Clear cart event
- */
-export function handleCartAdd(event?: {
-  productId?: string;
-  quantity?: number;
-  price?: number;
-}): void {
-  debug('Cart add event received', event);
-
-  // Auto-lock IIT → PIT
-  lockIntent(event)
-    .then((result) => {
-      // Emit locked event to listeners
-      if (result.success) {
-        const lockedEvent = {
-          purchaseToken: result.purchaseToken ?? '',
-          alreadyLocked: result.alreadyLocked,
-          timestamp: Date.now(),
-        };
-
-        for (const handler of lockedHandlers) {
-          try {
-            handler(lockedEvent);
-          } catch (err) {
-            console.error('[QredexAgent] onLocked handler error:', err);
-          }
-        }
-      } else {
-        // Emit error event
-        const errorEvent = {
-          error: result.error ?? 'Lock failed',
-          context: 'handleCartAdd',
-        };
-
-        for (const handler of errorHandlers) {
-          try {
-            handler(errorEvent);
-          } catch (err) {
-            console.error('[QredexAgent] onError handler error:', err);
-          }
-        }
-      }
-    })
-    .catch((err) => {
-      console.error('[QredexAgent] handleCartAdd lock failed:', err);
-
-      // Emit error event
-      const errorEvent = {
-        error: err instanceof Error ? err.message : 'Unknown error',
-        context: 'handleCartAdd',
-      };
-
-      for (const handler of errorHandlers) {
-        try {
-          handler(errorEvent);
-        } catch (handlerErr) {
-          console.error('[QredexAgent] onError handler error:', handlerErr);
-        }
-      }
-    });
-}
-
-/**
- * Tell the agent that the cart was emptied.
- *
- * This will automatically clear both IIT and PIT from storage.
- * Call this when the user empties their shopping cart.
- *
- * @param event - Optional cart empty event data (timestamp)
- *
- * @example
- * ```typescript
- * function clearCart() {
- *   cart.clear();
- *   QredexAgent.handleCartEmpty();
- * }
- * ```
- *
- * @emits `onCleared` - After tokens are cleared
- *
- * @see {@link clearTokens} - Manual token clearing
- * @see {@link onCleared} - Listen for clear events
- * @see {@link handlePaymentSuccess} - Payment success event
- */
-export function handleCartEmpty(event?: { timestamp?: number }): void {
-  debug('Cart empty event received', event);
-
-  // Auto-clear tokens
-  clearTokens();
-
-  // Emit cleared event to listeners
-  const clearedEvent = {
-    timestamp: event?.timestamp ?? Date.now(),
-  };
-
-  for (const handler of clearedHandlers) {
-    try {
-      handler(clearedEvent);
-    } catch (err) {
-      console.error('[QredexAgent] onCleared handler error:', err);
-    }
-  }
-}
-
-/**
  * Tell the agent that the cart state changed.
  *
- * This is optional and used for tracking cart state changes.
- * No automatic actions are taken (unlike `handleCartAdd` or `handleCartEmpty`).
+ * This is the **single method** for all cart state changes:
+ * - **Locks IIT → PIT** when `itemCount > 0` (first item added)
+ * - **Clears tokens** when `itemCount === 0` and PIT is present
+ *
+ * Only locks if IIT exists and PIT doesn't already exist.
  *
  * @param event - Cart change event data (item count, previous count)
  *
  * @example
  * ```typescript
- * QredexAgent.handleCartChange({
- *   itemCount: 5,
- *   previousCount: 3,
- * });
+ * // After cart update
+ * async function updateCart(itemCount: number, previousCount: number) {
+ *   await api.post('/cart', { itemCount });
+ *
+ *   QredexAgent.handleCartChange({
+ *     itemCount,
+ *     previousCount,
+ *   });
+ * }
+ *
+ * // Add to cart: itemCount goes from 0 → 1 (locks)
+ * // Remove from cart: itemCount goes from 3 → 2 (no action)
+ * // Empty cart: itemCount goes from 1 → 0 (clears)
  * ```
  *
- * @see {@link handleCartAdd} - Cart add event (auto-locks)
- * @see {@link handleCartEmpty} - Cart empty event (auto-clears)
+ * @emits `onLocked` - When IIT is locked to PIT (itemCount > 0)
+ * @emits `onCleared` - When tokens are cleared (itemCount === 0)
+ * @emits `onError` - If lock fails
+ *
+ * @see {@link lockIntent} - Manual lock operation
+ * @see {@link clearTokens} - Manual token clearing
+ * @see {@link onLocked} - Listen for lock events
+ * @see {@link onCleared} - Listen for clear events
  */
 export function handleCartChange(event: {
   itemCount: number;
-  previousCount: number;
+  previousCount?: number;
   timestamp?: number;
 }): void {
   debug('Cart change event received', event);
-  // Optional tracking - no automatic action
+
+  const { itemCount, previousCount } = event;
+
+  // Lock when cart goes from 0 → >0 (first item added)
+  if (itemCount > 0 && (previousCount === 0 || previousCount === undefined)) {
+    debug('Cart has items, locking intent');
+
+    // Auto-lock IIT → PIT
+    lockIntent()
+      .then((result) => {
+        // Emit locked event to listeners
+        if (result.success) {
+          const lockedEvent = {
+            purchaseToken: result.purchaseToken ?? '',
+            alreadyLocked: result.alreadyLocked,
+            timestamp: event.timestamp ?? Date.now(),
+          };
+
+          for (const handler of lockedHandlers) {
+            try {
+              handler(lockedEvent);
+            } catch (err) {
+              console.error('[QredexAgent] onLocked handler error:', err);
+            }
+          }
+        } else {
+          // Emit error event
+          const errorEvent = {
+            error: result.error ?? 'Lock failed',
+            context: 'handleCartChange',
+          };
+
+          for (const handler of errorHandlers) {
+            try {
+              handler(errorEvent);
+            } catch (err) {
+              console.error('[QredexAgent] onError handler error:', err);
+            }
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('[QredexAgent] handleCartChange lock failed:', err);
+
+        // Emit error event
+        const errorEvent = {
+          error: err instanceof Error ? err.message : 'Unknown error',
+          context: 'handleCartChange',
+        };
+
+        for (const handler of errorHandlers) {
+          try {
+            handler(errorEvent);
+          } catch (handlerErr) {
+            console.error('[QredexAgent] onError handler error:', handlerErr);
+          }
+        }
+      });
+  }
+
+  // Clear when cart goes from >0 → 0 (emptied) and PIT exists
+  if (itemCount === 0 && hasPurchaseIntentToken()) {
+    debug('Cart emptied, clearing tokens');
+
+    // Auto-clear tokens
+    clearTokens();
+
+    // Emit cleared event to listeners
+    const clearedEvent = {
+      timestamp: event.timestamp ?? Date.now(),
+    };
+
+    for (const handler of clearedHandlers) {
+      try {
+        handler(clearedEvent);
+      } catch (err) {
+        console.error('[QredexAgent] onCleared handler error:', err);
+      }
+    }
+  }
 }
 
 /**
@@ -422,7 +388,7 @@ export function handleCartChange(event: {
  *
  * @see {@link clearTokens} - Manual token clearing
  * @see {@link onCleared} - Listen for clear events
- * @see {@link handleCartEmpty} - Cart empty event
+ * @see {@link handleCartChange} - Cart state change event
  */
 export function handlePaymentSuccess(event: {
   orderId: string;
@@ -476,7 +442,7 @@ const errorHandlers: ErrorHandler[] = [];
  * Listen for successful lock events.
  *
  * Register a handler that will be called when the IIT is successfully locked to PIT.
- * This happens after `handleCartAdd()` or `lockIntent()` succeeds.
+ * This happens after `handleCartChange()` or `lockIntent()` succeeds.
  *
  * @param handler - Callback function that receives the lock event data.
  *
@@ -490,7 +456,7 @@ const errorHandlers: ErrorHandler[] = [];
  * ```
  *
  * @see {@link offLocked} - Unregister the handler
- * @see {@link handleCartAdd} - Triggers lock on cart add
+ * @see {@link handleCartChange} - Triggers lock/clear on cart state change
  */
 export function onLocked(handler: LockedHandler): void {
   lockedHandlers.push(handler);
@@ -500,7 +466,7 @@ export function onLocked(handler: LockedHandler): void {
  * Listen for cleared state events.
  *
  * Register a handler that will be called when tokens are cleared.
- * This happens after `handleCartEmpty()` or `handlePaymentSuccess()`.
+ * This happens after `handleCartChange()` or `handlePaymentSuccess()`.
  *
  * @param handler - Callback function that receives the clear event data.
  *
@@ -513,7 +479,7 @@ export function onLocked(handler: LockedHandler): void {
  * ```
  *
  * @see {@link offCleared} - Unregister the handler
- * @see {@link handleCartEmpty} - Triggers clear on cart empty
+ * @see {@link handleCartChange} - Triggers clear on cart empty
  * @see {@link handlePaymentSuccess} - Triggers clear on payment success
  */
 export function onCleared(handler: ClearedHandler): void {
@@ -710,8 +676,6 @@ if (typeof window !== 'undefined') {
     clearTokens,
 
     // Event Handlers (Merchant → Agent)
-    handleCartAdd,
-    handleCartEmpty,
     handleCartChange,
     handlePaymentSuccess,
 

@@ -20,15 +20,14 @@
 ### 2. Handle Cart Events
 
 ```javascript
-// When user adds to cart
+// When cart state changes
 async function addToCart(product) {
   await api.post('/cart', product);
 
-  // Tell agent (auto-locks IIT → PIT)
-  QredexAgent.handleCartAdd({
-    productId: product.id,
-    quantity: 1,
-    price: product.price,
+  // Tell agent (auto-locks IIT → PIT on first item)
+  QredexAgent.handleCartChange({
+    itemCount: cart.itemCount,
+    previousCount: cart.previousCount,
   });
 }
 
@@ -36,8 +35,11 @@ async function addToCart(product) {
 function clearCart() {
   cart.clear();
 
-  // Tell agent (auto-clears PIT)
-  QredexAgent.handleCartEmpty();
+  // Tell agent (auto-clears PIT when itemCount = 0)
+  QredexAgent.handleCartChange({
+    itemCount: 0,
+    previousCount: cart.previousCount,
+  });
 }
 
 // When payment succeeds
@@ -62,8 +64,8 @@ async function checkout(order) {
 The agent automatically:
 - ✅ Captures `qdx_intent` from URL
 - ✅ Stores IIT in browser storage
-- ✅ Locks IIT → PIT on cart add
-- ✅ Clears PIT on cart empty or checkout
+- ✅ Locks IIT → PIT when cart goes from 0 → 1 items
+- ✅ Clears PIT when cart goes from >0 → 0 items or checkout
 - ✅ Exposes PIT for checkout
 
 ---
@@ -86,9 +88,7 @@ QredexAgent.clearTokens()              // Clear all tokens
 
 ### Event Handlers (Merchant → Agent)
 ```javascript
-QredexAgent.handleCartAdd(event)       // Cart add
-QredexAgent.handleCartEmpty()          // Cart empty
-QredexAgent.handleCartChange(event)    // Cart change
+QredexAgent.handleCartChange(event)    // Cart state change (locks/clears)
 QredexAgent.handlePaymentSuccess(event) // Payment success
 ```
 
@@ -128,8 +128,7 @@ npm install qredex-agent
 
 ```javascript
 import {
-  handleCartAdd,
-  handleCartEmpty,
+  handleCartChange,
   getPurchaseIntentToken
 } from 'qredex-agent';
 ```
@@ -183,7 +182,10 @@ function useQredexAgent() {
 
   const addToCart = async (product) => {
     await api.post('/cart', product);
-    QredexAgent.handleCartAdd(product);
+    QredexAgent.handleCartChange({
+      itemCount: cart.itemCount,
+      previousCount: cart.previousCount,
+    });
   };
 
   const checkout = async (order) => {
@@ -213,7 +215,10 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
     body: JSON.stringify(product),
   });
 
-  QredexAgent.handleCartAdd(product);
+  QredexAgent.handleCartChange({
+    itemCount: cart.itemCount,
+    previousCount: cart.previousCount,
+  });
 });
 ```
 
@@ -234,7 +239,10 @@ onMounted(() => {
 
 const addToCart = async (product) => {
   await $api.post('/cart', product);
-  QredexAgent.handleCartAdd(product);
+  QredexAgent.handleCartChange({
+    itemCount: cart.itemCount,
+    previousCount: cart.previousCount,
+  });
 };
 
 const checkout = async (order) => {
@@ -255,15 +263,15 @@ const checkout = async (order) => {
 1. User lands with ?qdx_intent=xxx
    → Agent captures IIT, stores in sessionStorage + cookie
 
-2. User adds first item to cart
-   → handleCartAdd() locks IIT → PIT via API
+2. User adds first item to cart (itemCount: 0 → 1)
+   → handleCartChange() locks IIT → PIT via API
    → PIT stored, IIT cleared
 
 3. User continues shopping
    → PIT persists through additional cart adds
 
-4. User empties cart OR completes checkout
-   → handleCartEmpty() or handlePaymentSuccess() clears PIT
+4. User empties cart (itemCount: >0 → 0) OR completes checkout
+   → handleCartChange() or handlePaymentSuccess() clears PIT
 
 5. Next purchase requires new Qredex link (new IIT)
 ```
