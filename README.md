@@ -132,8 +132,8 @@ Requires ES2020+ support.
 
 | Document | Description |
 |----------|-------------|
-| **[Integration Model](docs/INTEGRATION_MODEL.md)** | 2-path integration guide (Backend API + Frontend Hooks) |
-| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale and guidance |
+| **[Integration Model](docs/INTEGRATION_MODEL.md)** | Browser agent integration (Frontend Hooks + Minimal Helper) |
+| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
 | **[API Reference](docs/API.md)** | Complete API documentation |
 | **[Installation Guide](docs/INSTALLATION.md)** | Setup instructions |
 | **[AGENTS.md](AGENTS.md)** | Development guidelines |
