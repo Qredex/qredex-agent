@@ -138,6 +138,36 @@ import {
 
 ## Examples
 
+Each example includes a complete working demo with testing instructions.
+
+| Example | Description | How to Run |
+|---------|-------------|------------|
+| [examples/basic/](examples/basic/) | Comprehensive demo with visual testing UI | `npx serve examples` → `http://localhost:3000/basic/` |
+| [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo | `npx serve examples` → `http://localhost:3000/vanilla/` |
+| [examples/react/](examples/react/) | React/Next.js integration | `cd examples/react && npm install && npm run dev` |
+| [examples/vue/](examples/vue/) | Vue 3 + Vite integration | `cd examples/vue && npm install && npm run dev` |
+
+### Quick Test (Basic Example)
+
+The fastest way to test Qredex Agent:
+
+```bash
+# 1. Serve the examples
+npx serve examples
+
+# 2. Open in browser
+# Navigate to: http://localhost:3000/basic/
+
+# 3. Simulate intent URL
+# Add ?qdx_intent=test123 to the URL and press Enter
+
+# 4. Add to cart
+# Click "Add to Cart" button - watch PIT get locked
+
+# 5. Clear cart
+# Click "Clear Tokens" - watch PIT get cleared
+```
+
 ### React/Next.js
 
 ```jsx
@@ -166,7 +196,7 @@ function useQredexAgent() {
 }
 ```
 
-**See:** [examples/react/](examples/react/) for complete React/Next.js example.
+**See:** [examples/react/](examples/react/) for complete React/Next.js example with testing scenarios.
 
 ### Vanilla JS
 
@@ -187,7 +217,7 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
 });
 ```
 
-**See:** [examples/vanilla/](examples/vanilla/) for complete vanilla JS example.
+**See:** [examples/vanilla/](examples/vanilla/) for complete vanilla JS e-commerce demo.
 
 ### Vue/Nuxt
 
@@ -215,7 +245,7 @@ const checkout = async (order) => {
 </script>
 ```
 
-**See:** [examples/vue/](examples/vue/) for complete Vue/Nuxt example.
+**See:** [examples/vue/](examples/vue/) for complete Vue 3 + Vite example.
 
 ---
 
@@ -280,36 +310,20 @@ Requires ES2020+ support.
 
 ## Examples Directory
 
-| Example | Description |
-|---------|-------------|
-| [examples/basic/](examples/basic/) | Comprehensive demo with testing UI |
-| [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo |
-| [examples/react/](examples/react/) | React/Next.js integration |
-| [examples/vue/](examples/vue/) | Vue/Nuxt integration |
+| Example | Description | Quick Start |
+|---------|-------------|-------------|
+| [examples/basic/](examples/basic/) | Comprehensive demo with testing UI | `npx serve examples` |
+| [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo | `npx serve examples` |
+| [examples/react/](examples/react/) | React/Next.js integration | `cd examples/react && npm run dev` |
+| [examples/vue/](examples/vue/) | Vue 3 + Vite integration | `cd examples/vue && npm run dev` |
 
----
+Each example includes:
+- Complete working demo
+- Step-by-step testing scenarios
+- Console commands reference
+- Debugging guide
 
-## Testing Examples
-
-Each example includes a testing UI to verify agent functionality:
-
-### Basic Example (Recommended for Testing)
-
-```bash
-# Serve the basic example
-cd examples/basic
-npx serve ..
-```
-
-Then open `http://localhost:3000/basic/` and:
-
-1. **Simulate Intent URL** - Add `?qdx_intent=test_token_123` to URL
-2. **Add to Cart** - Click "Add to Cart" button
-3. **Verify PIT** - Check PIT token appears
-4. **Empty Cart** - Clear cart, verify PIT cleared
-5. **Checkout Flow** - Complete full checkout flow
-
-**See:** [examples/basic/TESTING.md](examples/basic/TESTING.md) for complete testing guide.
+See individual example READMEs for detailed instructions.
 
 ---
 
