@@ -128,6 +128,18 @@ Requires ES2020+ support.
 
 ---
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| **[Integration Model](docs/INTEGRATION_MODEL.md)** | 2-path integration guide (Backend API + Frontend Hooks) |
+| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale and guidance |
+| **[API Reference](docs/API.md)** | Complete API documentation |
+| **[Installation Guide](docs/INSTALLATION.md)** | Setup instructions |
+| **[AGENTS.md](AGENTS.md)** | Development guidelines |
+
+---
+
 ## License
 
 MIT
