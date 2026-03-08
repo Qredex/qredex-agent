@@ -26,54 +26,21 @@
  */
 export interface LockRequest {
   /** The intent token (IIT) to lock */
-  intent_token: string;
-
-  /** Optional metadata about the lock request */
-  meta?: {
-    /** Product ID if available */
-    product_id?: string;
-
-    /** Product name if available */
-    product_name?: string;
-
-    /** Quantity if available */
-    quantity?: number;
-
-    /** Price if available */
-    price?: number;
-
-    /** User agent */
-    user_agent?: string;
-
-    /** Referrer URL */
-    referrer?: string;
-
-    /** Current page URL */
-    url?: string;
-
-    /** Additional custom fields */
-    [key: string]: unknown;
-  };
+  token: string;
 }
 
 /**
  * Response from the lock endpoint.
  */
 export interface LockResponse {
-  /** Whether the lock was successful */
-  success: boolean;
+  /** The purchase intent token (PIT) */
+  token: string;
 
-  /** The purchase intent token (PIT) if successful */
-  purchase_token?: string;
+  /** Token expiration timestamp */
+  expiresAt: string;
 
-  /** Whether the intent was already locked (idempotent response) */
-  already_locked?: boolean;
-
-  /** Error message if failed */
-  error?: string;
-
-  /** Additional response data */
-  [key: string]: unknown;
+  /** Token lock timestamp */
+  lockedAt: string;
 }
 
 /**
@@ -91,4 +58,24 @@ export interface LockResult {
 
   /** Error message if failed */
   error?: string;
+}
+
+/**
+ * Metadata for lock request.
+ */
+export interface LockMeta {
+  /** Product ID if available */
+  productId?: string;
+
+  /** Product name if available */
+  productName?: string;
+
+  /** Quantity if available */
+  quantity?: number;
+
+  /** Price if available */
+  price?: number;
+
+  /** Additional custom fields */
+  [key: string]: unknown;
 }

@@ -25,7 +25,7 @@ import { debug, info, warn } from '../utils/log.js';
 import { getConfig } from '../bootstrap/config.js';
 import { getIntentToken, getPurchaseToken, storePurchaseToken } from '../storage/tokens.js';
 import { endLock, isLockInProgress, startLock } from '../core/state.js';
-import type { LockRequest, LockResponse, LockResult } from './types.js';
+import type { LockRequest, LockResponse, LockResult, LockMeta } from './types.js';
 
 // Track the in-flight lock promise for idempotency
 let inFlightPromise: Promise<LockResult> | null = null;
@@ -37,7 +37,7 @@ let inFlightPromise: Promise<LockResult> | null = null;
  * - If a lock is already in flight, return the same promise
  * - If backend indicates already locked, treat it as success
  */
-export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockResult> => {
+export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
   const config = getConfig();
 
   // Check if PIT already exists locally - idempotent fast path
@@ -99,13 +99,7 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
 
       // Build the request payload
       const payload: LockRequest = {
-        intent_token: intentToken,
-        meta: {
-          ...meta,
-          user_agent: navigator.userAgent,
-          referrer: document.referrer || undefined,
-          url: window.location.href,
-        },
+        token: intentToken,
       };
 
       debug('Sending lock request to:', config.lockEndpoint);
@@ -136,46 +130,28 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
       endLock();
       inFlightPromise = null;
 
-      // Handle already-locked response from backend
-      if (data.already_locked === true) {
-        info('Intent was already locked on server');
-        if (data.purchase_token) {
-          // Store the returned PIT for future use
-          storePurchaseToken(data.purchase_token, {
-            influenceIntentToken: config.influenceIntentToken,
-            purchaseIntentToken: config.purchaseIntentToken,
-            cookieExpireDays: config.cookieExpireDays,
-          });
-        }
+      // Validate response has token
+      if (!data.token) {
         return {
-          success: true,
-          purchaseToken: data.purchase_token ?? null,
-          alreadyLocked: true,
-        };
-      }
-
-      // Handle successful lock
-      if (data.success && data.purchase_token) {
-        // Store the PIT for future use
-        storePurchaseToken(data.purchase_token, {
-          influenceIntentToken: config.influenceIntentToken,
-          purchaseIntentToken: config.purchaseIntentToken,
-          cookieExpireDays: config.cookieExpireDays,
-        });
-
-        info('Intent locked successfully');
-        return {
-          success: true,
-          purchaseToken: data.purchase_token,
+          success: false,
+          purchaseToken: null,
           alreadyLocked: false,
+          error: 'Invalid response from server: missing token',
         };
       }
 
+      // Store the PIT for future use
+      storePurchaseToken(data.token, {
+        influenceIntentToken: config.influenceIntentToken,
+        purchaseIntentToken: config.purchaseIntentToken,
+        cookieExpireDays: config.cookieExpireDays,
+      });
+
+      info('Intent locked successfully');
       return {
-        success: false,
-        purchaseToken: null,
+        success: true,
+        purchaseToken: data.token,
         alreadyLocked: false,
-        error: data.error || 'Lock request failed',
       };
     } catch (err) {
       endLock();

@@ -23,64 +23,35 @@
  * A lightweight, framework-agnostic browser agent that:
  * - Captures qdx_intent tokens from URLs
  * - Persists tokens in sessionStorage and cookies
- * - Detects add-to-cart actions
- * - Automatically locks intent through Qredex's API
+ * - Locks intent through Qredex's API
+ * - Manages attribution state
  */
 
-import { setDebugMode } from './utils/log.js';
+import { setDebugMode, debug } from './utils/log.js';
 import { getConfig } from './bootstrap/config.js';
 import { autoStart } from './bootstrap/auto-start.js';
-import {
-  init as initLifecycle,
-  destroy as destroyLifecycle,
-  isInitialized as isLifecycleInitialized,
-  getStatus as getLifecycleStatus,
-} from './core/lifecycle.js';
 import {
   getIntentToken as getStoredIntentToken,
   getPurchaseToken as getStoredPurchaseToken,
   hasIntentToken as hasStoredIntentToken,
   hasPurchaseToken as hasStoredPurchaseToken,
+  clearAllTokens,
 } from './storage/tokens.js';
 import { lockIntent as apiLockIntent } from './api/lock.js';
-import { triggerAddToCart } from './detect/manual.js';
-import {
-  onAddToCart as registerAddToCart,
-  offAddToCart as unregisterAddToCart,
-  enableDetection as enableAutoDetection,
-  disableDetection as disableAutoDetection,
-} from './detect/pipeline.js';
-import { initPipeline } from './detect/pipeline.js';
 
 import type { AgentConfig } from './bootstrap/config.js';
-import type { AddToCartMeta, AddToCartHandler } from './detect/types.js';
-import type { LockResult } from './api/types.js';
-
-// Initialize the pipeline on module load
-initPipeline();
+import type { LockResult, LockMeta } from './api/types.js';
 
 // Auto-start: capture intent token from URL immediately
 autoStart();
 
-/**
- * Initialize the Qredex Agent with optional configuration.
- * This can be called manually, but auto-start handles basic initialization.
- *
- * @param config - Optional configuration overrides
- */
-export function init(config?: AgentConfig): void {
-  initLifecycle(config);
-
-  // Apply debug mode if enabled
-  const cfg = getConfig();
-  setDebugMode(cfg.debug);
-}
+// ============================================
+// READ / STATE (Manual)
+// ============================================
 
 /**
  * Get the current intent token (IIT).
  * Checks sessionStorage first, then falls back to cookie.
- *
- * @returns The intent token or null if not found
  */
 export function getIntentToken(): string | null {
   const config = getConfig();
@@ -94,8 +65,6 @@ export function getIntentToken(): string | null {
 /**
  * Get the current purchase intent token (PIT).
  * Checks sessionStorage first, then falls back to cookie.
- *
- * @returns The purchase token or null if not found
  */
 export function getPurchaseIntentToken(): string | null {
   const config = getConfig();
@@ -108,8 +77,6 @@ export function getPurchaseIntentToken(): string | null {
 
 /**
  * Check if an intent token (IIT) exists.
- *
- * @returns true if an intent token is available, false otherwise
  */
 export function hasIntentToken(): boolean {
   const config = getConfig();
@@ -122,8 +89,6 @@ export function hasIntentToken(): boolean {
 
 /**
  * Check if a purchase intent token (PIT) exists.
- *
- * @returns true if a purchase token is available, false otherwise
  */
 export function hasPurchaseIntentToken(): boolean {
   const config = getConfig();
@@ -134,117 +99,321 @@ export function hasPurchaseIntentToken(): boolean {
   });
 }
 
+// ============================================
+// COMMANDS (Manual)
+// ============================================
+
 /**
  * Manually trigger a lock request.
  * This exchanges the IIT for a PIT.
  *
  * @param meta - Optional metadata to include with the lock request
- * @returns Promise resolving to the lock result
  */
-export async function lockIntent(meta?: Record<string, unknown>): Promise<LockResult> {
+export async function lockIntent(meta?: LockMeta): Promise<LockResult> {
   return apiLockIntent(meta);
 }
 
 /**
- * Manually trigger an add-to-cart event.
- * This is a first-class public API for explicit integration.
+ * Clear all tokens (IIT and PIT) from storage.
+ * Call this after successful checkout or when cart is emptied.
+ */
+export function clearTokens(): void {
+  const config = getConfig();
+  clearAllTokens({
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
+    cookieExpireDays: config.cookieExpireDays,
+  });
+  debug('Tokens cleared');
+}
+
+// ============================================
+// EVENT HANDLERS (Merchant → Agent)
+// ============================================
+
+/**
+ * Tell the agent that a cart add event happened.
+ * This will automatically lock IIT → PIT if conditions are met.
  *
- * @param meta - Optional metadata about the add-to-cart action
+ * @param event - Optional cart add event data
  */
-export function handleAddToCart(meta?: AddToCartMeta): void {
-  triggerAddToCart(meta);
+export function handleCartAdd(event?: {
+  productId?: string;
+  quantity?: number;
+  price?: number;
+}): void {
+  debug('Cart add event received', event);
+
+  // Auto-lock IIT → PIT
+  lockIntent(event)
+    .then((result) => {
+      // Emit locked event to listeners
+      if (result.success) {
+        const lockedEvent = {
+          purchaseToken: result.purchaseToken ?? '',
+          alreadyLocked: result.alreadyLocked,
+          timestamp: Date.now(),
+        };
+
+        for (const handler of lockedHandlers) {
+          try {
+            handler(lockedEvent);
+          } catch (err) {
+            console.error('[QredexAgent] onLocked handler error:', err);
+          }
+        }
+      } else {
+        // Emit error event
+        const errorEvent = {
+          error: result.error ?? 'Lock failed',
+          context: 'handleCartAdd',
+        };
+
+        for (const handler of errorHandlers) {
+          try {
+            handler(errorEvent);
+          } catch (err) {
+            console.error('[QredexAgent] onError handler error:', err);
+          }
+        }
+      }
+    })
+    .catch((err) => {
+      console.error('[QredexAgent] handleCartAdd lock failed:', err);
+
+      // Emit error event
+      const errorEvent = {
+        error: err instanceof Error ? err.message : 'Unknown error',
+        context: 'handleCartAdd',
+      };
+
+      for (const handler of errorHandlers) {
+        try {
+          handler(errorEvent);
+        } catch (handlerErr) {
+          console.error('[QredexAgent] onError handler error:', handlerErr);
+        }
+      }
+    });
 }
 
 /**
- * Register a handler for add-to-cart events.
+ * Tell the agent that the cart was emptied.
+ * This will automatically clear PIT from storage.
  *
- * @param handler - The handler function to call when add-to-cart is detected
+ * @param event - Optional cart empty event data
  */
-export function onAddToCart(handler: AddToCartHandler): void {
-  registerAddToCart(handler);
+export function handleCartEmpty(event?: { timestamp?: number }): void {
+  debug('Cart empty event received', event);
+
+  // Auto-clear tokens
+  clearTokens();
+
+  // Emit cleared event to listeners
+  const clearedEvent = {
+    timestamp: event?.timestamp ?? Date.now(),
+  };
+
+  for (const handler of clearedHandlers) {
+    try {
+      handler(clearedEvent);
+    } catch (err) {
+      console.error('[QredexAgent] onCleared handler error:', err);
+    }
+  }
 }
 
 /**
- * Unregister an add-to-cart event handler.
+ * Tell the agent that the cart state changed.
+ * This is optional and used for tracking.
  *
- * @param handler - The handler function to remove
+ * @param event - Cart change event data
  */
-export function offAddToCart(handler: AddToCartHandler): void {
-  unregisterAddToCart(handler);
+export function handleCartChange(event: {
+  itemCount: number;
+  previousCount: number;
+  timestamp?: number;
+}): void {
+  debug('Cart change event received', event);
+  // Optional tracking - no automatic action
 }
 
 /**
- * Enable automatic add-to-cart detection.
+ * Tell the agent that payment succeeded.
+ * This will automatically clear PIT from storage.
+ *
+ * @param event - Payment success event data
  */
-export function enableDetection(): void {
-  enableAutoDetection();
+export function handlePaymentSuccess(event: {
+  orderId: string;
+  amount: number;
+  currency: string;
+  timestamp?: number;
+}): void {
+  debug('Payment success event received', event);
+
+  // Auto-clear tokens
+  clearTokens();
+
+  // Emit cleared event to listeners
+  const clearedEvent = {
+    timestamp: event?.timestamp ?? Date.now(),
+  };
+
+  for (const handler of clearedHandlers) {
+    try {
+      handler(clearedEvent);
+    } catch (err) {
+      console.error('[QredexAgent] onCleared handler error:', err);
+    }
+  }
+}
+
+// ============================================
+// EVENT LISTENERS (Agent → Merchant) - Optional
+// ============================================
+
+type LockedHandler = (event: {
+  purchaseToken: string;
+  alreadyLocked: boolean;
+  timestamp: number;
+}) => void;
+
+type ClearedHandler = (event: {
+  timestamp: number;
+}) => void;
+
+type ErrorHandler = (event: {
+  error: string;
+  context?: string;
+}) => void;
+
+const lockedHandlers: LockedHandler[] = [];
+const clearedHandlers: ClearedHandler[] = [];
+const errorHandlers: ErrorHandler[] = [];
+
+/**
+ * Listen for successful lock events.
+ */
+export function onLocked(handler: LockedHandler): void {
+  lockedHandlers.push(handler);
 }
 
 /**
- * Disable automatic add-to-cart detection.
+ * Listen for cleared state events.
  */
-export function disableDetection(): void {
-  disableAutoDetection();
+export function onCleared(handler: ClearedHandler): void {
+  clearedHandlers.push(handler);
+}
+
+/**
+ * Listen for agent error events.
+ */
+export function onError(handler: ErrorHandler): void {
+  errorHandlers.push(handler);
+}
+
+/**
+ * Unregister a locked handler.
+ */
+export function offLocked(handler: LockedHandler): void {
+  const index = lockedHandlers.indexOf(handler);
+  if (index !== -1) {
+    lockedHandlers.splice(index, 1);
+  }
+}
+
+/**
+ * Unregister a cleared handler.
+ */
+export function offCleared(handler: ClearedHandler): void {
+  const index = clearedHandlers.indexOf(handler);
+  if (index !== -1) {
+    clearedHandlers.splice(index, 1);
+  }
+}
+
+/**
+ * Unregister an error handler.
+ */
+export function offError(handler: ErrorHandler): void {
+  const index = errorHandlers.indexOf(handler);
+  if (index !== -1) {
+    errorHandlers.splice(index, 1);
+  }
+}
+
+// ============================================
+// LIFECYCLE
+// ============================================
+
+/**
+ * Initialize the Qredex Agent with optional configuration.
+ * Usually not needed - agent auto-starts on script load.
+ */
+export function init(_config?: AgentConfig): void {
+  const cfg = getConfig();
+  setDebugMode(cfg.debug);
+  debug('Agent initialized');
 }
 
 /**
  * Destroy the agent and clean up all resources.
- * This removes event listeners and resets state.
  */
 export function destroy(): void {
-  destroyLifecycle();
+  lockedHandlers.length = 0;
+  clearedHandlers.length = 0;
+  errorHandlers.length = 0;
+  debug('Agent destroyed');
 }
 
 /**
- * Stop the agent and clean up all resources.
- * Alias for destroy() - provided for API clarity.
+ * Alias for destroy().
  */
 export function stop(): void {
-  destroyLifecycle();
+  destroy();
 }
 
-/**
- * Check if the agent is currently initialized and running.
- */
-export function isInitialized(): boolean {
-  return isLifecycleInitialized();
-}
+// ============================================
+// TYPES
+// ============================================
 
-/**
- * Get the current status of the agent.
- */
-export function getStatus(): {
-  initialized: boolean;
-  running: boolean;
-  destroyed: boolean;
-} {
-  return getLifecycleStatus();
-}
-
-/**
- * Export types for TypeScript consumers.
- */
 export type { AgentConfig } from './bootstrap/config.js';
-export type { AddToCartMeta, AddToCartHandler, AddToCartEvent } from './detect/types.js';
-export type { LockResult, LockRequest, LockResponse } from './api/types.js';
+export type { LockResult, LockMeta } from './api/types.js';
 
-// Attach to window for IIFE/browser usage
+// ============================================
+// WINDOW GLOBAL (IIFE usage)
+// ============================================
+
 if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).QredexAgent = {
-    init,
+    // Read/State
     getIntentToken,
     getPurchaseIntentToken,
     hasIntentToken,
     hasPurchaseIntentToken,
+
+    // Commands
     lockIntent,
-    handleAddToCart,
-    onAddToCart,
-    offAddToCart,
-    enableDetection,
-    disableDetection,
+    clearTokens,
+
+    // Event Handlers (Merchant → Agent)
+    handleCartAdd,
+    handleCartEmpty,
+    handleCartChange,
+    handlePaymentSuccess,
+
+    // Event Listeners (Agent → Merchant)
+    onLocked,
+    onCleared,
+    onError,
+    offLocked,
+    offCleared,
+    offError,
+
+    // Lifecycle
+    init,
     destroy,
     stop,
-    isInitialized,
-    getStatus,
   };
 }

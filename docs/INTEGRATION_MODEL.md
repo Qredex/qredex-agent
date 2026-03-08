@@ -149,7 +149,9 @@ QredexAgent.handleCartAdd({
   quantity: 1,
   price: 99.99,
 });
-// → Agent auto-locks IIT → PIT
+// → Agent auto-locks IIT → PIT by calling POST /api/v1/agent/intents/lock
+// Request: { "token": "IIT" }
+// Response: { "token": "PIT", "expiresAt": "...", "lockedAt": "..." }
 
 // Merchant tells agent when cart is emptied
 QredexAgent.handleCartEmpty();
@@ -159,6 +161,7 @@ QredexAgent.handleCartEmpty();
 QredexAgent.handlePaymentSuccess({
   orderId: 'order_789',
   amount: 99.99,
+  currency: 'USD',
 });
 // → Agent auto-clears PIT from storage
 ```

@@ -95,7 +95,7 @@ describe('Lock API', () => {
       // Mock fetch to simulate slow response
       const mockResponse = {
         success: true,
-        purchase_token: 'new_pit_67890',
+        token: 'new_pit_67890',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -118,21 +118,19 @@ describe('Lock API', () => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle already_locked response from server', async () => {
+    it('should handle successful lock response', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieExpireDays: testConfig.cookieExpireDays,
       });
 
-      // Mock fetch to return already_locked
+      // Mock fetch to return successful response
       const mockResponse = {
-        success: true,
-        purchase_token: 'server_pit_11111',
-        already_locked: true,
+        token: 'server_pit_11111',
+        expiresAt: '2026-03-08T00:00:00Z',
+        lockedAt: '2026-03-07T00:00:00Z',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -143,7 +141,7 @@ describe('Lock API', () => {
 
       expect(result.success).toBe(true);
       expect(result.purchaseToken).toBe('server_pit_11111');
-      expect(result.alreadyLocked).toBe(true);
+      expect(result.alreadyLocked).toBe(false);
     });
   });
 
@@ -170,7 +168,7 @@ describe('Lock API', () => {
       // Mock successful fetch response
       const mockResponse = {
         success: true,
-        purchase_token: 'new_pit_67890',
+        token: 'new_pit_67890',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -235,19 +233,18 @@ describe('Lock API', () => {
       expect(result.error).toBe('Network error');
     });
 
-    it('should handle invalid response without purchase_token', async () => {
+    it('should handle invalid response without token', async () => {
       // Store IIT
       storeIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieExpireDays: testConfig.cookieExpireDays,
       });
 
-      // Mock response without purchase_token
+      // Mock response without token (invalid)
       const mockResponse = {
-        success: true,
+        expiresAt: '2026-03-08T00:00:00Z',
+        lockedAt: '2026-03-07T00:00:00Z',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -256,6 +253,7 @@ describe('Lock API', () => {
 
       const result = await lockIntent();
 
+      // Should fail because token is missing
       expect(result.success).toBe(false);
       expect(result.purchaseToken).toBe(null);
       expect(result.alreadyLocked).toBe(false);
@@ -273,7 +271,7 @@ describe('Lock API', () => {
 
       const mockResponse = {
         success: true,
-        purchase_token: 'new_pit_67890',
+        token: 'new_pit_67890',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -292,12 +290,7 @@ describe('Lock API', () => {
       const callArgs = (global.fetch as vi.Mock).mock.calls[0];
       const body = JSON.parse(callArgs[1]?.body as string);
 
-      expect(body.intent_token).toBe('test_intent_12345');
-      expect(body.meta?.product_id).toBe('widget-001');
-      expect(body.meta?.quantity).toBe(2);
-      expect(body.meta?.price).toBe(99.99);
-      expect(body.meta?.user_agent).toBeDefined();
-      expect(body.meta?.url).toBeDefined();
+      expect(body.token).toBe('test_intent_12345');
     });
   });
 
@@ -314,7 +307,7 @@ describe('Lock API', () => {
 
       const mockResponse = {
         success: true,
-        purchase_token: 'new_pit_67890',
+        token: 'new_pit_67890',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -344,7 +337,7 @@ describe('Lock API', () => {
 
       const mockResponse1 = {
         success: true,
-        purchase_token: 'pit_1',
+        token: 'pit_1',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -378,7 +371,7 @@ describe('Lock API', () => {
       // Set up new mock for second request
       const mockResponse2 = {
         success: true,
-        purchase_token: 'pit_2',
+        token: 'pit_2',
       };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,

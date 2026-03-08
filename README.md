@@ -1,71 +1,103 @@
 # Qredex Agent
 
-A lightweight, framework-agnostic browser agent for Qredex that captures intent tokens from URLs, persists them safely, detects add-to-cart events, and automatically locks intent through Qredex's API.
+**Lightweight browser agent for Qredex intent capture and locking.**
+
+[![npm version](https://img.shields.io/npm/v/qredex-agent.svg)](https://npmjs.com/package/qredex-agent)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/qredex-agent)](https://bundlephobia.com/package/qredex-agent)
+[![license](https://img.shields.io/npm/l/qredex-agent)](LICENSE)
 
 ---
 
 ## Quick Start
 
-Add this single line before `</body>`:
+### 1. Install via Script Tag
 
 ```html
+<!-- Add before </body> -->
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-**That's it.** The agent auto-starts and begins capturing intent tokens.
-
----
-
-## What It Does
-
-1. **Captures** `qdx_intent` token from URL
-2. **Stores** token in sessionStorage + cookie
-3. **Detects** add-to-cart events automatically
-4. **Locks** intent (IIT → PIT) when cart action occurs
-5. **Exposes** global `window.QredexAgent` API
-
----
-
-## Configuration (Optional)
-
-Set config **before** the script loads:
-
-```html
-<script>
-  window.QredexAgentConfig = {
-    debug: false,  // Enable for troubleshooting
-  };
-</script>
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
-```
-
-See **[Installation Guide](docs/INSTALLATION.md)** for full configuration options.
-
----
-
-## Public API
-
-Access via `window.QredexAgent`:
+### 2. Handle Cart Events
 
 ```javascript
-// Check token status
-QredexAgent.hasIntentToken();
-QredexAgent.hasPurchaseIntentToken();
+// When user adds to cart
+async function addToCart(product) {
+  await api.post('/cart', product);
+  
+  // Tell agent (auto-locks IIT → PIT)
+  QredexAgent.handleCartAdd({
+    productId: product.id,
+    quantity: 1,
+    price: product.price,
+  });
+}
 
-// Get tokens
-QredexAgent.getIntentToken();
-QredexAgent.getPurchaseIntentToken();
+// When cart is emptied
+function clearCart() {
+  cart.clear();
+  
+  // Tell agent (auto-clears PIT)
+  QredexAgent.handleCartEmpty();
+}
 
-// Manual operations
-await QredexAgent.lockIntent({ productId: '123' });
-QredexAgent.handleAddToCart({ productId: '123', quantity: 1 });
-
-// Lifecycle
-QredexAgent.destroy();
-QredexAgent.isInitialized();
+// When payment succeeds
+async function checkout(order) {
+  const pit = QredexAgent.getPurchaseIntentToken();
+  
+  await api.post('/orders', {
+    ...order,
+    qredex_pit: pit,  // Send PIT to backend
+  });
+  
+  // Tell agent (auto-clears PIT)
+  QredexAgent.handlePaymentSuccess({
+    orderId: order.id,
+    amount: order.total,
+  });
+}
 ```
 
-See **[API Reference](docs/API.md)** for complete documentation.
+### 3. Done!
+
+The agent automatically:
+- ✅ Captures `qdx_intent` from URL
+- ✅ Stores IIT in browser storage
+- ✅ Locks IIT → PIT on cart add
+- ✅ Clears PIT on cart empty or checkout
+- ✅ Exposes PIT for checkout
+
+---
+
+## API Overview
+
+### Read Tokens
+```javascript
+QredexAgent.getIntentToken()           // Get IIT
+QredexAgent.getPurchaseIntentToken()   // Get PIT
+QredexAgent.hasIntentToken()           // Check IIT exists
+QredexAgent.hasPurchaseIntentToken()   // Check PIT exists
+```
+
+### Commands
+```javascript
+await QredexAgent.lockIntent(meta)     // Manual lock
+QredexAgent.clearTokens()              // Clear all tokens
+```
+
+### Event Handlers (Merchant → Agent)
+```javascript
+QredexAgent.handleCartAdd(event)       // Cart add
+QredexAgent.handleCartEmpty()          // Cart empty
+QredexAgent.handleCartChange(event)    // Cart change
+QredexAgent.handlePaymentSuccess(event) // Payment success
+```
+
+### Event Listeners (Agent → Merchant)
+```javascript
+QredexAgent.onLocked(handler)          // Listen for lock
+QredexAgent.onCleared(handler)         // Listen for clear
+QredexAgent.onError(handler)           // Listen for errors
+```
 
 ---
 
@@ -73,46 +105,84 @@ See **[API Reference](docs/API.md)** for complete documentation.
 
 | Document | Description |
 |----------|-------------|
-| **[Installation](docs/INSTALLATION.md)** | Setup, CDN versioning, Shopify/WooCommerce integration |
-| **[API Reference](docs/API.md)** | Complete public API documentation |
-| **[Lock Flow](docs/LOCK_FLOW.md)** | How IIT → PIT locking works |
-| **[Detection](docs/DETECTION.md)** | Add-to-cart detection strategies |
+| **[Integration Model](docs/INTEGRATION_MODEL.md)** | Complete integration guide |
+| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
+| **[API Reference](docs/API.md)** | Full API documentation |
 | **[AGENTS.md](AGENTS.md)** | Development guidelines |
 
 ---
 
-## Development
+## Installation
 
-### Setup
+### CDN (Recommended)
+
+```html
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+```
+
+### NPM
 
 ```bash
-npm install  # Install development dependencies
+npm install qredex-agent
 ```
 
-### Commands
-
-```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run test     # Run tests
-npm run lint     # Lint code
+```javascript
+import { 
+  handleCartAdd, 
+  handleCartEmpty, 
+  getPurchaseIntentToken 
+} from 'qredex-agent';
 ```
 
-### Project Structure
+---
 
+## Examples
+
+### React/Next.js
+
+```jsx
+import { useEffect } from 'react';
+
+function useQredexAgent() {
+  useEffect(() => {
+    // Optional: listen for agent events
+    QredexAgent.onLocked(({ purchaseToken }) => {
+      console.log('Locked:', purchaseToken);
+    });
+  }, []);
+  
+  const addToCart = async (product) => {
+    await api.post('/cart', product);
+    QredexAgent.handleCartAdd(product);
+  };
+  
+  const checkout = async (order) => {
+    const pit = QredexAgent.getPurchaseIntentToken();
+    await api.post('/orders', { ...order, qredex_pit: pit });
+    QredexAgent.handlePaymentSuccess(order);
+  };
+  
+  return { addToCart, checkout };
+}
 ```
-qredex-agent/
-├── src/
-│   ├── index.ts           # Main entry, public API
-│   ├── bootstrap/         # Auto-start, config
-│   ├── core/              # State, lifecycle
-│   ├── storage/           # sessionStorage, cookies
-│   ├── detect/            # Click, form, manual detection
-│   ├── api/               # Lock endpoint client
-│   └── utils/             # Logging, DOM, guards
-├── tests/
-│   └── unit/              # Unit tests
-└── dist/                  # Build output
+
+### Vanilla JS
+
+```javascript
+// Add to cart button
+document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
+  const product = {
+    id: e.target.dataset.productId,
+    price: parseFloat(e.target.dataset.price),
+  };
+  
+  await fetch('/api/cart', {
+    method: 'POST',
+    body: JSON.stringify(product),
+  });
+  
+  QredexAgent.handleCartAdd(product);
+});
 ```
 
 ---
@@ -125,18 +195,6 @@ qredex-agent/
 - Edge (latest)
 
 Requires ES2020+ support.
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[Integration Model](docs/INTEGRATION_MODEL.md)** | Browser agent integration (Frontend Hooks + Minimal Helper) |
-| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
-| **[API Reference](docs/API.md)** | Complete API documentation |
-| **[Installation Guide](docs/INSTALLATION.md)** | Setup instructions |
-| **[AGENTS.md](AGENTS.md)** | Development guidelines |
 
 ---
 
