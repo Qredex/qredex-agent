@@ -123,7 +123,7 @@ export function getPurchaseIntentToken(): string | null {
  * @see {@link getIntentToken} - Get the IIT token
  * @see {@link hasPurchaseIntentToken} - Check if PIT exists
  */
-export function hasIntentToken(): boolean {
+export const hasIntentToken = (): boolean => {
   const config = getConfig();
   return hasStoredIntentToken({
     influenceIntentToken: config.influenceIntentToken,
