@@ -5,15 +5,17 @@
  */
 
 import clearTokens, {
-  getIntentToken,
+  getInfluenceIntentToken,
+  getIntentToken,  // deprecated
   getPurchaseIntentToken,
   hasInfluenceIntentToken,
+  hasIntentToken,  // deprecated
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,
   onLocked,
   onCleared,
-  onError, hasIntentToken,
+  onError,
 } from '../../src/index.js';
 
 // ============================================
@@ -22,9 +24,11 @@ import clearTokens, {
 
 // Make available globally for console access
 window.QredexAgent = {
-  getIntentToken,
+  getInfluenceIntentToken,
+  getIntentToken,  // deprecated
   getPurchaseIntentToken,
-  hasIntentToken,
+  hasInfluenceIntentToken,
+  hasIntentToken,  // deprecated
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,

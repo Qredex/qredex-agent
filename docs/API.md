@@ -33,21 +33,33 @@ function init(config?: AgentConfig): void
 **Configuration Options:**
 ```typescript
 interface AgentConfig {
-  lockEndpoint?: string;           // Default: '/api/v1/agent/intents/lock'
+  lockEndpoint?: string;           // Default: 'https://api.qredex.com/api/v1/agent/intents/lock'
   debug?: boolean;                 // Default: false
-  autoDetect?: boolean;            // Default: true (not currently used)
+  useMockEndpoint?: boolean;       // Default: false (⚠️ DEV ONLY)
   influenceIntentToken?: string;   // Default: '__qdx_iit'
   purchaseIntentToken?: string;    // Default: '__qdx_pit'
   cookieExpireDays?: number;       // Default: 30
 }
 ```
 
+**⚠️ Production Safety:**
+- `useMockEndpoint: true` throws runtime error in production builds
+- Never deploy with `useMockEndpoint: true`
+- Console warning logged when mock endpoint enabled
+
 **Example:**
 ```javascript
-QredexAgent.init({
+// Development (local testing)
+QredexAgentConfig = {
   debug: true,
-  lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock'
-});
+  useMockEndpoint: true,  // Mock PIT, no network calls
+};
+
+// Production
+QredexAgentConfig = {
+  debug: false,
+  // useMockEndpoint omitted or false
+};
 ```
 
 **Note:** Usually not needed - agent auto-starts on script load with default configuration.
@@ -56,20 +68,20 @@ QredexAgent.init({
 
 ## Token Access
 
-### `getIntentToken()`
+### `getInfluenceIntentToken()`
 
 Get the current Influence Intent Token (IIT).
 
 **Signature:**
 ```typescript
-function getIntentToken(): string | null
+function getInfluenceIntentToken(): string | null
 ```
 
 **Returns:** IIT token string or `null`
 
 **Example:**
 ```javascript
-const iit = QredexAgent.getIntentToken();
+const iit = QredexAgent.getInfluenceIntentToken();
 if (iit) {
   console.log('IIT:', iit);
 }
@@ -78,6 +90,52 @@ if (iit) {
 **Storage Priority:**
 1. sessionStorage (primary)
 2. Cookie (fallback)
+
+---
+
+### `getIntentToken()` ⚠️ Deprecated
+
+**Deprecated:** Use [`getInfluenceIntentToken()`](#getinfluenceintenttoken) instead. Will be removed in v2.0.
+
+**Signature:**
+```typescript
+function getIntentToken(): string | null
+```
+
+**Alias for:** `getInfluenceIntentToken()`
+
+---
+
+### `hasInfluenceIntentToken()`
+
+Check if an Influence Intent Token (IIT) exists.
+
+**Signature:**
+```typescript
+function hasInfluenceIntentToken(): boolean
+```
+
+**Returns:** `true` if IIT exists, `false` otherwise
+
+**Example:**
+```javascript
+if (QredexAgent.hasInfluenceIntentToken()) {
+  console.log('User came from Qredex link');
+}
+```
+
+---
+
+### `hasIntentToken()` ⚠️ Deprecated
+
+**Deprecated:** Use [`hasInfluenceIntentToken()`](#hasinfluenceintenttoken) instead. Will be removed in v2.0.
+
+**Signature:**
+```typescript
+function hasIntentToken(): boolean
+```
+
+**Alias for:** `hasInfluenceIntentToken()`
 
 ---
 
@@ -569,8 +627,11 @@ interface AgentConfig {
   /** Enable debug logging */
   debug?: boolean;
 
-  /** Enable automatic detection (not currently used) */
-  autoDetect?: boolean;
+  /** 
+   * Use mock endpoint for local development (generates fake PIT tokens)
+   * ⚠️ DEVELOPMENT ONLY - throws error in production
+   */
+  useMockEndpoint?: boolean;
 
   /** sessionStorage/cookie key for IIT */
   influenceIntentToken?: string;
@@ -586,9 +647,9 @@ interface AgentConfig {
 **Defaults:**
 ```typescript
 {
-  lockEndpoint: '/api/v1/agent/intents/lock',
+  lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
-  autoDetect: true,
+  useMockEndpoint: false,  // ⚠️ Never use in production
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
@@ -708,15 +769,17 @@ interface ErrorEvent {
 | Method | Category | Returns | Description |
 |--------|----------|---------|-------------|
 | `init(config?)` | Lifecycle | `void` | Initialize with config |
-| `getIntentToken()` | Token Access | `string \| null` | Get IIT |
+| `getInfluenceIntentToken()` | Token Access | `string \| null` | Get IIT (new name) |
+| `getIntentToken()` ⚠️ | Token Access | `string \| null` | Get IIT (deprecated) |
 | `getPurchaseIntentToken()` | Token Access | `string \| null` | Get PIT |
-| `hasInfluenceIntentToken()` | Token Access | `boolean` | Check IIT exists |
+| `hasInfluenceIntentToken()` | Token Access | `boolean` | Check IIT exists (new name) |
+| `hasIntentToken()` ⚠️ | Token Access | `boolean` | Check IIT exists (deprecated) |
 | `hasPurchaseIntentToken()` | Token Access | `boolean` | Check PIT exists |
 | `lockIntent(meta?)` | Lock | `Promise<LockResult>` | Lock IIT → PIT |
 | `clearTokens()` | Lock | `void` | Clear all tokens |
-| `handleCartAdd(event?)` | Event Handler | `void` | Cart add |
-| `handleCartEmpty(event?)` | Event Handler | `void` | Cart empty |
-| `handleCartChange(event)` | Event Handler | `void` | Cart change |
+| `handleCartChange(event)` | Event Handler | `void` | Cart state change |
+| `handleCartAdd(count, meta?)` | Event Handler | `void` | Add to cart |
+| `handleCartEmpty()` | Event Handler | `void` | Empty cart |
 | `handlePaymentSuccess(event)` | Event Handler | `void` | Payment success |
 | `onLocked(handler)` | Event Listener | `void` | Listen for lock |
 | `onCleared(handler)` | Event Listener | `void` | Listen for clear |
@@ -727,6 +790,8 @@ interface ErrorEvent {
 | `destroy()` | Lifecycle | `void` | Cleanup |
 | `stop()` | Lifecycle | `void` | Alias for destroy |
 | `isInitialized()` | Lifecycle | `boolean` | Check initialized |
+
+⚠️ Deprecated - will be removed in v2.0. Use new names instead.
 
 ---
 

@@ -79,10 +79,12 @@ The agent automatically:
 
 ### Read Tokens
 ```javascript
-QredexAgent.getIntentToken()           // Get IIT
-QredexAgent.getPurchaseIntentToken()   // Get PIT
-QredexAgent.hasInfluenceIntentToken()           // Check IIT exists
-QredexAgent.hasPurchaseIntentToken()   // Check PIT exists
+QredexAgent.getInfluenceIntentToken()     // Get IIT (new name)
+QredexAgent.getIntentToken()              // Get IIT (deprecated, use above)
+QredexAgent.getPurchaseIntentToken()      // Get PIT
+QredexAgent.hasInfluenceIntentToken()     // Check IIT exists (new name)
+QredexAgent.hasIntentToken()              // Check IIT exists (deprecated, use above)
+QredexAgent.hasPurchaseIntentToken()      // Check PIT exists
 ```
 
 ### Commands
@@ -307,14 +309,20 @@ const checkout = async (order) => {
    → handleCartChange() locks IIT → PIT via API
    → PIT stored, IIT cleared
 
-3. User continues shopping
-   → PIT persists through additional cart adds
+3. User continues shopping (itemCount: 1 → 2 → 3...)
+   → Lock retries on every add-to-cart if previous lock failed
+   → PIT persists once locked
 
 4. User empties cart (itemCount: >0 → 0) OR completes checkout
    → handleCartChange() or handlePaymentSuccess() clears PIT
 
 5. Next purchase requires new Qredex link (new IIT)
 ```
+
+**Key Behaviors:**
+- **Retry on failure:** If lock fails, it retries on every subsequent add-to-cart while cart has items
+- **Idempotent:** Safe to call `handleCartChange()` multiple times; no duplicate locks
+- **Cart-driven:** Lock only happens when cart has items AND IIT exists AND PIT doesn't exist
 
 **See:** [docs/INTEGRATION_MODEL.md](docs/INTEGRATION_MODEL.md) for complete flow diagram.
 
@@ -327,7 +335,8 @@ Optional configuration via `window.QredexAgentConfig`:
 ```javascript
 window.QredexAgentConfig = {
   debug: true,                    // Enable debug logging
-  lockEndpoint: '/api/v1/...',   // Lock API endpoint
+  useMockEndpoint: true,          // ⚠️ DEV ONLY: mock PIT tokens (no network calls)
+  lockEndpoint: '/api/v1/...',    // Lock API endpoint
   cookieExpireDays: 30,           // Cookie expiration
 };
 ```
@@ -336,12 +345,18 @@ window.QredexAgentConfig = {
 ```typescript
 {
   debug: false,
-  lockEndpoint: '/api/v1/agent/intents/lock',
+  useMockEndpoint: false,         // ⚠️ NEVER use in production
+  lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
 }
 ```
+
+**⚠️ Production Safety:**
+- `useMockEndpoint: true` throws a runtime error in production builds
+- Always set `useMockEndpoint: false` or remove the option before deploying
+- Console warning is logged when mock endpoint is enabled
 
 ---
 
