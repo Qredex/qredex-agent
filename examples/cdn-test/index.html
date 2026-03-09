@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Qredex Agent - CDN Test</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <h1>🔐 Qredex Agent - CDN Test</h1>
+
+  <div class="card">
+    <h2>📋 Instructions</h2>
+    <ol>
+      <li>Add <code>?qdx_intent=test123</code> to the URL and reload</li>
+      <li>Verify IIT appears in the Status panel below</li>
+      <li>Click "Add to Cart" to lock IIT → PIT</li>
+      <li>Click "Clear Cart" to clear tokens</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Current URL</h2>
+    <code id="current-url" style="word-break: break-all;"></code>
+    <div style="margin-top: 10px;">
+      <button class="btn" onclick="addIntentToUrl()">➕ Add ?qdx_intent=test123</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Status</h2>
+    <span class="status-item info" id="status-iit">IIT: Checking...</span>
+    <span class="status-item info" id="status-pit">PIT: Checking...</span>
+  </div>
+
+  <div class="card">
+    <h2>Test Cart</h2>
+    <p>Current cart items: <strong id="cart-count">0</strong></p>
+    <button class="btn" onclick="addToCart()">🛒 Add to Cart</button>
+    <button class="btn btn-danger" onclick="clearCart()">🗑️ Clear Cart</button>
+  </div>
+
+  <div class="card">
+    <h2>Console</h2>
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- Qredex Agent from local dist -->
+  <script src="../../dist/qredex-agent.iife.min.js"></script>
+  <script>
+    // Cart state
+    let cartItemCount = 0;
+
+    // Show current URL
+    document.getElementById('current-url').textContent = window.location.href;
+
+    // Check if intent exists
+    const hasIntent = QredexAgent.hasIntentToken();
+    if (!hasIntent) {
+      log('⚠️ No intent token found. Add ?qdx_intent=xxx to URL or use the button above.', 'warning');
+    }
+
+    // Configure (optional)
+    window.QredexAgentConfig = { debug: true };
+
+    // Listen for events
+    QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
+      log(`✅ Locked! PIT: ${purchaseToken.substring(0, 20)}...`, 'success');
+      if (alreadyLocked) log('  (already locked)', 'info');
+      updateStatus();
+    });
+
+    QredexAgent.onCleared(() => {
+      log('🗑️ Cleared', 'info');
+      updateStatus();
+    });
+
+    QredexAgent.onError(({ error, context }) => {
+      log(`❌ Error in ${context}: ${error}`, 'error');
+    });
+
+    // Cart actions
+    function addToCart() {
+      // Check if we have intent token
+      if (!QredexAgent.hasIntentToken()) {
+        log('⚠️ No intent token! Add ?qdx_intent=xxx to URL first.', 'error');
+        return;
+      }
+
+      const previousCount = cartItemCount;
+      cartItemCount++;
+
+      QredexAgent.handleCartChange({
+        itemCount: cartItemCount,
+        previousCount,
+        meta: {
+          productId: 'test-product',
+          quantity: 1,
+          price: 99.99,
+        },
+      });
+
+      document.getElementById('cart-count').textContent = cartItemCount;
+      log(`Added item. Cart: ${cartItemCount}`, 'success');
+    }
+
+    function clearCart() {
+      const previousCount = cartItemCount;
+      cartItemCount = 0;
+
+      QredexAgent.handleCartChange({
+        itemCount: 0,
+        previousCount,
+      });
+
+      document.getElementById('cart-count').textContent = 0;
+      log('Cart cleared', 'info');
+    }
+
+    function addIntentToUrl() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('qdx_intent', 'test123');
+      window.location.href = url.toString();
+    }
+
+    // UI helpers
+    function updateStatus() {
+      const iit = QredexAgent.getIntentToken();
+      const pit = QredexAgent.getPurchaseIntentToken();
+
+      document.getElementById('status-iit').textContent =
+        iit ? `IIT: ${iit.substring(0, 30)}...` : 'IIT: Not found';
+      document.getElementById('status-iit').className =
+        'status-item ' + (iit ? 'success' : 'info');
+
+      document.getElementById('status-pit').textContent =
+        pit ? `PIT: ${pit.substring(0, 30)}...` : 'PIT: Not found';
+      document.getElementById('status-pit').className =
+        'status-item ' + (pit ? 'success' : 'info');
+    }
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Initialize
+    updateStatus();
+    log('Qredex Agent loaded from CDN', 'success');
+    log(`Add ?qdx_intent=xxx to URL to test intent capture`, 'info');
+  </script>
+</body>
+</html>

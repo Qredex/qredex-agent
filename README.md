@@ -131,6 +131,7 @@ QredexAgent.onError(handler)           // Listen for errors
 |----------|-------------|
 | **[Integration Model](docs/INTEGRATION_MODEL.md)** | Complete integration guide with 2 paths |
 | **[API Reference](docs/API.md)** | Full API documentation |
+| **[Cart Change Behavior](docs/CART_CHANGE_BEHAVIOR.md)** | handleCartChange() state transitions |
 | **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
 | **[AGENTS.md](AGENTS.md)** | Development guidelines |
 
@@ -165,6 +166,7 @@ Each example includes a complete working demo with testing instructions.
 
 | Example | Description | How to Run |
 |---------|-------------|------------|
+| [examples/cdn-test/](examples/cdn-test/) | Quick CDN testing page | `npm run build` → open in browser |
 | [examples/basic/](examples/basic/) | Comprehensive demo with visual testing UI | `npx serve examples` → `http://localhost:3000/basic/` |
 | [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo | `npx serve examples` → `http://localhost:3000/vanilla/` |
 | [examples/react/](examples/react/) | React/Next.js integration | `cd examples/react && npm install && npm run dev` |
