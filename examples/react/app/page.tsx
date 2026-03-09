@@ -157,13 +157,19 @@ export default function Home() {
         return [...prev, { ...product, quantity: 1 }];
       });
 
-      // Tell Qredex agent (auto-locks IIT → PIT)
+      const previousCount = cartItems.length;
+
+      // Tell Qredex agent (auto-locks IIT → PIT on first item)
       const agent = (window as any).QredexAgent;
       if (agent) {
-        agent.handleCartAdd({
-          productId: product.id,
-          quantity: 1,
-          price: product.price,
+        agent.handleCartChange({
+          itemCount: cartItems.length + 1,
+          previousCount,
+          meta: {
+            productId: product.id,
+            quantity: 1,
+            price: product.price,
+          },
         });
       }
 
@@ -178,12 +184,16 @@ export default function Home() {
   };
 
   const clearCart = () => {
+    const previousCount = cartItems.length;
     setCartItems([]);
 
-    // Tell Qredex agent (auto-clears PIT)
+    // Tell Qredex agent (auto-clears PIT when cart emptied)
     const agent = (window as any).QredexAgent;
     if (agent) {
-      agent.handleCartEmpty();
+      agent.handleCartChange({
+        itemCount: 0,
+        previousCount,
+      });
     }
 
     addLog('Cart cleared', 'info');
@@ -396,8 +406,7 @@ QredexAgent.hasIntentToken()
 QredexAgent.hasPurchaseIntentToken()
 
 // Event handlers
-QredexAgent.handleCartAdd({ productId, quantity, price })
-QredexAgent.handleCartEmpty()
+QredexAgent.handleCartChange({ itemCount, previousCount, meta })
 QredexAgent.handlePaymentSuccess({ orderId, amount, currency })
 
 // Event listeners
