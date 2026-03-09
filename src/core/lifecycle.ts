@@ -23,10 +23,9 @@
  */
 
 import { debug, info, warn } from '../utils/log.js';
-import { initConfig, getConfig, type AgentConfig } from '../bootstrap/config.js';
+import { initConfig, type AgentConfig } from '../bootstrap/config.js';
 import { captureIntentToken } from '../bootstrap/auto-start.js';
 import { markInitialized, resetState, destroyState, isRunning, isDestroyed } from './state.js';
-import { enableDetection, disableDetection } from '../detect/pipeline.js';
 
 let lifecycleInitialized = false;
 
@@ -49,12 +48,6 @@ export function init(config?: AgentConfig): void {
 
     // Mark as initialized
     markInitialized();
-
-    // Enable detection if configured
-    const cfg = getConfig();
-    if (cfg.autoDetect) {
-      enableDetection();
-    }
 
     lifecycleInitialized = true;
     info('QredexAgent initialized');
@@ -82,9 +75,6 @@ export function destroy(): void {
   }
 
   try {
-    // Disable detection
-    disableDetection();
-
     // Destroy state (runs cleanup functions)
     destroyState();
 
@@ -108,7 +98,6 @@ export function stop(): void {
  * Useful for testing or re-initialization scenarios.
  */
 export function reset(): void {
-  disableDetection();
   resetState();
   lifecycleInitialized = false;
   debug('Agent reset');

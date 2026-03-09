@@ -54,7 +54,8 @@ describe('Config Pre-load', () => {
 
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(false);
-    expect(config.autoDetect).toBe(true);
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
+    expect(config.purchaseIntentToken).toBe('__qdx_pit');
   });
 
   it('should respect pre-load global config', () => {
@@ -62,7 +63,6 @@ describe('Config Pre-load', () => {
     (window as Record<string, unknown>).QredexAgentConfig = {
       debug: true,
       lockEndpoint: 'https://custom.api.com/lock',
-      autoDetect: false,
     };
 
     // Access config (should auto-initialize from pre-load)
@@ -70,7 +70,6 @@ describe('Config Pre-load', () => {
 
     expect(config.debug).toBe(true);
     expect(config.lockEndpoint).toBe('https://custom.api.com/lock');
-    expect(config.autoDetect).toBe(false);
   });
 
   it('should merge pre-load config with programmatic config', () => {

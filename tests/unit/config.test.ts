@@ -35,9 +35,9 @@ describe('Configuration', () => {
 
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(false);
-    expect(config.autoDetect).toBe(true);
     expect(config.influenceIntentToken).toBe('__qdx_iit');
     expect(config.purchaseIntentToken).toBe('__qdx_pit');
+    expect(config.cookieExpireDays).toBe(30);
   });
 
   it('should merge user config with defaults', () => {
@@ -48,7 +48,7 @@ describe('Configuration', () => {
 
     expect(config.debug).toBe(true);
     expect(config.lockEndpoint).toBe('https://custom.endpoint.com/lock');
-    expect(config.autoDetect).toBe(true); // default
+    expect(config.influenceIntentToken).toBe('__qdx_iit'); // default
   });
 
   it('should respect pre-load global config', () => {
@@ -78,7 +78,7 @@ describe('Configuration', () => {
     initConfig({ debug: true });
 
     expect(getConfigValue('debug')).toBe(true);
-    expect(getConfigValue('autoDetect')).toBe(true);
+    expect(getConfigValue('influenceIntentToken')).toBe('__qdx_iit');
   });
 
   it('should track initialization state', () => {
@@ -90,13 +90,13 @@ describe('Configuration', () => {
   });
 
   it('should reset to defaults', () => {
-    initConfig({ debug: true, autoDetect: false });
+    initConfig({ debug: true });
     resetConfig();
 
     expect(isConfigInitialized()).toBe(false);
 
     const config = getConfig();
     expect(config.debug).toBe(false);
-    expect(config.autoDetect).toBe(true);
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
   });
 });

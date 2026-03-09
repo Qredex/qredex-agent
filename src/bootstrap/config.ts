@@ -42,12 +42,6 @@ export interface AgentConfig {
   debug?: boolean;
 
   /**
-   * Enable automatic add-to-cart detection.
-   * @default true
-   */
-  autoDetect?: boolean;
-
-  /**
    * Key name for influence intent token (used for both cookie and sessionStorage).
    * @default '__qdx_iit'
    */
@@ -78,7 +72,6 @@ declare global {
 const DEFAULT_CONFIG: Required<AgentConfig> = {
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
-  autoDetect: true,
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
@@ -124,10 +117,6 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
     // Validate and merge boolean options
     if (typeof userConfig.debug === 'boolean') {
       config.debug = userConfig.debug;
-    }
-
-    if (typeof userConfig.autoDetect === 'boolean') {
-      config.autoDetect = userConfig.autoDetect;
     }
 
     // Validate and merge token key options

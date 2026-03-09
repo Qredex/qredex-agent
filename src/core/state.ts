@@ -53,9 +53,6 @@ export interface RuntimeState {
   /** Whether the agent has been initialized */
   initialized: boolean;
 
-  /** Whether auto-detection is enabled */
-  autoDetectEnabled: boolean;
-
   /** Current cart state (for transition detection) */
   cartState: CartState;
 
@@ -69,7 +66,6 @@ const initialState: RuntimeState = {
   lastLockAttempt: null,
   lockAttempts: 0,
   initialized: false,
-  autoDetectEnabled: true,
   cartState: 'unknown',
   cleanupFns: [],
 };
@@ -169,21 +165,6 @@ export function markInitialized(): void {
   state.initialized = true;
   state.state = 'running';
   debug('Agent initialized');
-}
-
-/**
- * Check if auto-detection is enabled.
- */
-export function isAutoDetectEnabled(): boolean {
-  return state.autoDetectEnabled;
-}
-
-/**
- * Set auto-detection enabled state.
- */
-export function setAutoDetectEnabled(enabled: boolean): void {
-  state.autoDetectEnabled = enabled;
-  debug(`Auto-detection ${enabled ? 'enabled' : 'disabled'}`);
 }
 
 /**
