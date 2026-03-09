@@ -44,6 +44,7 @@ const DEFAULT_CONFIG: TokenStorageConfig = {
  */
 export function storeIntentToken(token: string, config: TokenStorageConfig = DEFAULT_CONFIG): void {
   if (!isValidToken(token)) {
+    debug('Invalid intent token (must be 8-2048 chars):', token?.length ?? 0, 'chars');
     return;
   }
 
@@ -68,11 +69,21 @@ export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): str
     return sessionToken;
   }
 
+  // Log if we found an invalid token in sessionStorage
+  if (sessionToken) {
+    debug('Invalid intent token in sessionStorage (must be 8-2048 chars):', sessionToken.length, 'chars');
+  }
+
   // Fallback to cookie
   const cookieToken = getCookie(config.influenceIntentToken);
   if (isValidToken(cookieToken)) {
     debug('Intent token retrieved from cookie');
     return cookieToken;
+  }
+
+  // Log if we found an invalid token in cookie
+  if (cookieToken) {
+    debug('Invalid intent token in cookie (must be 8-2048 chars):', cookieToken.length, 'chars');
   }
 
   return null;
@@ -95,6 +106,7 @@ export function storePurchaseToken(
   config: TokenStorageConfig = DEFAULT_CONFIG
 ): void {
   if (!isValidToken(token)) {
+    debug('Invalid purchase token (must be 8-2048 chars):', token?.length ?? 0, 'chars');
     return;
   }
 
@@ -119,11 +131,21 @@ export const getPurchaseToken = (config: TokenStorageConfig = DEFAULT_CONFIG): s
     return sessionToken;
   }
 
+  // Log if we found an invalid token in sessionStorage
+  if (sessionToken) {
+    debug('Invalid purchase token in sessionStorage (must be 8-2048 chars):', sessionToken.length, 'chars');
+  }
+
   // Fallback to cookie
   const cookieToken = getCookie(config.purchaseIntentToken);
   if (isValidToken(cookieToken)) {
     debug('Purchase token retrieved from cookie');
     return cookieToken;
+  }
+
+  // Log if we found an invalid token in cookie
+  if (cookieToken) {
+    debug('Invalid purchase token in cookie (must be 8-2048 chars):', cookieToken.length, 'chars');
   }
 
   return null;
