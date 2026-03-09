@@ -13,7 +13,7 @@ import clearTokens, {
   lockIntent,
   onLocked,
   onCleared,
-  onError,
+  onError, hasIntentToken,
 } from '../../src/index.js';
 
 // ============================================
@@ -24,7 +24,7 @@ import clearTokens, {
 window.QredexAgent = {
   getIntentToken,
   getPurchaseIntentToken,
-  hasInfluenceIntentToken: hasInfluenceIntentToken,
+  hasIntentToken,
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,

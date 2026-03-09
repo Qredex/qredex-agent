@@ -33,7 +33,7 @@ import { autoStart } from './bootstrap/auto-start.js';
 import {
   getIntentToken as getStoredIntentToken,
   getPurchaseToken as getStoredPurchaseToken,
-  hasInfluenceIntentToken as hasStoredIntentToken,
+  hasIntentToken as hasStoredIntentToken,
   hasPurchaseToken as hasStoredPurchaseToken,
   clearAllTokens,
 } from './storage/tokens.js';
@@ -66,7 +66,7 @@ autoStart();
  * }
  * ```
  *
- * @see {@link hasInfluenceIntentToken} - Check if IIT exists
+ * @see {@link hasIntentToken} - Check if IIT exists
  * @see {@link getPurchaseIntentToken} - Get the PIT token
  */
 export function getIntentToken(): string | null {
@@ -114,7 +114,7 @@ export function getPurchaseIntentToken(): string | null {
  *
  * @example
  * ```TypeScript
- * if (QredexAgent.hasInfluenceIntentToken()) {
+ * if (QredexAgent.hasIntentToken()) {
  *   console.log('Intent token available - user came from Qredex link');
  * } else {
  *   console.log('No intent token - regular traffic');
@@ -124,7 +124,7 @@ export function getPurchaseIntentToken(): string | null {
  * @see {@link getIntentToken} - Get the IIT token
  * @see {@link hasPurchaseIntentToken} - Check if PIT exists
  */
-export const hasInfluenceIntentToken = (): boolean => {
+export const hasIntentToken = (): boolean => {
   const config = getConfig();
   return hasStoredIntentToken({
     influenceIntentToken: config.influenceIntentToken,
@@ -147,7 +147,7 @@ export const hasInfluenceIntentToken = (): boolean => {
  * ```
  *
  * @see {@link getPurchaseIntentToken} - Get the PIT token
- * @see {@link hasInfluenceIntentToken} - Check if IIT exists
+ * @see {@link hasIntentToken} - Check if IIT exists
  */
 export function hasPurchaseIntentToken(): boolean {
   const config = getConfig();
@@ -340,7 +340,7 @@ export function handleCartChange(event: {
 
   // Lock when cart has items, IIT exists, and PIT doesn't exist
   // This retries on every add-to-cart if lock previously failed (Rule 13)
-  if (itemCount > 0 && hasInfluenceIntentToken() && !hasPurchaseIntentToken()) {
+  if (itemCount > 0 && hasIntentToken() && !hasPurchaseIntentToken()) {
     debug('Cart has items, IIT exists, no PIT - attempting lock');
 
     // Auto-lock IIT → PIT
@@ -818,7 +818,7 @@ if (typeof window !== 'undefined') {
     // Read/State
     getIntentToken,
     getPurchaseIntentToken,
-    hasInfluenceIntentToken: hasInfluenceIntentToken,
+    hasIntentToken,
     hasPurchaseIntentToken,
 
     // Commands
