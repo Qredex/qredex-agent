@@ -12,7 +12,7 @@
   <div class="card">
     <h2>📋 Instructions</h2>
     <ol>
-      <li>Add <code>?qdx_intent=test1234</code> to the URL and reload (token must be 8+ chars)</li>
+      <li>Click "Set Random IIT" to add a random <code>qdx_intent</code> token to the URL</li>
       <li>Verify IIT appears in the Status panel below</li>
       <li>Click "Add to Cart" to lock IIT → PIT</li>
       <li>Click "Clear Cart" to clear tokens</li>
@@ -23,7 +23,7 @@
     <h2>Current URL</h2>
     <code id="current-url" style="word-break: break-all;"></code>
     <div style="margin-top: 10px;">
-      <button class="btn" onclick="addIntentToUrl()">➕ Add ?qdx_intent=test123</button>
+      <button class="btn" onclick="addIntentToUrl()">➕ Set Random IIT</button>
     </div>
   </div>
 
@@ -121,8 +121,19 @@
 
     function addIntentToUrl() {
       const url = new URL(window.location.href);
-      url.searchParams.set('qdx_intent', 'test1234');  // 8 characters
+      const randomToken = generateRandomToken();
+      url.searchParams.set('qdx_intent', randomToken);
       window.location.href = url.toString();
+    }
+
+    function generateRandomToken() {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const length = 16;
+      let token = 'iit_';
+      for (let i = 0; i < length; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return token;
     }
 
     // UI helpers
@@ -153,7 +164,7 @@
     // Initialize
     updateStatus();
     log('Qredex Agent loaded from CDN', 'success');
-    log(`Add ?qdx_intent=xxx to URL to test intent capture`, 'info');
+    log('Click "Set Random IIT" to add a random intent token', 'info');
   </script>
 </body>
 </html>

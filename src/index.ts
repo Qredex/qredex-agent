@@ -338,9 +338,10 @@ export function handleCartChange(event: {
   // Update cart state for tracking
   setCartState(itemCount > 0 ? 'non-empty' : 'empty');
 
-  // Lock when cart goes from 0 → >0 (first item added)
-  if (itemCount > 0 && previousCount === 0) {
-    debug('Cart has items, locking intent');
+  // Lock when cart has items, IIT exists, and PIT doesn't exist
+  // This retries on every add-to-cart if lock previously failed (Rule 13)
+  if (itemCount > 0 && hasIntentToken() && !hasPurchaseIntentToken()) {
+    debug('Cart has items, IIT exists, no PIT - attempting lock');
 
     // Auto-lock IIT → PIT
     lockIntent(meta)
