@@ -23,7 +23,7 @@
 
 import { debug, info, warn } from '../utils/log.js';
 import { getConfig } from '../bootstrap/config.js';
-import { getIntentToken, getPurchaseToken, storePurchaseToken } from '../storage/tokens.js';
+import { getIntentToken, getPurchaseToken, storePurchaseToken, removeIntentToken } from '../storage/tokens.js';
 import { endLock, isLockInProgress, startLock } from '../core/state.js';
 import type { LockRequest, LockResponse, LockResult, LockMeta } from './types.js';
 
@@ -142,6 +142,13 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
 
       // Store the PIT for future use
       storePurchaseToken(data.token, {
+        influenceIntentToken: config.influenceIntentToken,
+        purchaseIntentToken: config.purchaseIntentToken,
+        cookieExpireDays: config.cookieExpireDays,
+      });
+
+      // Remove the IIT since it's been successfully locked
+      removeIntentToken({
         influenceIntentToken: config.influenceIntentToken,
         purchaseIntentToken: config.purchaseIntentToken,
         cookieExpireDays: config.cookieExpireDays,

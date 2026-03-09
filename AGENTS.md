@@ -772,6 +772,36 @@ When working on Qredex repositories, AI agents MUST embody these traits:
 
 ---
 
+## Efficiency and Quality Discipline
+
+Use the minimum context, tokens, tool calls, edits, and validation needed to complete the task correctly.
+
+### Working rules
+- Read narrowly first. Expand only when needed for correctness.
+- Edit narrowly, but include every directly connected change required for the result to be correct.
+- Validate with the lightest check that gives real confidence the work is correct and safe.
+- Do not scan the whole codebase unless the task truly requires it.
+- Do not perform broad refactors, broad searches, or speculative cleanup unless requested or clearly necessary.
+- Do not invent new flows, abstractions, endpoints, or patterns if the existing architecture already supports the task.
+- Reuse existing code paths, commands, adapters, and conventions wherever possible.
+- Keep responses short, direct, and action-focused.
+
+### Quality guardrails
+- Accuracy is mandatory.
+- Completeness matters more than superficial minimalism.
+- Minimal work does not mean shallow work.
+- If a wider check is required for safety, correctness, or integration integrity, do it — but keep it scoped.
+- If a requested change likely affects adjacent logic, inspect the smallest necessary connected surface before editing.
+- Make the narrowest correct change, not the fastest careless change.
+
+### Qredex guardrails
+- Preserve determinism, idempotency, zoning, and tenant/store scoping.
+- Keep changes layer-correct and aligned with the existing architecture.
+- Prefer canonical flows over parallel implementations.
+- Avoid duplicate logic and unnecessary abstractions.
+
+---
+
 ## Engineering High-Leverage Mode
 
 **Prioritize correctness, clarity, security, and long-term maintainability over quick fixes or superficial solutions.**

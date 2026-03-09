@@ -12,7 +12,7 @@
   <div class="card">
     <h2>📋 Instructions</h2>
     <ol>
-      <li>Add <code>?qdx_intent=test123</code> to the URL and reload</li>
+      <li>Add <code>?qdx_intent=test1234</code> to the URL and reload (token must be 8+ chars)</li>
       <li>Verify IIT appears in the Status panel below</li>
       <li>Click "Add to Cart" to lock IIT → PIT</li>
       <li>Click "Clear Cart" to clear tokens</li>
@@ -45,6 +45,11 @@
     <div class="log" id="log"></div>
   </div>
 
+  <!-- Configure Qredex Agent BEFORE loading (required for debug mode) -->
+  <script>
+    window.QredexAgentConfig = { debug: true };
+  </script>
+
   <!-- Qredex Agent from local dist -->
   <script src="../../dist/qredex-agent.iife.min.js"></script>
   <script>
@@ -59,9 +64,6 @@
     if (!hasIntent) {
       log('⚠️ No intent token found. Add ?qdx_intent=xxx to URL or use the button above.', 'warning');
     }
-
-    // Configure (optional)
-    window.QredexAgentConfig = { debug: true };
 
     // Listen for events
     QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
@@ -119,7 +121,7 @@
 
     function addIntentToUrl() {
       const url = new URL(window.location.href);
-      url.searchParams.set('qdx_intent', 'test123');
+      url.searchParams.set('qdx_intent', 'test1234');  // 8 characters
       window.location.href = url.toString();
     }
 

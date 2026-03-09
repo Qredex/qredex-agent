@@ -21,11 +21,6 @@ const products = [
 // QREDEX AGENT SETUP
 // ============================================
 
-// Configure agent (optional)
-window.QredexAgentConfig = {
-  debug: true,  // Enable debug logging
-};
-
 // Listen for agent events (optional but recommended)
 QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
   console.log('✅ Qredex locked:', { purchaseToken, alreadyLocked });

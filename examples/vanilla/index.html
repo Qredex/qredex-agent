@@ -47,6 +47,13 @@
     </section>
   </main>
 
+  <!-- Configure Qredex Agent BEFORE loading -->
+  <script>
+    window.QredexAgentConfig = {
+      debug: true,  // Enable debug logging
+    };
+  </script>
+
   <!-- Qredex Agent -->
   <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
   <script src="app.js"></script>

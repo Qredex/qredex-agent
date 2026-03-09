@@ -23,10 +23,10 @@
  */
 
 import { debug, info } from '../utils/log.js';
-import { getConfig } from '../bootstrap/config.js';
-import { getIntentToken, hasPurchaseToken, storePurchaseToken } from '../storage/tokens.js';
+import { getIntentToken, hasPurchaseToken } from '../storage/tokens.js';
 import { isLockInProgress, registerCleanup } from '../core/state.js';
 import { lockIntent } from '../api/lock.js';
+import { getConfig } from '../bootstrap/config.js';
 import type { AddToCartEvent, AddToCartHandler } from './types.js';
 import { enableClickDetection, disableClickDetection } from './click.js';
 import { enableFormDetection, disableFormDetection } from './form.js';
@@ -119,21 +119,12 @@ async function tryLockIntent(): Promise<void> {
     return;
   }
 
-  const config = getConfig();
-
   try {
     info('Attempting to lock intent...');
 
     const response = await lockIntent();
 
     if (response.success && response.purchaseToken) {
-      // Store the purchase token (also done in lockIntent, but double-check)
-      storePurchaseToken(response.purchaseToken, {
-        influenceIntentToken: config.influenceIntentToken,
-        purchaseIntentToken: config.purchaseIntentToken,
-        cookieExpireDays: config.cookieExpireDays,
-      });
-
       if (response.alreadyLocked) {
         info('Intent was already locked');
       } else {
