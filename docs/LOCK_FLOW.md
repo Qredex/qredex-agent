@@ -140,12 +140,6 @@ This ensures retry on every add-to-cart if previous lock failed (Rule 13).
 | >0 | >0 | `non-empty` → `non-empty` | **Retry lock** if IIT exists and PIT doesn't (Rule 13) |
 | >0 | 0 | `non-empty` → `empty` | **Clear IIT + PIT** |
 
-0
-
-`non-empty` → `empty`
-
-**Clear IIT + PIT**
-
 ---
 
 ## Idempotency
@@ -286,45 +280,12 @@ if (!response.ok) {
 
 ### Lock Failure Behavior
 
-Error Type
-
-IIT
-
-PIT
-
-Retry
-
-Network error
-
-**Kept**
-
-Not created
-
-Yes, on next cart event
-
-HTTP 4xx (invalid)
-
-**Kept**
-
-Not created
-
-Yes, on next cart event
-
-HTTP 5xx (server)
-
-**Kept**
-
-Not created
-
-Yes, on next cart event
-
-Cart emptied
-
-**Cleared**
-
-**Cleared**
-
-No (state reset)
+| Error Type | IIT | PIT | Retry |
+|------------|-----|-----|-------|
+| Network error | **Kept** | Not created | **Yes, on every add-to-cart** |
+| HTTP 4xx (invalid) | **Kept** | Not created | **Yes, on every add-to-cart** |
+| HTTP 5xx (server) | **Kept** | Not created | **Yes, on every add-to-cart** |
+| Cart emptied | **Cleared** | **Cleared** | No (state reset) |
 
 ---
 

@@ -249,7 +249,7 @@ export default clearTokens
  *
  * @example
  * ```TypeScript
- * // Add to cart (0 → 1 items) - locks IIT → PIT
+ * // Add to cart (0 → 1 item) - locks IIT → PIT
  * QredexAgent.handleCartChange({
  *   itemCount: 1,
  *   previousCount: 0,

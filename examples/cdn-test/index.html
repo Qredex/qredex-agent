@@ -45,13 +45,13 @@
     <div class="log" id="log"></div>
   </div>
 
+  <!-- Qredex Agent from local dist -->
+  <script src="../../dist/qredex-agent.iife.min.js"></script>
   <!-- Configure Qredex Agent BEFORE loading (required for debug mode) -->
   <script>
     window.QredexAgentConfig = { debug: true };
   </script>
 
-  <!-- Qredex Agent from local dist -->
-  <script src="../../dist/qredex-agent.iife.min.js"></script>
   <script>
     // Cart state
     let cartItemCount = 0;
@@ -99,6 +99,7 @@
           productId: 'test-product',
           quantity: 1,
           price: 99.99,
+          from: 'cdn-test',
         },
       });
 
