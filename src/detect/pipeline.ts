@@ -108,6 +108,7 @@ function shouldAttemptLock(): boolean {
     return false;
   }
 
+  debug('Lock conditions met');
   return true;
 }
 

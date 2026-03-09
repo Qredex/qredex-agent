@@ -30,6 +30,11 @@ import { debug } from '../utils/log.js';
 export type AgentState = 'idle' | 'running' | 'locking' | 'destroyed';
 
 /**
+ * Cart state for tracking empty/non-empty transitions.
+ */
+export type CartState = 'unknown' | 'empty' | 'non-empty';
+
+/**
  * Internal runtime state object.
  */
 export interface RuntimeState {
@@ -51,6 +56,9 @@ export interface RuntimeState {
   /** Whether auto-detection is enabled */
   autoDetectEnabled: boolean;
 
+  /** Current cart state (for transition detection) */
+  cartState: CartState;
+
   /** Event listener cleanup functions */
   cleanupFns: Array<() => void>;
 }
@@ -62,6 +70,7 @@ const initialState: RuntimeState = {
   lockAttempts: 0,
   initialized: false,
   autoDetectEnabled: true,
+  cartState: 'unknown',
   cleanupFns: [],
 };
 
@@ -208,4 +217,33 @@ export function destroyState(): void {
 
   state = { ...initialState, state: 'destroyed', initialized: true };
   debug('Agent destroyed');
+}
+
+/**
+ * Get the current cart state.
+ */
+export function getCartState(): CartState {
+  return state.cartState;
+}
+
+/**
+ * Update the cart state.
+ */
+export function setCartState(cartState: CartState): void {
+  state.cartState = cartState;
+  debug(`Cart state updated: ${cartState}`);
+}
+
+/**
+ * Check if cart is currently empty.
+ */
+export function isCartEmpty(): boolean {
+  return state.cartState === 'empty';
+}
+
+/**
+ * Check if cart currently has items.
+ */
+export function hasCartItems(): boolean {
+  return state.cartState === 'non-empty';
 }

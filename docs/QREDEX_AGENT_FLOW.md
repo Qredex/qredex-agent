@@ -21,13 +21,13 @@
 
 ## Purpose
 
-Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` token issued by Qredex redirect traffic, stores it safely in the shopper session, detects add-to-cart activity, and locks that IIT into a PIT through the public AGENT endpoint. The goal is to make IIT → PIT handling simple, consistent, and easy to embed on any storefront.
+Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` token issued by Qredex redirect traffic, stores it safely in the shopper session, and locks that IIT into a PIT through the public AGENT endpoint when the cart becomes non-empty. The goal is to make IIT → PIT handling simple, consistent, and easy to embed on any storefront.
 
 ## Core Terms
 
--   **IIT** = Influence Intent Token Click-time token issued when a shopper lands through a Qredex tracking link.
--   **PIT** = Purchase Intent Token Lock-time token created when the shopper adds to cart.
--   **AGENT endpoint** = Public client-runtime endpoint used for PIT locking on cart events.
+-   **IIT** = Influence Intent Token. Click-time token issued when a shopper lands through a Qredex tracking link.
+-   **PIT** = Purchase Intent Token. Lock-time token created when the shopper adds to cart.
+-   **AGENT endpoint** = Public client-runtime endpoint used for PIT locking on cart events (`/api/v1/agent/intents/lock`).
 
 ---
 
@@ -39,17 +39,50 @@ Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` tok
 4.  Agent stores the IIT in browser session storage and cookie fallback.
 5.  Agent removes `qdx_intent` from the visible URL.
 6.  Shopper browses the storefront.
-7.  Shopper adds an item to cart.
-8.  Agent detects the add-to-cart event.
-9.  Agent checks whether:
+7.  Merchant calls `handleCartChange()` or `handleCartAdd()` when cart state changes.
+8.  Agent checks whether:
+    -   Cart transitioned from empty → non-empty
     -   IIT exists
     -   PIT is not already present
-    -   no lock request is already in flight
-10.  Agent calls `POST /api/v1/agent/intents/lock`.
-11.  Qredex validates the IIT and returns a PIT on success.
-12.  Agent stores the PIT in browser storage.
-13.  Storefront/cart flow carries PIT forward into checkout/order handoff.
-14.  Qredex later resolves attribution from the PIT at order ingestion time.
+    -   No lock request is already in flight
+9.  Agent calls `POST /api/v1/agent/intents/lock`.
+10. Qredex validates the IIT and returns a PIT on success.
+11. Agent stores the PIT in browser storage.
+12. Agent clears the IIT (PIT is now authoritative).
+13. Storefront/cart flow carries PIT forward into checkout/order handoff.
+14. Qredex later resolves attribution from the PIT at order ingestion time.
+
+---
+
+## State Machine
+
+The agent maintains a simple cart state machine:
+
+```
+┌─────────────┐
+│   unknown   │ (initial state)
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│    empty    │◄────────────────┐
+└──────┬──────┘                 │
+       │                        │
+       │ 0 → >0 (first item)    │ >0 → 0 (cart emptied)
+       ▼                        │
+┌─────────────┐                 │
+│  non-empty  │─────────────────┘
+└─────────────┘
+```
+
+**State transitions trigger actions:**
+
+| Transition | Condition | Action |
+|------------|-----------|--------|
+| `unknown` → `empty` | Initial load | None |
+| `empty` → `non-empty` | First item added | **Lock IIT → PIT** (if IIT exists, PIT doesn't) |
+| `non-empty` → `non-empty` | More items added | None (already locked or no IIT) |
+| `non-empty` → `empty` | Cart emptied | **Clear IIT + PIT** |
 
 ---
 
@@ -68,9 +101,11 @@ sequenceDiagram
     FE->>FE: Store IIT in sessionStorage
     FE->>FE: Store IIT in cookie fallback
     FE->>FE: Remove qdx_intent from URL
+    FE->>FE: Cart state: empty
 
     U->>FE: Add item to cart
-    FE->>FE: Detect add-to-cart
+    FE->>FE: Merchant calls handleCartAdd()
+    FE->>FE: Cart state: empty → non-empty
     FE->>FE: Check IIT exists
     FE->>FE: Check PIT not already stored
     FE->>FE: Check no lock already in flight
@@ -81,9 +116,220 @@ sequenceDiagram
 
     FE->>FE: Store PIT in sessionStorage
     FE->>FE: Store PIT in cookie fallback
+    FE->>FE: Clear IIT (PIT now authoritative)
     FE->>C: Attach PIT to cart/session/order handoff
 
     U->>C: Complete checkout
     C->>O: Submit order with PIT
     O->>Q: Resolve attribution from PIT
 ```
+
+---
+
+## Token Lifecycle
+
+### IIT (Influence Intent Token)
+
+| Event | Action |
+|-------|--------|
+| URL has `?qdx_intent` | Capture and store in sessionStorage + cookie |
+| PIT already exists | **Ignore new IIT** (locked attribution wins) |
+| Lock succeeds | **Clear IIT** (PIT now authoritative) |
+| Lock fails | Keep IIT (allow retry on future cart events) |
+| Cart becomes empty | **Clear IIT** |
+
+### PIT (Purchase Intent Token)
+
+| Event | Action |
+|-------|--------|
+| Lock succeeds | Store in sessionStorage + cookie |
+| Lock fails | Do not create PIT |
+| Cart becomes empty | **Clear PIT** |
+| Checkout succeeds | **Clear PIT** |
+
+---
+
+## Merchant Integration
+
+### Primary Method: `handleCartChange()`
+
+```typescript
+// Merchant tells agent about cart state change
+QredexAgent.handleCartChange({
+  itemCount: 3,        // Current cart item count
+  previousCount: 0,    // Previous cart item count
+  meta: {              // Optional: sent to lock API
+    productId: 'widget-001',
+    quantity: 2,
+    price: 99.99,
+  },
+});
+```
+
+**Transition rules:**
+
+| `previousCount` | `itemCount` | Action |
+|-----------------|-------------|--------|
+| 0 | >0 | **Lock IIT → PIT** (if IIT exists) |
+| >0 | >0 | None (state unchanged) |
+| >0 | 0 | **Clear IIT + PIT** |
+| 0 | 0 | None (state unchanged) |
+
+### Convenience Wrappers
+
+```typescript
+// Add to cart (automatically tracks state)
+QredexAgent.handleCartAdd(itemCount, {
+  productId: 'widget-001',
+  quantity: 1,
+});
+
+// Empty cart (automatically clears tokens)
+QredexAgent.handleCartEmpty();
+```
+
+### Manual Lock (Optional)
+
+```typescript
+// Usually not needed - handleCartChange() auto-locks
+const result = await QredexAgent.lockIntent({
+  productId: 'widget-001',
+  quantity: 2,
+});
+
+if (result.success) {
+  console.log('PIT:', result.purchaseToken);
+} else {
+  console.error('Lock failed:', result.error);
+}
+```
+
+### After Checkout
+
+```typescript
+// After successful payment/order
+QredexAgent.handlePaymentSuccess({
+  orderId: 'order-123',
+  amount: 99.99,
+  currency: 'USD',
+});
+
+// Or manually clear tokens
+QredexAgent.clearTokens();
+```
+
+---
+
+## Idempotency Rules
+
+### Lock Operation
+
+The lock operation is **idempotent** - safe to call multiple times:
+
+1. **PIT already exists locally** → Return cached PIT immediately
+2. **Lock already in flight** → Return same promise
+3. **Backend returns `already_locked`** → Store PIT, return success
+
+### Retry Behavior
+
+| Scenario | Behavior |
+|----------|----------|
+| Lock fails (network error) | Keep IIT, retry on next cart event |
+| Lock fails (invalid IIT) | Keep IIT, retry on next cart event |
+| Cart emptied, then items added again | Clear tokens, capture new IIT if URL has it |
+
+---
+
+## Storage Behavior
+
+### Keys
+
+| Token | sessionStorage | Cookie |
+|-------|----------------|--------|
+| IIT | `__qdx_iit` | `__qdx_iit` |
+| PIT | `__qdx_pit` | `__qdx_pit` |
+
+### Priority
+
+1. **sessionStorage** (primary)
+2. **Cookie** (fallback)
+
+### Security
+
+- Cookies use `SameSite: Strict`
+- Cookies scoped to `path=/`
+- No sensitive data in localStorage
+
+---
+
+## Error Handling
+
+### No IIT Available
+
+```typescript
+// Lock will fail with error
+{
+  success: false,
+  error: 'No intent token available'
+}
+```
+
+### Network Error
+
+```typescript
+// Lock fails, IIT preserved for retry
+{
+  success: false,
+  error: 'Network error'
+}
+```
+
+### HTTP Error
+
+```typescript
+// Lock fails, IIT preserved for retry
+{
+  success: false,
+  error: 'HTTP 400: Invalid token'
+}
+```
+
+---
+
+## Debug Mode
+
+Enable debug logging:
+
+```html
+<script>
+  window.QredexAgentConfig = { debug: true };
+</script>
+```
+
+**Example output:**
+
+```
+[QredexAgent] Intent token captured from URL
+[QredexAgent] Cart change event received { itemCount: 1, previousCount: 0 }
+[QredexAgent] Cart state updated: non-empty
+[QredexAgent] Lock conditions met
+[QredexAgent] Sending lock request to: https://api.qredex.com/...
+[QredexAgent] Intent locked successfully
+[QredexAgent] Purchase token stored
+[QredexAgent] Intent token removed
+```
+
+---
+
+## Related Documentation
+
+- **[Installation](./INSTALLATION.md)** - Setup and integration
+- **[API Reference](./API.md)** - Public API methods
+- **[Lock Flow](./LOCK_FLOW.md)** - Detailed lock sequence
+- **[Detection](./DETECTION.md)** - Add-to-cart detection strategies
+
+---
+
+## Support
+
+For questions: support@qredex.com

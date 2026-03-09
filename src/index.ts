@@ -38,6 +38,7 @@ import {
   clearAllTokens,
 } from './storage/tokens.js';
 import { lockIntent as apiLockIntent } from './api/lock.js';
+import { setCartState, hasCartItems as checkHasCartItems } from './core/state.js';
 
 import type { AgentConfig } from './bootstrap/config.js';
 import type { LockResult, LockMeta } from './api/types.js';
@@ -334,6 +335,9 @@ export function handleCartChange(event: {
 
   debug('Cart change event received', event);
 
+  // Update cart state for tracking
+  setCartState(itemCount > 0 ? 'non-empty' : 'empty');
+
   // Lock when cart goes from 0 → >0 (first item added)
   if (itemCount > 0 && previousCount === 0) {
     debug('Cart has items, locking intent');
@@ -411,6 +415,96 @@ export function handleCartChange(event: {
       }
     }
   }
+}
+
+/**
+ * Tell the agent that an item was added to cart.
+ *
+ * Convenience wrapper for `handleCartChange()` when adding items.
+ * Tracks cart state internally to determine previous count.
+ *
+ * @param itemCount - Current number of items in cart (after adding)
+ * @param meta - Optional metadata (product info)
+ *
+ * @example
+ * ```TypeScript
+ * // After adding item to cart
+ * const newCount = cart.getItems().length;
+ * QredexAgent.handleCartAdd(newCount, {
+ *   productId: 'widget-001',
+ *   quantity: 1,
+ * });
+ * ```
+ *
+ * @see {@link handleCartChange} - Main cart state change method
+ * @see {@link handleCartEmpty} - Convenience wrapper for emptying cart
+ */
+export function handleCartAdd(
+  itemCount: number,
+  meta?: {
+    productId?: string;
+    quantity?: number;
+    price?: number;
+  }
+): void {
+  if (typeof itemCount !== 'number' || itemCount < 0) {
+    const errorEvent = {
+      error: 'itemCount must be a non-negative number',
+      context: 'handleCartAdd',
+    };
+
+    for (const handler of errorHandlers) {
+      try {
+        handler(errorEvent);
+      } catch (err) {
+        console.error('[QredexAgent] onError handler error:', err);
+      }
+    }
+    return;
+  }
+
+  // Get current cart state to determine previous count
+  const wasEmpty = !hasCartItems();
+  const previousCount = wasEmpty ? 0 : 1;
+
+  handleCartChange({
+    itemCount,
+    previousCount,
+    meta,
+  });
+}
+
+/**
+ * Tell the agent that the cart was emptied.
+ *
+ * Convenience wrapper for `handleCartChange()` when cart becomes empty.
+ * This will clear both IIT and PIT tokens.
+ *
+ * @example
+ * ```TypeScript
+ * // After emptying cart
+ * cart.clear();
+ * QredexAgent.handleCartEmpty();
+ * ```
+ *
+ * @see {@link handleCartChange} - Main cart state change method
+ * @see {@link handleCartAdd} - Convenience wrapper for adding to cart
+ */
+export function handleCartEmpty(): void {
+  const previousCount = hasCartItems() ? 1 : 0;
+
+  handleCartChange({
+    itemCount: 0,
+    previousCount,
+  });
+}
+
+/**
+ * Check if cart currently has items.
+ * @internal
+ */
+function hasCartItems(): boolean {
+  return checkHasCartItems();
 }
 
 /**
@@ -732,6 +826,8 @@ if (typeof window !== 'undefined') {
 
     // Event Handlers (Merchant → Agent)
     handleCartChange,
+    handleCartAdd,
+    handleCartEmpty,
     handlePaymentSuccess,
 
     // Event Listeners (Agent → Merchant)
