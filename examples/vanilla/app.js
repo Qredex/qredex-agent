@@ -120,6 +120,7 @@ async function addToCart(productId) {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     // Add to local cart
+    const previousCount = cartItems.length;
     const existingItem = cartItems.find(item => item.id === productId);
     if (existingItem) {
       existingItem.quantity += 1;
@@ -127,11 +128,15 @@ async function addToCart(productId) {
       cartItems.push({ ...product, quantity: 1 });
     }
 
-    // Tell Qredex agent (auto-locks IIT → PIT)
-    QredexAgent.handleCartAdd({
-      productId: product.id,
-      quantity: existingItem ? existingItem.quantity : 1,
-      price: product.price,
+    // Tell Qredex agent (auto-locks IIT → PIT on first item)
+    QredexAgent.handleCartChange({
+      itemCount: cartItems.length,
+      previousCount,
+      meta: {
+        productId: product.id,
+        quantity: existingItem ? existingItem.quantity : 1,
+        price: product.price,
+      },
     });
 
     renderCart();
@@ -143,11 +148,15 @@ async function addToCart(productId) {
 }
 
 function clearCart() {
+  const previousCount = cartItems.length;
   cartItems = [];
   renderCart();
 
-  // Tell Qredex agent (auto-clears PIT)
-  QredexAgent.handleCartEmpty();
+  // Tell Qredex agent (auto-clears PIT when cart emptied)
+  QredexAgent.handleCartChange({
+    itemCount: 0,
+    previousCount,
+  });
 
   showNotification('Cart cleared', 'info');
 }

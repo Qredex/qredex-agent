@@ -149,6 +149,7 @@ const addToCart = async (product: Product) => {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     // Add to local cart
+    const previousCount = cartItems.value.length;
     const existing = cartItems.value.find(item => item.id === product.id);
     if (existing) {
       existing.quantity += 1;
@@ -156,13 +157,17 @@ const addToCart = async (product: Product) => {
       cartItems.value.push({ ...product, quantity: 1 });
     }
 
-    // Tell Qredex agent (auto-locks IIT → PIT)
+    // Tell Qredex agent (auto-locks IIT → PIT on first item)
     const agent = (window as any).QredexAgent;
     if (agent) {
-      agent.handleCartAdd({
-        productId: product.id,
-        quantity: 1,
-        price: product.price,
+      agent.handleCartChange({
+        itemCount: cartItems.value.length,
+        previousCount,
+        meta: {
+          productId: product.id,
+          quantity: 1,
+          price: product.price,
+        },
       });
     }
 
@@ -177,12 +182,16 @@ const addToCart = async (product: Product) => {
 };
 
 const clearCart = () => {
+  const previousCount = cartItems.value.length;
   cartItems.value = [];
 
-  // Tell Qredex agent (auto-clears PIT)
+  // Tell Qredex agent (auto-clears PIT when cart emptied)
   const agent = (window as any).QredexAgent;
   if (agent) {
-    agent.handleCartEmpty();
+    agent.handleCartChange({
+      itemCount: 0,
+      previousCount,
+    });
   }
 
   addLog('Cart cleared', 'info');
@@ -370,8 +379,7 @@ QredexAgent.hasIntentToken()
 QredexAgent.hasPurchaseIntentToken()
 
 // Event handlers
-QredexAgent.handleCartAdd({ productId, quantity, price })
-QredexAgent.handleCartEmpty()
+QredexAgent.handleCartChange({ itemCount, previousCount, meta })
 QredexAgent.handlePaymentSuccess({ orderId, amount, currency })
 
 // Event listeners
