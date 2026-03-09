@@ -4,18 +4,17 @@
  * This demonstrates the Qredex Agent integration with a visual testing UI.
  */
 
-import {
-  init,
+import clearTokens, {
   getIntentToken,
   getPurchaseIntentToken,
   hasIntentToken,
   hasPurchaseIntentToken,
-  handleAddToCart,
+  handleCartChange,
   lockIntent,
-  isInitialized,
-  getStatus,
-  onAddToCart,
-} from '../../src/index.ts';
+  onLocked,
+  onCleared,
+  onError,
+} from '../../src/index.js';
 
 // ============================================
 // INITIALIZATION
@@ -23,50 +22,75 @@ import {
 
 // Make available globally for console access
 window.QredexAgent = {
-  init,
   getIntentToken,
   getPurchaseIntentToken,
   hasIntentToken,
   hasPurchaseIntentToken,
-  handleAddToCart,
+  handleCartChange,
   lockIntent,
-  isInitialized,
-  getStatus,
-  onAddToCart,
+  clearTokens,
+  onLocked,
+  onCleared,
+  onError,
 };
 
-// Initialize with debug mode
-init({ debug: true });
-
-// Log add-to-cart events
-onAddToCart((event) => {
-  log(`Add-to-cart detected: ${event.source}`, 'info');
-  if (event.meta.productId) {
-    log(`  Product: ${event.meta.productId}`, 'info');
+// Listen for agent events
+onLocked((event) => {
+  log(`✅ Intent locked! PIT: ${event.purchaseToken.substring(0, 20)}...`, 'success');
+  if (event.alreadyLocked) {
+    log('  (was already locked)', 'info');
   }
+  refreshTokens();
+});
+
+onCleared(() => {
+  log('🗑️ Tokens cleared', 'info');
+  refreshTokens();
+});
+
+onError((event) => {
+  log(`❌ Error in ${event.context || 'agent'}: ${event.error}`, 'error');
 });
 
 // ============================================
 // GLOBAL FUNCTIONS (for HTML onclick handlers)
 // ============================================
 
+// Cart state tracking
+let cartItemCount = 0;
+
 window.addToCart = () => {
   const quantity = parseInt(document.getElementById('quantity').value, 10) || 1;
-  handleAddToCart({
-    productId: 'widget-001',
-    productName: 'Premium Widget',
-    quantity,
-    price: 99.99,
+  const previousCount = cartItemCount;
+  cartItemCount += quantity;
+
+  // Tell agent cart state changed (with optional metadata)
+  handleCartChange({
+    itemCount: cartItemCount,
+    previousCount,
+    meta: {
+      productId: 'widget-001',
+      quantity,
+      price: 99.99,
+    },
   });
-  log('Add-to-cart triggered manually', 'success');
+
+  log(`Added ${quantity} item(s) to cart. Total: ${cartItemCount}`, 'success');
 };
 
 window.manualAddToCart = () => {
-  handleAddToCart({
-    productId: 'manual-trigger',
-    productName: 'Manual Trigger Test',
-    quantity: 1,
+  const previousCount = cartItemCount;
+  cartItemCount = 1;
+
+  handleCartChange({
+    itemCount: cartItemCount,
+    previousCount,
+    meta: {
+      productId: 'manual-trigger',
+      quantity: 1,
+    },
   });
+
   log('Manual add-to-cart triggered', 'success');
 };
 
@@ -103,13 +127,14 @@ window.refreshTokens = () => {
   log('Tokens refreshed', 'info');
 };
 
-window.clearTokens = () => {
+window.default = () => {
   sessionStorage.clear();
   document.cookie.split(';').forEach((c) => {
     document.cookie = c
       .replace(/^ +/, '')
       .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
   });
+  cartItemCount = 0;
   log('All tokens cleared', 'success');
   updateStatus();
 };
@@ -123,14 +148,14 @@ window.clearLog = () => {
 // ============================================
 
 function updateStatus() {
-  const status = getStatus();
   const iit = getIntentToken();
   const pit = getPurchaseIntentToken();
 
-  document.getElementById('status-initialized').textContent =
-    `Initialized: ${status.initialized ? 'Yes' : 'No'}`;
-  document.getElementById('status-initialized').className =
-    `status-item ${status.initialized ? 'success' : 'error'}`;
+  const initializedEl = document.getElementById('status-initialized');
+  if (initializedEl) {
+    initializedEl.textContent = `Initialized: Yes`;
+    initializedEl.className = 'status-item success';
+  }
 
   const iitEl = document.getElementById('status-iit');
   if (iit) {
@@ -139,8 +164,10 @@ function updateStatus() {
     document.getElementById('iit-display').textContent = iit;
     document.getElementById('iit-display').classList.remove('empty');
   } else {
-    iitEl.textContent = 'IIT: Not found';
-    iitEl.className = 'status-item';
+    if (iitEl) {
+      iitEl.textContent = 'IIT: Not found';
+      iitEl.className = 'status-item';
+    }
     document.getElementById('iit-display').textContent = 'No intent token found';
     document.getElementById('iit-display').classList.add('empty');
   }
@@ -152,8 +179,10 @@ function updateStatus() {
     document.getElementById('pit-display').textContent = pit;
     document.getElementById('pit-display').classList.remove('empty');
   } else {
-    pitEl.textContent = 'PIT: Not found';
-    pitEl.className = 'status-item';
+    if (pitEl) {
+      pitEl.textContent = 'PIT: Not found';
+      pitEl.className = 'status-item';
+    }
     document.getElementById('pit-display').textContent = 'No purchase token found';
     document.getElementById('pit-display').classList.add('empty');
   }
@@ -176,3 +205,4 @@ function log(message, type = 'info') {
 // Initial status update
 updateStatus();
 log('Qredex Agent demo initialized', 'success');
+log(`Current cart items: ${cartItemCount}`, 'info');

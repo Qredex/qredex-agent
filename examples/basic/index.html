@@ -105,15 +105,19 @@
         window.QredexAgent.hasIntentToken()
         window.QredexAgent.hasPurchaseIntentToken()
 
-        // Manual trigger
-        window.QredexAgent.handleAddToCart({ productId: 'xxx', quantity: 2 })
+        // Handle cart state change (locks when 0→1, clears when >0→0)
+        window.QredexAgent.handleCartChange({ itemCount: 1, previousCount: 0 })
 
-        // Lock intent (idempotent)
+        // Lock intent manually (idempotent)
         window.QredexAgent.lockIntent()
 
-        // Status
-        window.QredexAgent.isInitialized()
-        window.QredexAgent.getStatus()
+        // Clear tokens
+        window.QredexAgent.clearTokens()
+
+        // Listen for events
+        window.QredexAgent.onLocked(({ purchaseToken }) => {...})
+        window.QredexAgent.onCleared(() => {...})
+        window.QredexAgent.onError(({ error }) => {...})
       </code>
       </pre>
 </div>

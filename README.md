@@ -28,6 +28,11 @@ async function addToCart(product) {
   QredexAgent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount: cart.previousCount,
+    meta: {
+      productId: product.id,
+      quantity: product.quantity,
+      price: product.price,
+    },
   });
 }
 
@@ -88,9 +93,28 @@ QredexAgent.clearTokens()              // Clear all tokens
 
 ### Event Handlers (Merchant → Agent)
 ```javascript
-QredexAgent.handleCartChange(event)    // Cart state change (locks/clears)
+// Single method for all cart state changes
+QredexAgent.handleCartChange(event)    // Locks on 0→1, clears on >0→0
 QredexAgent.handlePaymentSuccess(event) // Payment success
 ```
+
+#### handleCartChange Event
+```javascript
+QredexAgent.handleCartChange({
+  itemCount: 1,              // Required: current cart item count
+  previousCount: 0,          // Required: previous cart item count
+  meta: {                    // Optional: sent to lock API
+    productId: 'widget-001',
+    quantity: 2,
+    price: 99.99,
+  },
+});
+```
+
+**Behavior:**
+- `itemCount > 0` and `previousCount === 0` → **Locks IIT → PIT**
+- `itemCount === 0` and `previousCount > 0` → **Clears tokens**
+- Other transitions → No action (e.g., 1 → 3, 3 → 2)
 
 ### Event Listeners (Agent → Merchant)
 ```javascript
@@ -185,6 +209,11 @@ function useQredexAgent() {
     QredexAgent.handleCartChange({
       itemCount: cart.itemCount,
       previousCount: cart.previousCount,
+      meta: {
+        productId: product.id,
+        quantity: product.quantity,
+        price: product.price,
+      },
     });
   };
 
@@ -218,6 +247,10 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
   QredexAgent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount: cart.previousCount,
+    meta: {
+      productId: product.id,
+      price: product.price,
+    },
   });
 });
 ```
@@ -242,6 +275,11 @@ const addToCart = async (product) => {
   QredexAgent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount: cart.previousCount,
+    meta: {
+      productId: product.id,
+      quantity: product.quantity,
+      price: product.price,
+    },
   });
 };
 
