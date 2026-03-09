@@ -23,7 +23,7 @@
 
 import { debug, info, warn } from '../utils/log.js';
 import { getConfig } from '../bootstrap/config.js';
-import { getIntentToken, getPurchaseToken, storePurchaseToken, removeIntentToken } from '../storage/tokens.js';
+import { getInfluenceIntentToken, getPurchaseToken, storePurchaseToken, removeInfluenceIntentToken } from '../storage/tokens.js';
 import { endLock, isLockInProgress, startLock } from '../core/state.js';
 import type { LockRequest, LockResponse, LockResult, LockMeta } from './types.js';
 
@@ -80,7 +80,7 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
   inFlightPromise = (async (): Promise<LockResult> => {
     try {
       // Get the intent token
-      const intentToken = getIntentToken({
+      const intentToken = getInfluenceIntentToken({
         influenceIntentToken: config.influenceIntentToken,
         purchaseIntentToken: config.purchaseIntentToken,
         cookieExpireDays: config.cookieExpireDays,
@@ -115,7 +115,7 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
         });
 
         // Remove the IIT
-        removeIntentToken({
+        removeInfluenceIntentToken({
           influenceIntentToken: config.influenceIntentToken,
           purchaseIntentToken: config.purchaseIntentToken,
           cookieExpireDays: config.cookieExpireDays,
@@ -182,7 +182,7 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
       });
 
       // Remove the IIT since it's been successfully locked
-      removeIntentToken({
+      removeInfluenceIntentToken({
         influenceIntentToken: config.influenceIntentToken,
         purchaseIntentToken: config.purchaseIntentToken,
         cookieExpireDays: config.cookieExpireDays,

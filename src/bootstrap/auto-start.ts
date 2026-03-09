@@ -23,7 +23,7 @@
  */
 
 import { debug, info, warn } from '../utils/log.js';
-import { getPurchaseToken, storeIntentToken } from '../storage/tokens.js';
+import { getPurchaseToken, storeInfluenceIntentToken } from '../storage/tokens.js';
 import { getConfigValue } from './config.js';
 
 const INFLUENCE_INTENT_TOKEN_PARAM = 'qdx_intent';
@@ -74,7 +74,7 @@ export const cleanUrl = (): void => {
 /**
  * Capture and store the intent token from URL.
  * Returns true if a token was found and stored.
- * 
+ *
  * IIT can be replaced by a new IIT until PIT exists (lock happens).
  * Once PIT exists, no new IIT will be captured.
  */
@@ -99,7 +99,7 @@ export function captureIntentToken(): boolean {
   }
 
   // Store the token (replaces any existing IIT)
-  storeIntentToken(token, {
+  storeInfluenceIntentToken(token, {
     influenceIntentToken: getConfigValue('influenceIntentToken'),
     purchaseIntentToken: getConfigValue('purchaseIntentToken'),
     cookieExpireDays: getConfigValue('cookieExpireDays'),

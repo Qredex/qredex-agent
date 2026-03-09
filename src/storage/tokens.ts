@@ -40,11 +40,11 @@ const DEFAULT_CONFIG: TokenStorageConfig = {
 };
 
 /**
- * Store the intent token (IIT) in both sessionStorage and cookie.
+ * Store the influence intent token (IIT) in both sessionStorage and cookie.
  */
-export function storeIntentToken(token: string, config: TokenStorageConfig = DEFAULT_CONFIG): void {
+export function storeInfluenceIntentToken(token: string, config: TokenStorageConfig = DEFAULT_CONFIG): void {
   if (!isValidToken(token)) {
-    debug('Invalid intent token (must be 8-2048 chars):', token?.length ?? 0, 'chars');
+    debug('Invalid influence intent token (must be 8-2048 chars):', token?.length ?? 0, 'chars');
     return;
   }
 
@@ -55,47 +55,68 @@ export function storeIntentToken(token: string, config: TokenStorageConfig = DEF
     sameSite: 'Strict',
   });
 
-  debug('Intent token stored');
+  debug('Influence intent token stored');
 }
 
 /**
- * Get the intent token (IIT) from sessionStorage first, then cookie fallback.
+ * Get the influence intent token (IIT) from sessionStorage first, then cookie fallback.
  */
-export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
+export function getInfluenceIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
   // Try sessionStorage first
   const sessionToken = getSession(config.influenceIntentToken);
   if (isValidToken(sessionToken)) {
-    debug('Intent token retrieved from sessionStorage');
+    debug('Influence intent token retrieved from sessionStorage');
     return sessionToken;
   }
 
   // Log if we found an invalid token in sessionStorage
   if (sessionToken) {
-    debug('Invalid intent token in sessionStorage (must be 8-2048 chars):', sessionToken.length, 'chars');
+    debug('Invalid influence intent token in sessionStorage (must be 8-2048 chars):', sessionToken.length, 'chars');
   }
 
   // Fallback to cookie
   const cookieToken = getCookie(config.influenceIntentToken);
   if (isValidToken(cookieToken)) {
-    debug('Intent token retrieved from cookie');
+    debug('Influence intent token retrieved from cookie');
     return cookieToken;
   }
 
   // Log if we found an invalid token in cookie
   if (cookieToken) {
-    debug('Invalid intent token in cookie (must be 8-2048 chars):', cookieToken.length, 'chars');
+    debug('Invalid influence intent token in cookie (must be 8-2048 chars):', cookieToken.length, 'chars');
   }
 
   return null;
 }
 
 /**
- * Remove the intent token from both storage layers.
+ * Remove the influence intent token from both storage layers.
  */
-export function removeIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
+export function removeInfluenceIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
   removeSession(config.influenceIntentToken);
   removeCookie(config.influenceIntentToken, { path: '/' });
-  debug('Intent token removed');
+  debug('Influence intent token removed');
+}
+
+/**
+ * @deprecated Use `storeInfluenceIntentToken()` instead. Will be removed in v2.0.
+ */
+export function storeIntentToken(token: string, config: TokenStorageConfig = DEFAULT_CONFIG): void {
+  storeInfluenceIntentToken(token, config);
+}
+
+/**
+ * @deprecated Use `getInfluenceIntentToken()` instead. Will be removed in v2.0.
+ */
+export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
+  return getInfluenceIntentToken(config);
+}
+
+/**
+ * @deprecated Use `removeInfluenceIntentToken()` instead. Will be removed in v2.0.
+ */
+export function removeIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
+  removeInfluenceIntentToken(config);
 }
 
 /**
@@ -168,10 +189,17 @@ export function hasPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): b
 }
 
 /**
- * Check if an intent token already exists.
+ * Check if an influence intent token (IIT) already exists.
  */
 export function hasInfluenceIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): boolean {
-  return getIntentToken(config) !== null;
+  return getInfluenceIntentToken(config) !== null;
+}
+
+/**
+ * @deprecated Use `hasInfluenceIntentToken()` instead. Will be removed in v2.0.
+ */
+export function hasIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): boolean {
+  return hasInfluenceIntentToken(config);
 }
 
 /**

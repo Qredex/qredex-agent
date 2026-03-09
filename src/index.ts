@@ -31,9 +31,9 @@ import { setDebugMode, debug } from './utils/log.js';
 import { getConfig } from './bootstrap/config.js';
 import { autoStart } from './bootstrap/auto-start.js';
 import {
-  getIntentToken as getStoredIntentToken,
+  getInfluenceIntentToken as getStoredInfluenceIntentToken,
   getPurchaseToken as getStoredPurchaseToken,
-  hasIntentToken as hasStoredIntentToken,
+  hasInfluenceIntentToken as hasStoredInfluenceIntentToken,
   hasPurchaseToken as hasStoredPurchaseToken,
   clearAllTokens,
 } from './storage/tokens.js';
@@ -60,22 +60,29 @@ autoStart();
  *
  * @example
  * ```typescript
- * const iit = QredexAgent.getIntentToken();
+ * const iit = QredexAgent.getInfluenceIntentToken();
  * if (iit) {
  *   console.log('IIT:', iit);
  * }
  * ```
  *
- * @see {@link hasIntentToken} - Check if IIT exists
+ * @see {@link hasInfluenceIntentToken} - Check if IIT exists
  * @see {@link getPurchaseIntentToken} - Get the PIT token
  */
-export function getIntentToken(): string | null {
+export function getInfluenceIntentToken(): string | null {
   const config = getConfig();
-  return getStoredIntentToken({
+  return getStoredInfluenceIntentToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
     cookieExpireDays: config.cookieExpireDays,
   });
+}
+
+/**
+ * @deprecated Use {@link getInfluenceIntentToken()} instead. Will be removed in v2.0.
+ */
+export function getIntentToken(): string | null {
+  return getInfluenceIntentToken();
 }
 
 /**
@@ -114,23 +121,30 @@ export function getPurchaseIntentToken(): string | null {
  *
  * @example
  * ```TypeScript
- * if (QredexAgent.hasIntentToken()) {
+ * if (QredexAgent.hasInfluenceIntentToken()) {
  *   console.log('Intent token available - user came from Qredex link');
  * } else {
  *   console.log('No intent token - regular traffic');
  * }
  * ```
  *
- * @see {@link getIntentToken} - Get the IIT token
+ * @see {@link getInfluenceIntentToken} - Get the IIT token
  * @see {@link hasPurchaseIntentToken} - Check if PIT exists
  */
-export const hasIntentToken = (): boolean => {
+export const hasInfluenceIntentToken = (): boolean => {
   const config = getConfig();
-  return hasStoredIntentToken({
+  return hasStoredInfluenceIntentToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
     cookieExpireDays: config.cookieExpireDays,
   });
+};
+
+/**
+ * @deprecated Use {@link hasInfluenceIntentToken()} instead. Will be removed in v2.0.
+ */
+export const hasIntentToken = (): boolean => {
+  return hasInfluenceIntentToken();
 };
 
 /**
@@ -340,7 +354,7 @@ export function handleCartChange(event: {
 
   // Lock when cart has items, IIT exists, and PIT doesn't exist
   // This retries on every add-to-cart if lock previously failed (Rule 13)
-  if (itemCount > 0 && hasIntentToken() && !hasPurchaseIntentToken()) {
+  if (itemCount > 0 && hasInfluenceIntentToken() && !hasPurchaseIntentToken()) {
     debug('Cart has items, IIT exists, no PIT - attempting lock');
 
     // Auto-lock IIT → PIT
@@ -816,9 +830,11 @@ export type { LockResult, LockMeta } from './api/types.js';
 if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).QredexAgent = {
     // Read/State
-    getIntentToken,
+    getInfluenceIntentToken,
+    getIntentToken,  // deprecated
     getPurchaseIntentToken,
-    hasIntentToken,
+    hasInfluenceIntentToken,
+    hasIntentToken,  // deprecated
     hasPurchaseIntentToken,
 
     // Commands
