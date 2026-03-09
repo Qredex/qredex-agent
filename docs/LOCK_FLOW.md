@@ -83,8 +83,7 @@ When `handleCartChange()` is called, the agent checks:
 ┌─────────────────┐
 │ Cart Change     │
 │ itemCount > 0   │
-│ previousCount = 0│
-└────────┬────────┘
+└────────────────┘
          │
          ▼
 ┌─────────────────┐
@@ -100,7 +99,7 @@ When `handleCartChange()` is called, the agent checks:
          │ No
          ▼
 ┌─────────────────┐
-│ Check: Lock     │──── Yes ──► Skip (request in progress)
+│ Check: Lock     │──── Yes ──► Return in-flight promise
 │ In Progress?    │
 └────────┬────────┘
          │ No
@@ -112,8 +111,8 @@ When `handleCartChange()` is called, the agent checks:
          │
          ▼
 ┌─────────────────┐
-│ Success?        │──── No ──► Keep IIT, retry later
-└────────┬────────┘
+│ Success?        │──── No ──► Keep IIT, retry on next add-to-cart
+└────────────────┘
          │ Yes
          ▼
 ┌─────────────────┐
@@ -122,43 +121,24 @@ When `handleCartChange()` is called, the agent checks:
 └─────────────────┘
 ```
 
+**Key:** Lock is attempted on **every** `handleCartChange()` call where:
+- `itemCount > 0` (cart has items)
+- IIT exists
+- PIT doesn't exist
+- No lock in-flight
+
+This ensures retry on every add-to-cart if previous lock failed (Rule 13).
+
 ---
 
 ## Cart State Transitions
 
-`previousCount`
-
-`itemCount`
-
-Transition
-
-Action
-
-0
-
-0
-
-`empty` → `empty`
-
-None
-
-0
-
->0
-
-`empty` → `non-empty`
-
-**Lock IIT → PIT** (if IIT exists)
-
->0
-
->0
-
-`non-empty` → `non-empty`
-
-None
-
->0
+| `previousCount` | `itemCount` | Transition | Action |
+|-----------------|-------------|------------|--------|
+| 0 | 0 | `empty` → `empty` | None |
+| 0 | >0 | `empty` → `non-empty` | **Lock IIT → PIT** (if IIT exists) |
+| >0 | >0 | `non-empty` → `non-empty` | **Retry lock** if IIT exists and PIT doesn't (Rule 13) |
+| >0 | 0 | `non-empty` → `empty` | **Clear IIT + PIT** |
 
 0
 

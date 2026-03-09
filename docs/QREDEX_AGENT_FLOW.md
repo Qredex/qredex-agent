@@ -81,7 +81,7 @@ The agent maintains a simple cart state machine:
 |------------|-----------|--------|
 | `unknown` → `empty` | Initial load | None |
 | `empty` → `non-empty` | First item added | **Lock IIT → PIT** (if IIT exists, PIT doesn't) |
-| `non-empty` → `non-empty` | More items added | None (already locked or no IIT) |
+| `non-empty` → `non-empty` | More items added | **Retry lock** if IIT exists and PIT doesn't (Rule 13) |
 | `non-empty` → `empty` | Cart emptied | **Clear IIT + PIT** |
 
 ---
@@ -171,7 +171,7 @@ QredexAgent.handleCartChange({
 | `previousCount` | `itemCount` | Action |
 |-----------------|-------------|--------|
 | 0 | >0 | **Lock IIT → PIT** (if IIT exists) |
-| >0 | >0 | None (state unchanged) |
+| >0 | >0 | **Retry lock** if IIT exists and PIT doesn't (Rule 13) |
 | >0 | 0 | **Clear IIT + PIT** |
 | 0 | 0 | None (state unchanged) |
 
@@ -234,9 +234,12 @@ The lock operation is **idempotent** - safe to call multiple times:
 
 | Scenario | Behavior |
 |----------|----------|
-| Lock fails (network error) | Keep IIT, retry on next cart event |
-| Lock fails (invalid IIT) | Keep IIT, retry on next cart event |
+| Lock fails (network error) | Keep IIT, **retry on every add-to-cart** while cart has items |
+| Lock fails (invalid IIT) | Keep IIT, **retry on every add-to-cart** while cart has items |
+| Lock succeeds | PIT stored, IIT cleared, no more retries |
 | Cart emptied, then items added again | Clear tokens, capture new IIT if URL has it |
+
+**Rule 13:** If another item is added and PIT still does not exist, try locking again.
 
 ---
 
