@@ -170,7 +170,7 @@ export function hasPurchaseToken(config: TokenStorageConfig = DEFAULT_CONFIG): b
 /**
  * Check if an intent token already exists.
  */
-export function hasIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): boolean {
+export function hasInfluenceIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): boolean {
   return getIntentToken(config) !== null;
 }
 

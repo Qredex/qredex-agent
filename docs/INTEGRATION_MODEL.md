@@ -309,7 +309,7 @@ getPurchaseIntentToken(): string | null
 getIntentToken(): string | null
 
 // Check if IIT exists
-hasIntentToken(): boolean
+hasInfluenceIntentToken(): boolean
 
 // Check if PIT exists
 hasPurchaseIntentToken(): boolean
@@ -431,7 +431,7 @@ type ErrorHandler = (event: ErrorEvent) => void;
 |--------|------|---------|
 | `getIntentToken()` | Manual | Read IIT |
 | `getPurchaseIntentToken()` | Manual | Read PIT |
-| `hasIntentToken()` | Manual | Check IIT exists |
+| `hasInfluenceIntentToken()` | Manual | Check IIT exists |
 | `hasPurchaseIntentToken()` | Manual | Check PIT exists |
 | `lockIntent(meta?)` | Manual | Lock IIT → PIT |
 | `clearTokens()` | Manual | Clear local IIT/PIT state |

@@ -7,7 +7,7 @@
 import clearTokens, {
   getIntentToken,
   getPurchaseIntentToken,
-  hasIntentToken,
+  hasInfluenceIntentToken,
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,
@@ -24,7 +24,7 @@ import clearTokens, {
 window.QredexAgent = {
   getIntentToken,
   getPurchaseIntentToken,
-  hasIntentToken,
+  hasInfluenceIntentToken: hasInfluenceIntentToken,
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,

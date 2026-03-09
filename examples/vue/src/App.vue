@@ -74,7 +74,7 @@ const updateStatus = () => {
     const pit = agent.getPurchaseIntentToken();
 
     isInitialized.value = initialized;
-    hasIIT.value = agent.hasIntentToken();
+    hasIIT.value = agent.hasInfluenceIntentToken();
     hasPIT.value = agent.hasPurchaseIntentToken();
     iitToken.value = iit;
     pitToken.value = pit;
@@ -375,7 +375,7 @@ QredexAgent.getIntentToken()
 QredexAgent.getPurchaseIntentToken()
 
 // Check token existence
-QredexAgent.hasIntentToken()
+QredexAgent.hasInfluenceIntentToken()
 QredexAgent.hasPurchaseIntentToken()
 
 // Event handlers

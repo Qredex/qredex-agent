@@ -103,20 +103,20 @@ if (pit) {
 
 ---
 
-### `hasIntentToken()`
+### `hasInfluenceIntentToken()`
 
 Check if IIT exists.
 
 **Signature:**
 ```typescript
-function hasIntentToken(): boolean
+function hasInfluenceIntentToken(): boolean
 ```
 
 **Returns:** `true` if IIT available
 
 **Example:**
 ```javascript
-if (QredexAgent.hasIntentToken()) {
+if (QredexAgent.hasInfluenceIntentToken()) {
   console.log('Intent token available');
 } else {
   console.log('No intent token - shopper didn\'t come from Qredex link');
@@ -710,7 +710,7 @@ interface ErrorEvent {
 | `init(config?)` | Lifecycle | `void` | Initialize with config |
 | `getIntentToken()` | Token Access | `string \| null` | Get IIT |
 | `getPurchaseIntentToken()` | Token Access | `string \| null` | Get PIT |
-| `hasIntentToken()` | Token Access | `boolean` | Check IIT exists |
+| `hasInfluenceIntentToken()` | Token Access | `boolean` | Check IIT exists |
 | `hasPurchaseIntentToken()` | Token Access | `boolean` | Check PIT exists |
 | `lockIntent(meta?)` | Lock | `Promise<LockResult>` | Lock IIT → PIT |
 | `clearTokens()` | Lock | `void` | Clear all tokens |

@@ -78,7 +78,7 @@ export default function Home() {
       const pit = agent.getPurchaseIntentToken();
 
       setIsInitialized(initialized);
-      setHasIIT(agent.hasIntentToken());
+      setHasIIT(agent.hasInfluenceIntentToken());
       setHasPIT(agent.hasPurchaseIntentToken());
       setIitToken(iit);
       setPitToken(pit);
@@ -402,7 +402,7 @@ QredexAgent.getIntentToken()
 QredexAgent.getPurchaseIntentToken()
 
 // Check token existence
-QredexAgent.hasIntentToken()
+QredexAgent.hasInfluenceIntentToken()
 QredexAgent.hasPurchaseIntentToken()
 
 // Event handlers

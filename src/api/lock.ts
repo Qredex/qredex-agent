@@ -97,6 +97,40 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
         };
       }
 
+      // Use mock endpoint for local development
+      if (config.useMockEndpoint) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '[QredexAgent] ⚠️ MOCK ENDPOINT ENABLED - Development mode only! ' +
+          'Do not deploy to production with useMockEndpoint: true'
+        );
+        debug('Using mock endpoint (development mode)');
+        const mockPit = generateMockPIT();
+
+        // Store the mock PIT
+        storePurchaseToken(mockPit, {
+          influenceIntentToken: config.influenceIntentToken,
+          purchaseIntentToken: config.purchaseIntentToken,
+          cookieExpireDays: config.cookieExpireDays,
+        });
+
+        // Remove the IIT
+        removeIntentToken({
+          influenceIntentToken: config.influenceIntentToken,
+          purchaseIntentToken: config.purchaseIntentToken,
+          cookieExpireDays: config.cookieExpireDays,
+        });
+
+        endLock();
+        inFlightPromise = null;
+        info('Intent locked successfully (mock)');
+        return {
+          success: true,
+          purchaseToken: mockPit,
+          alreadyLocked: false,
+        };
+      }
+
       // Build the request payload
       const payload: LockRequest = {
         token: intentToken,
@@ -175,3 +209,22 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
 
   return inFlightPromise;
 };
+
+/**
+ * Generate a mock PIT token for local development.
+ * ⚠️ DEVELOPMENT ONLY - Throws error in production.
+ */
+function generateMockPIT(): string {
+  // Safety check: prevent mock endpoint in production
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      '[QredexAgent] CRITICAL: useMockEndpoint is enabled in production! ' +
+      'This is a development-only feature and must be disabled before deployment. ' +
+      'Set useMockEndpoint: false or remove the option entirely.'
+    );
+  }
+
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `mock_pit_${timestamp}_${random}`;
+}

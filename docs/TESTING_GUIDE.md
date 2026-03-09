@@ -77,7 +77,7 @@ Open browser DevTools (F12) and prepare:
 **Console Verification:**
 ```javascript
 QredexAgent.isInitialized()      // true
-QredexAgent.hasIntentToken()     // false
+QredexAgent.hasInfluenceIntentToken()     // false
 QredexAgent.hasPurchaseIntentToken() // false
 QredexAgent.getIntentToken()     // null
 QredexAgent.getPurchaseIntentToken() // null
@@ -106,7 +106,7 @@ QredexAgent.getPurchaseIntentToken() // null
 **Console Verification:**
 ```javascript
 QredexAgent.getIntentToken()     // "test_intent_abc123"
-QredexAgent.hasIntentToken()     // true
+QredexAgent.hasInfluenceIntentToken()     // true
 QredexAgent.hasPurchaseIntentToken() // false
 ```
 
@@ -157,7 +157,7 @@ Content-Type: application/json
 ```javascript
 QredexAgent.getIntentToken()        // null (cleared after lock)
 QredexAgent.getPurchaseIntentToken() // "pit_xyz789"
-QredexAgent.hasIntentToken()        // false
+QredexAgent.hasInfluenceIntentToken()        // false
 QredexAgent.hasPurchaseIntentToken() // true
 ```
 
@@ -208,7 +208,7 @@ console.log(result);
 ```javascript
 QredexAgent.getIntentToken()        // null
 QredexAgent.getPurchaseIntentToken() // null
-QredexAgent.hasIntentToken()        // false
+QredexAgent.hasInfluenceIntentToken()        // false
 QredexAgent.hasPurchaseIntentToken() // false
 ```
 
@@ -460,7 +460,7 @@ QredexAgent.getIntentToken()           // string | null
 QredexAgent.getPurchaseIntentToken()   // string | null
 
 // Check existence
-QredexAgent.hasIntentToken()           // boolean
+QredexAgent.hasInfluenceIntentToken()           // boolean
 QredexAgent.hasPurchaseIntentToken()   // boolean
 
 // Status
@@ -559,7 +559,7 @@ POST /api/v1/agent/intents/lock
 ```javascript
 console.log({
   initialized: QredexAgent.isInitialized(),
-  hasIIT: QredexAgent.hasIntentToken(),
+  hasIIT: QredexAgent.hasInfluenceIntentToken(),
   hasPIT: QredexAgent.hasPurchaseIntentToken(),
   iit: QredexAgent.getIntentToken(),
   pit: QredexAgent.getPurchaseIntentToken(),
@@ -615,7 +615,7 @@ location.reload();
 **Symptoms:** Add to cart clicked but PIT not created
 
 **Solutions:**
-1. Check IIT exists: `QredexAgent.hasIntentToken()`
+1. Check IIT exists: `QredexAgent.hasInfluenceIntentToken()`
 2. Check Network tab for API errors
 3. Verify lock endpoint is correct
 4. Check CORS configuration

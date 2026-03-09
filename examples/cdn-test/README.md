@@ -156,7 +156,7 @@ Configure before the script loads:
 ```javascript
 QredexAgent.getIntentToken()           // string | null
 QredexAgent.getPurchaseIntentToken()   // string | null
-QredexAgent.hasIntentToken()           // boolean
+QredexAgent.hasInfluenceIntentToken()           // boolean
 QredexAgent.hasPurchaseIntentToken()   // boolean
 ```
 

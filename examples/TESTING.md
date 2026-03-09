@@ -41,7 +41,7 @@ All examples support the same core testing scenarios below.
 **Verify in Console:**
 ```javascript
 QredexAgent.isInitialized()      // true
-QredexAgent.hasIntentToken()     // false
+QredexAgent.hasInfluenceIntentToken()     // false
 QredexAgent.hasPurchaseIntentToken() // false
 ```
 
@@ -64,7 +64,7 @@ QredexAgent.hasPurchaseIntentToken() // false
 **Verify in Console:**
 ```javascript
 QredexAgent.getIntentToken()     // "test_token_abc123"
-QredexAgent.hasIntentToken()     // true
+QredexAgent.hasInfluenceIntentToken()     // true
 QredexAgent.hasPurchaseIntentToken() // false
 ```
 
@@ -161,7 +161,7 @@ console.log(result);
 
 **Verify in Console:**
 ```javascript
-QredexAgent.hasIntentToken()      // false
+QredexAgent.hasInfluenceIntentToken()      // false
 QredexAgent.hasPurchaseIntentToken() // false
 ```
 
@@ -358,7 +358,7 @@ Monitor API calls:
 // Quick status check
 console.log({
   initialized: QredexAgent.isInitialized(),
-  hasIIT: QredexAgent.hasIntentToken(),
+  hasIIT: QredexAgent.hasInfluenceIntentToken(),
   hasPIT: QredexAgent.hasPurchaseIntentToken(),
   iit: QredexAgent.getIntentToken(),
   pit: QredexAgent.getPurchaseIntentToken(),
@@ -393,7 +393,7 @@ location.reload();
 **Symptoms:** Add to cart clicked but PIT not created
 
 **Solutions:**
-1. Check IIT exists before lock: `QredexAgent.hasIntentToken()`
+1. Check IIT exists before lock: `QredexAgent.hasInfluenceIntentToken()`
 2. Check Network tab for API errors
 3. Check CORS configuration
 4. Verify lock endpoint is correct
@@ -450,7 +450,7 @@ All available console commands:
 // Read tokens
 QredexAgent.getIntentToken()              // Get IIT
 QredexAgent.getPurchaseIntentToken()      // Get PIT
-QredexAgent.hasIntentToken()              // Check IIT exists
+QredexAgent.hasInfluenceIntentToken()              // Check IIT exists
 QredexAgent.hasPurchaseIntentToken()      // Check PIT exists
 
 // Commands

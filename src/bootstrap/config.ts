@@ -42,6 +42,19 @@ export interface AgentConfig {
   debug?: boolean;
 
   /**
+   * Use mock endpoint for local development (no network calls).
+   * When true, generates fake PIT tokens locally for testing.
+   *
+   * ⚠️ **DEVELOPMENT ONLY - Never use in production.**
+   * - Throws runtime error if used in production build
+   * - Logs console warning when enabled
+   * - Always set to `false` or remove before deploying
+   *
+   * @default false
+   */
+  useMockEndpoint?: boolean;
+
+  /**
    * Key name for influence intent token (used for both cookie and sessionStorage).
    * @default '__qdx_iit'
    */
@@ -72,6 +85,7 @@ declare global {
 const DEFAULT_CONFIG: Required<AgentConfig> = {
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
+  useMockEndpoint: false,
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
@@ -117,6 +131,10 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
     // Validate and merge boolean options
     if (typeof userConfig.debug === 'boolean') {
       config.debug = userConfig.debug;
+    }
+
+    if (typeof userConfig.useMockEndpoint === 'boolean') {
+      config.useMockEndpoint = userConfig.useMockEndpoint;
     }
 
     // Validate and merge token key options

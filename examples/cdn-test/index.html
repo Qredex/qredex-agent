@@ -49,7 +49,10 @@
   <script src="../../dist/qredex-agent.iife.min.js"></script>
   <!-- Configure Qredex Agent BEFORE loading (required for debug mode) -->
   <script>
-    window.QredexAgentConfig = { debug: true };
+    window.QredexAgentConfig = {
+      debug: true,
+      useMockEndpoint: true,  // Mock endpoint for local testing (no network calls)
+    };
   </script>
 
   <script>
@@ -60,7 +63,7 @@
     document.getElementById('current-url').textContent = window.location.href;
 
     // Check if intent exists
-    const hasIntent = QredexAgent.hasIntentToken();
+    const hasIntent = QredexAgent.hasInfluenceIntentToken();
     if (!hasIntent) {
       log('⚠️ No intent token found. Add ?qdx_intent=xxx to URL or use the button above.', 'warning');
     }
@@ -84,7 +87,7 @@
     // Cart actions
     function addToCart() {
       // Check if we have intent token
-      if (!QredexAgent.hasIntentToken()) {
+      if (!QredexAgent.hasInfluenceIntentToken() && !QredexAgent.hasPurchaseIntentToken()) {
         log('⚠️ No intent token! Add ?qdx_intent=xxx to URL first.', 'error');
         return;
       }
@@ -164,8 +167,9 @@
 
     // Initialize
     updateStatus();
-    log('Qredex Agent loaded from CDN', 'success');
+    log('Qredex Agent loaded (MOCK MODE - no network calls)', 'success');
     log('Click "Set Random IIT" to add a random intent token', 'info');
+    log('⚠️ Mock PIT tokens are for development only', 'warning');
   </script>
 </body>
 </html>

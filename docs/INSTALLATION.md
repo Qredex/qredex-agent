@@ -293,7 +293,7 @@ useEffect(() => {
 ### Lock Not Working
 
 1. Check `lockEndpoint` is correct for your environment
-2. Verify IIT exists: `QredexAgent.hasIntentToken()`
+2. Verify IIT exists: `QredexAgent.hasInfluenceIntentToken()`
 3. Check network tab for API errors
 
 ---

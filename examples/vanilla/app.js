@@ -82,7 +82,7 @@ function renderCart() {
 }
 
 function updateStatus() {
-  const hasIIT = QredexAgent.hasIntentToken();
+  const hasIIT = QredexAgent.hasInfluenceIntentToken();
   const hasPIT = QredexAgent.hasPurchaseIntentToken();
 
   document.getElementById('iit-status').classList.toggle('active', hasIIT);

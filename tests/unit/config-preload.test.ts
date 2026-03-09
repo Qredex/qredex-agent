@@ -30,7 +30,7 @@ import {
   isConfigInitialized,
 } from '../../src/bootstrap/config.js';
 import {
-  hasIntentToken,
+  hasInfluenceIntentToken,
   hasPurchaseToken,
   storeIntentToken,
   storePurchaseToken,
@@ -128,14 +128,14 @@ describe('Token Helpers', () => {
     clearAllTokens(testConfig);
   });
 
-  describe('hasIntentToken', () => {
+  describe('hasInfluenceIntentToken', () => {
     it('should return false when no token exists', () => {
-      expect(hasIntentToken(testConfig)).toBe(false);
+      expect(hasInfluenceIntentToken(testConfig)).toBe(false);
     });
 
     it('should return true when token exists in sessionStorage', () => {
       storeIntentToken('test_iit_12345', testConfig);
-      expect(hasIntentToken(testConfig)).toBe(true);
+      expect(hasInfluenceIntentToken(testConfig)).toBe(true);
     });
 
     it('should return true when token exists in cookie', () => {
@@ -145,13 +145,13 @@ describe('Token Helpers', () => {
       // Directly set cookie (storeIntentToken sets both)
       document.cookie = `${testConfig.influenceIntentToken}=test_iit_cookie; path=/; max-age=86400`;
 
-      expect(hasIntentToken(testConfig)).toBe(true);
+      expect(hasInfluenceIntentToken(testConfig)).toBe(true);
     });
 
     it('should return false for invalid tokens', () => {
       // Too short
       storeIntentToken('short', testConfig);
-      expect(hasIntentToken(testConfig)).toBe(false);
+      expect(hasInfluenceIntentToken(testConfig)).toBe(false);
     });
   });
 

@@ -81,7 +81,7 @@ The agent automatically:
 ```javascript
 QredexAgent.getIntentToken()           // Get IIT
 QredexAgent.getPurchaseIntentToken()   // Get PIT
-QredexAgent.hasIntentToken()           // Check IIT exists
+QredexAgent.hasInfluenceIntentToken()           // Check IIT exists
 QredexAgent.hasPurchaseIntentToken()   // Check PIT exists
 ```
 

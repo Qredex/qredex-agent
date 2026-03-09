@@ -119,7 +119,7 @@ QredexAgent.getIntentToken()
 QredexAgent.getPurchaseIntentToken()
 
 // Check token existence
-QredexAgent.hasIntentToken()
+QredexAgent.hasInfluenceIntentToken()
 QredexAgent.hasPurchaseIntentToken()
 
 // Event handlers

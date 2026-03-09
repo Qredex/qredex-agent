@@ -243,7 +243,7 @@ document.cookie = '__qdx_iit=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
 ### No IIT Available
 
 ```javascript
-if (!hasIntentToken()) {
+if (!hasInfluenceIntentToken()) {
   return {
     success: false,
     error: 'No intent token available'
