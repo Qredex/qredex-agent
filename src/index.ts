@@ -130,7 +130,7 @@ export const hasIntentToken = (): boolean => {
     purchaseIntentToken: config.purchaseIntentToken,
     cookieExpireDays: config.cookieExpireDays,
   });
-}
+};
 
 /**
  * Check if a Purchase Intent Token (PIT) exists.
