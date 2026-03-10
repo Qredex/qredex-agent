@@ -94,6 +94,15 @@ Use subagents for focused exploration and parallel research to keep the main con
 - Specify exactly what information should be returned
 - Launch multiple subagents concurrently for independent tasks
 
+## Model Usage Limit Discipline
+
+- **Treat Codex and other model/agent usage limits as a hard resource constraint.** Optimize for minimum usage without degrading correctness, safety, or architectural quality.
+- **Read narrowly first and stop early when sufficient evidence exists.** Do not keep exploring once the answer or safe implementation path is already proven.
+- **Prefer the smallest sufficient action.** Use the fewest files, the shortest useful command output, and the narrowest validation that still provides real confidence without increasing regression risk.
+- **Avoid speculative work.** Do not browse adjacent code, run optional checks, or expand scope unless the current task or integration risk requires it.
+- **Compress communication.** Keep responses short, direct, and action-focused so unnecessary conversational token usage does not accumulate.
+- **Escalate only when necessary.** If certainty would require materially more usage, state the trade-off briefly and ask before doing broad exploration or expensive validation.
+
 ## Change Discipline
 
 - Prefer minimal, reversible changes.
