@@ -212,18 +212,9 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
 
 /**
  * Generate a mock PIT token for local development.
- * ⚠️ DEVELOPMENT ONLY - Throws error in production.
+ * ⚠️ DEVELOPMENT ONLY - Must only be called when config.useMockEndpoint is true.
  */
 function generateMockPIT(): string {
-  // Safety check: prevent mock endpoint in production
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      '[QredexAgent] CRITICAL: useMockEndpoint is enabled in production! ' +
-      'This is a development-only feature and must be disabled before deployment. ' +
-      'Set useMockEndpoint: false or remove the option entirely.'
-    );
-  }
-
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 15);
   return `mock_pit_${timestamp}_${random}`;
