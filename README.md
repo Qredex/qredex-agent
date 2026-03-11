@@ -169,20 +169,19 @@ Each example includes a complete working demo with testing instructions.
 | Example | Description | How to Run |
 |---------|-------------|------------|
 | [examples/cdn-test/](examples/cdn-test/) | Quick CDN testing page | `npm run build` → open in browser |
-| [examples/basic/](examples/basic/) | Comprehensive demo with visual testing UI | `npx serve examples` → `http://localhost:3000/basic/` |
 
 > **Note:** React, Vue, and other framework integrations will be available as separate packages (`@qredex/react`, `@qredex/vue`, etc.) in their own repositories.
 
-### Quick Test (Basic Example)
+### Quick Test
 
 The fastest way to test Qredex Agent:
 
 ```bash
-# 1. Serve the examples
-npx serve examples
+# 1. Build the project
+npm run build
 
-# 2. Open in browser
-# Navigate to: http://localhost:3000/basic/
+# 2. Open the test page
+open examples/cdn-test/index.html
 
 # 3. Simulate intent URL
 # Add ?qdx_intent=test123 to the URL and press Enter
@@ -191,7 +190,7 @@ npx serve examples
 # Click "Add to Cart" button - watch PIT get locked
 
 # 5. Clear cart
-# Click "Clear Tokens" - watch PIT get cleared
+# Click "Clear Cart" - watch PIT get cleared
 ```
 
 ### React/Next.js
@@ -230,7 +229,7 @@ function useQredexAgent() {
 }
 ```
 
-**See:** [examples/basic/](examples/basic/) for complete vanilla JS example with testing scenarios.
+**See:** [examples/cdn-test/](examples/cdn-test/) for complete testing page with all scenarios.
 
 ### Vanilla JS
 
@@ -258,7 +257,7 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
 });
 ```
 
-**See:** [examples/basic/](examples/basic/) for complete vanilla JS e-commerce demo.
+**See:** [examples/cdn-test/](examples/cdn-test/) for complete testing page.
 
 ---
 
@@ -351,8 +350,7 @@ Requires ES2020+ support.
 
 | Example | Description | Quick Start |
 |---------|-------------|-------------|
-| [examples/basic/](examples/basic/) | Comprehensive demo with testing UI | `npx serve examples` |
-| [examples/cdn-test/](examples/cdn-test/) | Quick CDN testing | `npx serve examples` |
+| [examples/cdn-test/](examples/cdn-test/) | Quick CDN testing | `npm run build` → open in browser |
 
 Each example includes:
 - Complete working demo

@@ -1,21 +1,28 @@
 # Qredex Agent - Testing Guide
 
-Unified testing guide for all Qredex Agent examples.
+Complete testing guide for Qredex Agent.
 
 ---
 
 ## Quick Start
 
-### Step 1: Choose an Example
+### Step 1: Build & Open
 
-| Example | Best For | How to Run |
-|---------|----------|------------|
-| [basic/](basic/) | First-time testing, visual feedback | `npx serve ..` → `http://localhost:3000/basic/` |
-| [cdn-test/](cdn-test/) | Quick CDN testing | `npx serve ..` → `http://localhost:3000/cdn-test/` |
+```bash
+# 1. Build the project
+npm run build
+
+# 2. Open the test page
+open examples/cdn-test/index.html
+
+# Or serve locally
+npx serve examples
+# Navigate to: http://localhost:3000/cdn-test/
+```
 
 ### Step 2: Run Testing Scenarios
 
-All examples support the same core testing scenarios below.
+Follow the scenarios below to test all Qredex Agent functionality.
 
 ---
 
