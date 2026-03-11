@@ -27,6 +27,24 @@
 export interface LockRequest {
   /** The intent token (IIT) to lock */
   token: string;
+
+  /** Optional metadata to include with the lock request */
+  meta?: {
+    /** Product ID if available */
+    productId?: string;
+
+    /** Product name if available */
+    productName?: string;
+
+    /** Quantity if available */
+    quantity?: number;
+
+    /** Price if available */
+    price?: number;
+
+    /** Additional custom fields */
+    [key: string]: unknown;
+  };
 }
 
 /**

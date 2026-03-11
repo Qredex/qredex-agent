@@ -89,8 +89,18 @@ QredexAgent.hasPurchaseIntentToken()      // Check PIT exists
 
 ### Commands
 ```javascript
-await QredexAgent.lockIntent(meta)     // Manual lock
-QredexAgent.clearTokens()              // Clear all tokens
+// Manual lock (meta is optional)
+await QredexAgent.lockIntent(meta)
+
+// Example with metadata
+await QredexAgent.lockIntent({
+  productId: 'widget-001',
+  productName: 'Premium Widget',
+  quantity: 2,
+  price: 99.99,
+})
+
+QredexAgent.clearTokens()  // Clear all tokens
 ```
 
 ### Event Handlers (Merchant → Agent)
@@ -313,6 +323,7 @@ window.QredexAgentConfig = {
   lockEndpoint: '/api/v1/...',    // Lock API endpoint (default: Qredex CDN)
   autoDetect: true,               // Auto-detect add-to-cart (default: true)
   cookieExpireDays: 30,           // Cookie expiration (default: 30)
+  useMockEndpoint: true,          // ⚠️ DEV ONLY: mock PIT tokens (default: false)
 };
 ```
 
@@ -325,6 +336,7 @@ window.QredexAgentConfig = {
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
+  useMockEndpoint: false,
 }
 ```
 
@@ -334,8 +346,15 @@ window.QredexAgentConfig = {
 // Or customize as needed:
 window.QredexAgentConfig = {
   debug: false,  // Disable debug logging
+  lockEndpoint: 'https://your-backend.com/api/lock',  // Custom backend
 };
 ```
+
+**⚠️ Mock Endpoint Warning:**
+- `useMockEndpoint: true` generates fake PIT tokens (no network calls)
+- Only use for local development/testing
+- Console warning is logged when used on non-localhost domains
+- **Never deploy to production with `useMockEndpoint: true`**
 
 ---
 

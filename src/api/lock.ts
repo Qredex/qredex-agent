@@ -99,11 +99,19 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
 
       // Use mock endpoint for local development
       if (config.useMockEndpoint) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          '[QredexAgent] ⚠️ MOCK ENDPOINT ENABLED - Development mode only! ' +
-          'Do not deploy to production with useMockEndpoint: true'
-        );
+        // Only warn in development (check for localhost or file protocol)
+        const isLocalhost = typeof window !== 'undefined' &&
+          (window.location.hostname === 'localhost' ||
+           window.location.hostname === '127.0.0.1' ||
+           window.location.protocol === 'file:');
+
+        if (!isLocalhost) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[QredexAgent] ⚠️ MOCK ENDPOINT ENABLED - Development mode only! ' +
+            'Do not deploy to production with useMockEndpoint: true'
+          );
+        }
         debug('Using mock endpoint (development mode)');
         const mockPit = generateMockPIT();
 
@@ -131,10 +139,15 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
         };
       }
 
-      // Build the request payload
+      // Build the request payload (meta is optional)
       const payload: LockRequest = {
         token: intentToken,
       };
+
+      // Include meta if provided
+      if (_meta && Object.keys(_meta).length > 0) {
+        payload.meta = _meta;
+      }
 
       debug('Sending lock request to:', config.lockEndpoint);
 
