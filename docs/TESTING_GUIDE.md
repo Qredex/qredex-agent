@@ -1,29 +1,22 @@
 # Qredex Agent - Complete Testing Guide
 
-Comprehensive guide for testing Qredex Agent across all example implementations.
+Comprehensive guide for testing Qredex Agent.
 
 ---
 
-## Table of Contents
+## Quick Start
 
-1. [Overview](#overview)
-2. [Test Environment Setup](#test-environment-setup)
-3. [Test Scenarios](#test-scenarios)
-4. [Example-Specific Testing](#example-specific-testing)
-5. [API Testing Reference](#api-testing-reference)
-6. [Debugging Guide](#debugging-guide)
-7. [Troubleshooting](#troubleshooting)
+```bash
+# 1. Build the project
+npm run build
 
----
+# 2. Open the test page
+open examples/cdn-test/index.html
 
-## Overview
-
-This guide covers testing for all Qredex Agent examples:
-
-| Example | Framework | Port | URL |
-|---------|-----------|------|-----|
-| [basic/](../examples/basic/) | Vanilla JS | 3000 | `/basic/` |
-| [cdn-test/](../examples/cdn-test/) | Vanilla JS (CDN) | 3000 | `/cdn-test/` |
+# Or serve locally
+npx serve examples
+# Navigate to: http://localhost:3000/cdn-test/
+```
 
 > **Note:** Framework-specific examples (React, Vue, etc.) will be available in separate repositories when `@qredex/react`, `@qredex/vue`, and other packages are released.
 
@@ -31,27 +24,16 @@ This guide covers testing for all Qredex Agent examples:
 
 ## Test Environment Setup
 
-### 1. Serve All Examples
-
-```bash
-# From project root
-npx serve examples
-
-# Or individually
-cd examples/basic
-npx serve ..
-```
-
-### 2. Browser Requirements
+### Browser Requirements
 
 - Chrome, Firefox, Safari, or Edge (latest)
 - JavaScript enabled
 - Cookies enabled
 - sessionStorage available
 
-### 3. DevTools Setup
+### DevTools Setup
 
-Open browser DevTools (F12) and prepare:
+Open browser DevTools (F12):
 - **Console** - For logs and manual commands
 - **Network** - Monitor API calls
 - **Application** - Inspect storage (sessionStorage, cookies)
