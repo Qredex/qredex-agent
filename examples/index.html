@@ -60,85 +60,7 @@
   <script src="../dist/qredex-agent.iife.min.js" onerror="document.body.innerHTML = '<div style=\'padding: 40px; font-family: monospace;\'><h1>❌ Script Failed to Load</h1><p><strong>Problem:</strong> The script path is incorrect or file doesn\'t exist.</p><p><strong>Solution:</strong> Run these commands:</p><ol><li><code>npm run build</code></li><li><code>npx serve .</code></li><li>Open <code>http://localhost:3000/examples/index.html</code></li></ol><p>Current path: <code>' + window.location.pathname + '</code></p><p>Script path: <code>../dist/qredex-agent.iife.min.js</code></p></div>'"></script>
 
   <script>
-    // Check if QredexAgent loaded
-    if (!window.QredexAgent) {
-      document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>❌ Qredex Agent Failed to Load</h1><p>Make sure you ran <code>npm run build</code> first.</p><p>File path: <code>' + window.location.pathname + '</code></p></div>';
-      throw new Error('QredexAgent not loaded');
-    }
-
-    // Get reference to QredexAgent (cleaner than window.QredexAgent everywhere)
-    const QredexAgent = window.QredexAgent;
-
-    // Cart state
-    let cartItemCount = 0;
-
-    // Show current URL
-    document.getElementById('current-url').textContent = window.location.href;
-
-    // Check if intent exists
-    const hasIntent = QredexAgent.hasInfluenceIntentToken();
-    if (!hasIntent) {
-      log('⚠️ No intent token found. Add ?qdx_intent=xxx to URL or use the button above.', 'warning');
-    } else {
-      log('✅ Intent token found in URL!', 'success');
-      updateStatus();
-    }
-
-    // Listen for events
-    QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
-      log(`✅ Locked! PIT: ${purchaseToken.substring(0, 20)}...`, 'success');
-      if (alreadyLocked) log('  (already locked)', 'info');
-      updateStatus();
-    });
-
-    QredexAgent.onCleared(() => {
-      log('🗑️ Cleared', 'info');
-      updateStatus();
-    });
-
-    QredexAgent.onError(({ error, context }) => {
-      log(`❌ Error in ${context}: ${error}`, 'error');
-    });
-
-    // Cart actions
-    function addToCart() {
-      // Check if we have intent token
-      if (!QredexAgent.hasInfluenceIntentToken() && !QredexAgent.hasPurchaseIntentToken()) {
-        log('⚠️ No intent token! Add ?qdx_intent=xxx to URL first.', 'error');
-        return;
-      }
-
-      const previousCount = cartItemCount;
-      cartItemCount++;
-
-      QredexAgent.handleCartChange({
-        itemCount: cartItemCount,
-        previousCount,
-        meta: {
-          productId: 'test-product',
-          quantity: 1,
-          price: 99.99,
-          from: 'cdn-test',
-        },
-      });
-
-      document.getElementById('cart-count').textContent = cartItemCount;
-      log(`Added item. Cart: ${cartItemCount}`, 'success');
-    }
-
-    function clearCart() {
-      const previousCount = cartItemCount;
-      cartItemCount = 0;
-
-      QredexAgent.handleCartChange({
-        itemCount: 0,
-        previousCount,
-      });
-
-      document.getElementById('cart-count').textContent = 0;
-      log('Cart cleared', 'info');
-    }
-
+    // Define functions FIRST (before any checks)
     function addIntentToUrl() {
       log('🔄 Generating random token...', 'info');
       const url = new URL(window.location.href);
@@ -159,24 +81,51 @@
       return token;
     }
 
+    function addToCart() {
+      if (!QredexAgent) {
+        log('❌ QredexAgent not loaded!', 'error');
+        return;
+      }
+      if (!QredexAgent.hasInfluenceIntentToken() && !QredexAgent.hasPurchaseIntentToken()) {
+        log('⚠️ No intent token! Add ?qdx_intent=xxx to URL first.', 'error');
+        return;
+      }
+      const previousCount = cartItemCount;
+      cartItemCount++;
+      QredexAgent.handleCartChange({
+        itemCount: cartItemCount,
+        previousCount,
+        meta: { productId: 'test-product', quantity: 1, price: 99.99 },
+      });
+      document.getElementById('cart-count').textContent = cartItemCount;
+      log(`Added item. Cart: ${cartItemCount}`, 'success');
+    }
+
+    function clearCart() {
+      if (!QredexAgent) {
+        log('❌ QredexAgent not loaded!', 'error');
+        return;
+      }
+      const previousCount = cartItemCount;
+      cartItemCount = 0;
+      QredexAgent.handleCartChange({ itemCount: 0, previousCount });
+      document.getElementById('cart-count').textContent = 0;
+      log('Cart cleared', 'info');
+    }
+
     // UI helpers
     function updateStatus() {
-      const iit = QredexAgent.getInfluenceIntentToken();
-      const pit = QredexAgent.getPurchaseIntentToken();
-
-      document.getElementById('status-iit').textContent =
-        iit ? `IIT: ${iit.substring(0, 30)}...` : 'IIT: Not found';
-      document.getElementById('status-iit').className =
-        'status-item ' + (iit ? 'success' : 'info');
-
-      document.getElementById('status-pit').textContent =
-        pit ? `PIT: ${pit.substring(0, 30)}...` : 'PIT: Not found';
-      document.getElementById('status-pit').className =
-        'status-item ' + (pit ? 'success' : 'info');
+      const iit = QredexAgent ? QredexAgent.getInfluenceIntentToken() : null;
+      const pit = QredexAgent ? QredexAgent.getPurchaseIntentToken() : null;
+      document.getElementById('status-iit').textContent = iit ? `IIT: ${iit.substring(0, 30)}...` : 'IIT: Not found';
+      document.getElementById('status-iit').className = 'status-item ' + (iit ? 'success' : 'info');
+      document.getElementById('status-pit').textContent = pit ? `PIT: ${pit.substring(0, 30)}...` : 'PIT: Not found';
+      document.getElementById('status-pit').className = 'status-item ' + (pit ? 'success' : 'info');
     }
 
     function log(message, type = 'info') {
       const logEl = document.getElementById('log');
+      if (!logEl) return;
       const entry = document.createElement('div');
       entry.className = `log-entry log-${type}`;
       entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
@@ -184,11 +133,50 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
+    // Now check if QredexAgent loaded
+    let QredexAgent = null;
+    let cartItemCount = 0;
+
+    if (!window.QredexAgent) {
+      log('❌ QredexAgent failed to load! Check browser console.', 'error');
+      document.getElementById('current-url').textContent = window.location.href;
+      updateStatus();
+    } else {
+      QredexAgent = window.QredexAgent;
+
+      // Show current URL
+      document.getElementById('current-url').textContent = window.location.href;
+
+      // Check if intent exists
+      const hasIntent = QredexAgent.hasInfluenceIntentToken();
+      if (!hasIntent) {
+        log('⚠️ No intent token found. Click "Set Random IIT" button.', 'warning');
+      } else {
+        log('✅ Intent token found in URL!', 'success');
+        updateStatus();
+      }
+
+      // Listen for events
+      QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
+        log(`✅ Locked! PIT: ${purchaseToken.substring(0, 20)}...`, 'success');
+        if (alreadyLocked) log('  (already locked)', 'info');
+        updateStatus();
+      });
+
+      QredexAgent.onCleared(() => {
+        log('🗑️ Cleared', 'info');
+        updateStatus();
+      });
+
+      QredexAgent.onError(({ error, context }) => {
+        log(`❌ Error in ${context}: ${error}`, 'error');
+      });
+    }
+
     // Initialize
     updateStatus();
     log('Qredex Agent loaded (MOCK MODE - no network calls)', 'success');
     log('Click "Set Random IIT" to add a random intent token', 'info');
-    log('⚠️ Mock PIT tokens are for development only', 'warning');
   </script>
 </body>
 </html>
