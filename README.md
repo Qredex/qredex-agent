@@ -309,10 +309,10 @@ Optional configuration via `window.QredexAgentConfig`:
 
 ```javascript
 window.QredexAgentConfig = {
-  debug: true,                    // Enable debug logging
-  useMockEndpoint: true,          // ⚠️ DEV ONLY: mock PIT tokens (no network calls)
-  lockEndpoint: '/api/v1/...',    // Lock API endpoint
-  cookieExpireDays: 30,           // Cookie expiration
+  debug: true,                    // Enable debug logging (default: false)
+  lockEndpoint: '/api/v1/...',    // Lock API endpoint (default: Qredex CDN)
+  autoDetect: true,               // Auto-detect add-to-cart (default: true)
+  cookieExpireDays: 30,           // Cookie expiration (default: 30)
 };
 ```
 
@@ -320,18 +320,22 @@ window.QredexAgentConfig = {
 ```typescript
 {
   debug: false,
-  useMockEndpoint: false,         // ⚠️ NEVER use in production
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
+  autoDetect: true,
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
 }
 ```
 
-**⚠️ Production Safety:**
-- `useMockEndpoint: true` throws a runtime error in production builds
-- Always set `useMockEndpoint: false` or remove the option before deploying
-- Console warning is logged when mock endpoint is enabled
+**Production Usage:**
+```javascript
+// No config needed - uses defaults
+// Or customize as needed:
+window.QredexAgentConfig = {
+  debug: false,  // Disable debug logging
+};
+```
 
 ---
 

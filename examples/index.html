@@ -47,11 +47,10 @@
 
   <!-- Qredex Agent from local dist -->
   <script src="../dist/qredex-agent.iife.min.js"></script>
-  <!-- Configure Qredex Agent BEFORE loading (required for debug mode) -->
+  <!-- Configure Qredex Agent BEFORE loading (optional) -->
   <script>
     window.QredexAgentConfig = {
-      debug: true,
-      useMockEndpoint: true,  // Mock endpoint for local testing (no network calls)
+      debug: true,  // Enable debug logging (optional)
     };
   </script>
 
