@@ -31,6 +31,16 @@ import { isObject, isNonEmptyString, isValidUrl } from '../utils/guards.js';
 export interface AgentConfig {
   /**
    * The lock endpoint URL.
+   *
+   * ⚠️ **Development/Staging Only** - Override is ignored in production.
+   *
+   * In production builds, the default Qredex AGENT endpoint is always used
+   * regardless of this setting. This ensures consistent runtime behavior
+   * and prevents merchants from accidentally pointing to non-standard backends.
+   *
+   * For local development, staging, or testing environments, you may override
+   * this to point to your own backend or test endpoint.
+   *
    * @default 'https://api.qredex.com/api/v1/agent/intents/lock'
    */
   lockEndpoint?: string;
@@ -114,17 +124,27 @@ function ensureConfigInitialized(): void {
 
 /**
  * Merge user config with defaults, validating known fields.
+ *
+ * Note: lockEndpoint override is only allowed in development mode.
+ * In production, the default Qredex AGENT endpoint is always used.
  */
 function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
   const config: Required<AgentConfig> = { ...DEFAULT_CONFIG };
 
   if (isObject(userConfig)) {
-    // Validate and merge lockEndpoint
+    // Validate and merge lockEndpoint (DEV ONLY - production always uses default)
     if (userConfig.lockEndpoint !== undefined && isNonEmptyString(userConfig.lockEndpoint)) {
-      if (isValidUrl(userConfig.lockEndpoint)) {
-        config.lockEndpoint = userConfig.lockEndpoint;
+      if (__DEV__) {
+        // Allow override in development/staging/test environments
+        if (isValidUrl(userConfig.lockEndpoint)) {
+          config.lockEndpoint = userConfig.lockEndpoint;
+          debug('lockEndpoint overridden (development mode):', userConfig.lockEndpoint);
+        } else {
+          warn('Invalid lockEndpoint URL, using default');
+        }
       } else {
-        warn('Invalid lockEndpoint URL, using default');
+        // Ignore override in production - always use default Qredex AGENT endpoint
+        debug('lockEndpoint override ignored in production, using default');
       }
     }
 

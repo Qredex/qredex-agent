@@ -108,9 +108,6 @@ Set `window.QredexAgentConfig` **before** the script loads:
 ```html
 <script>
   window.QredexAgentConfig = {
-    // API endpoint
-    lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
-
     // Debug logging (silent by default, safe for production)
     debug: false,
 
@@ -129,7 +126,7 @@ Set `window.QredexAgentConfig` **before** the script loads:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `lockEndpoint` | `string` | Production URL | API endpoint for lock requests |
+| `lockEndpoint` | `string` | Production URL | ⚠️ **Dev/Staging only** - Override ignored in production |
 | `debug` | `boolean` | `false` | Enable debug logging |
 | `influenceIntentToken` | `string` | `'__qdx_iit'` | IIT storage key |
 | `purchaseIntentToken` | `string` | `'__qdx_pit'` | PIT storage key |
@@ -169,6 +166,8 @@ Set `window.QredexAgentConfig` **before** the script loads:
 <!-- Defaults to production endpoint -->
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
+
+> **Note:** In production builds, `lockEndpoint` overrides are **ignored**. The agent always uses the default Qredex AGENT endpoint (`https://api.qredex.com/api/v1/agent/intents/lock`). This ensures consistent runtime behavior and prevents accidental misconfiguration.
 
 ---
 

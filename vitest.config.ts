@@ -30,4 +30,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
     },
   },
+  define: {
+    __DEV__: 'true',  // Tests run in development mode
+  },
 });

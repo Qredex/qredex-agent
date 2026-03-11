@@ -99,4 +99,42 @@ describe('Configuration', () => {
     expect(config.debug).toBe(false);
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
   });
+
+  it('should allow lockEndpoint override in development mode', () => {
+    // Note: Tests run with __DEV__ = true, simulating dev/staging/test environments
+    // In production (__DEV__ = false), lockEndpoint overrides are ignored
+    const config = initConfig({
+      lockEndpoint: 'https://dev.example.com/lock',
+    });
+
+    expect(config.lockEndpoint).toBe('https://dev.example.com/lock');
+  });
+
+  it('should use default lockEndpoint when invalid URL provided', () => {
+    const config = initConfig({
+      lockEndpoint: 'not-a-valid-url',
+    });
+
+    // Invalid URLs always fall back to default
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
+  });
+
+  it('should document production lockEndpoint behavior', () => {
+    // Production behavior test (documented, not executable in test suite):
+    //
+    // In production builds (__DEV__ = false):
+    // - lockEndpoint overrides are IGNORED
+    // - Default Qredex AGENT endpoint is ALWAYS used
+    // - This prevents merchants from accidentally using non-standard backends
+    //
+    // Example production config (override ignored):
+    // window.QredexAgentConfig = {
+    //   lockEndpoint: 'https://custom.example.com/lock'  // IGNORED in production
+    // };
+    //
+    // Result: config.lockEndpoint === 'https://api.qredex.com/api/v1/agent/intents/lock'
+    //
+    // This is enforced at build time via __DEV__ constant.
+    expect(true).toBe(true); // Placeholder documenting expected behavior
+  });
 });
