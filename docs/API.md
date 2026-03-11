@@ -131,28 +131,6 @@ if (pit) {
 
 ---
 
-### `hasInfluenceIntentToken()`
-
-Check if IIT exists.
-
-**Signature:**
-```typescript
-function hasInfluenceIntentToken(): boolean
-```
-
-**Returns:** `true` if IIT available
-
-**Example:**
-```javascript
-if (QredexAgent.hasInfluenceIntentToken()) {
-  console.log('Intent token available');
-} else {
-  console.log('No intent token - shopper didn\'t come from Qredex link');
-}
-```
-
----
-
 ### `hasPurchaseIntentToken()`
 
 Check if PIT exists.
@@ -214,7 +192,8 @@ if (result.success) {
 ```typescript
 // POST /api/v1/agent/intents/lock
 {
-  "token": "IIT_VALUE"
+  "token": "IIT_VALUE",
+  "meta": { ... }  // Optional, if provided
 }
 
 // Response
@@ -259,13 +238,13 @@ QredexAgent.clearIntent();
 
 Tell the agent when important events happen.
 
-### `handleCartAdd(event?)`
+### `handleCartAdd(itemCount, meta?)`
 
-Tell the agent that a cart add event happened. Automatically locks IIT → PIT.
+Tell the agent that a cart add event happened. Automatically locks IIT → PIT if IIT exists and PIT doesn't.
 
 **Signature:**
 ```typescript
-function handleCartAdd(event?: {
+function handleCartAdd(itemCount: number, meta?: {
   productId?: string;
   quantity?: number;
   price?: number;
@@ -273,7 +252,8 @@ function handleCartAdd(event?: {
 ```
 
 **Parameters:**
-- `event` (optional) - Cart add event data
+- `itemCount` - Current total item count in cart after adding
+- `meta` (optional) - Cart add event data
 
 **Example:**
 ```javascript
@@ -281,7 +261,7 @@ function handleCartAdd(event?: {
 async function addToCart(product) {
   await api.post('/cart', product);
 
-  QredexAgent.handleCartAdd({
+  QredexAgent.handleCartAdd(cart.itemCount, {
     productId: product.id,
     quantity: 1,
     price: product.price,
@@ -290,7 +270,7 @@ async function addToCart(product) {
 ```
 
 **What happens:**
-1. Checks if IIT exists
+1. Checks if IIT exists and PIT doesn't exist
 2. Calls lock API to exchange IIT → PIT
 3. Emits `onLocked` event if successful
 4. Emits `onError` event if failed
@@ -299,15 +279,12 @@ async function addToCart(product) {
 
 ### `handleCartEmpty()`
 
-Tell the agent that the cart was emptied. Automatically clears PIT.
+Tell the agent that the cart was emptied. Automatically clears IIT and PIT.
 
 **Signature:**
 ```typescript
-function handleCartEmpty(event?: { timestamp?: number }): void
+function handleCartEmpty(): void
 ```
-
-**Parameters:**
-- `event` (optional) - Cart empty event data
 
 **Example:**
 ```javascript
@@ -326,7 +303,7 @@ function clearCart() {
 
 ### `handleCartChange(event)`
 
-Tell the agent that the cart state changed. Optional tracking.
+Tell the agent that the cart state changed. Automatically locks IIT → PIT when cart goes 0→>0, clears tokens when cart goes >0→0.
 
 **Signature:**
 ```typescript
@@ -348,7 +325,12 @@ QredexAgent.handleCartChange({
 });
 ```
 
-**Note:** This is for optional tracking only. No automatic actions are taken.
+**What happens:**
+- **Cart 0 → >0** (with IIT, without PIT): Locks IIT → PIT
+- **Cart >0 → 0** (with PIT): Clears IIT and PIT
+- **Other transitions**: No action
+
+**Note:** Lock only occurs if IIT exists and PIT doesn't exist. Clear only occurs if PIT exists.
 
 ---
 

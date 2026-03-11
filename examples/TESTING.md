@@ -289,23 +289,28 @@ console.log(result);
 
 ---
 
-### Scenario 10: Status API
+### Scenario 10: First-Touch Attribution
 
-**Purpose:** Verify status reporting API.
+**Purpose:** Verify first-touch attribution is maintained.
 
 **Steps:**
-1. Open console
-2. Call status API at different stages:
+1. Complete checkout flow (PIT must exist)
+2. Navigate with new `?qdx_intent=new_token` URL
+3. Verify new IIT ignored, PIT preserved
 
+**Expected Results:**
+- ✅ Original PIT preserved
+- ❌ New IIT ignored (first-touch attribution)
+- Console shows: Token captured but PIT unchanged
+
+**Verify in Console:**
 ```javascript
-// Initial state
-QredexAgent.getStatus()
-// { initialized: true, running: true, destroyed: false }
+// Before new IIT
+QredexAgent.getPurchaseIntentToken() // "pit_original"
 
-// After destroy (if supported)
-QredexAgent.destroy()
-QredexAgent.getStatus()
-// { initialized: true, running: false, destroyed: true }
+// After new IIT arrives
+QredexAgent.getPurchaseIntentToken() // "pit_original" (unchanged)
+QredexAgent.getInfluenceIntentToken() // null (ignored)
 ```
 
 ---
@@ -463,9 +468,9 @@ await QredexAgent.lockIntent(meta)        // Manual lock (idempotent)
 QredexAgent.clearIntent()                 // Clear all tokens
 
 // Event handlers (Merchant → Agent)
-QredexAgent.handleCartAdd(event)          // Cart add
-QredexAgent.handleCartEmpty()             // Cart empty
-QredexAgent.handlePaymentSuccess(event)   // Payment success
+QredexAgent.handleCartAdd(itemCount, meta?)   // Cart add
+QredexAgent.handleCartEmpty()                 // Cart empty
+QredexAgent.handlePaymentSuccess(event)       // Payment success
 
 // Event listeners (Agent → Merchant)
 QredexAgent.onLocked(handler)             // Listen for lock
@@ -482,7 +487,6 @@ QredexAgent.init(config)                  // Initialize
 QredexAgent.destroy()                     // Destroy
 QredexAgent.stop()                        // Stop
 QredexAgent.isInitialized()               // Check initialized
-QredexAgent.getStatus()                   // Get status
 ```
 
 ---

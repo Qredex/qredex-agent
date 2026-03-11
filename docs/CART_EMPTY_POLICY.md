@@ -47,9 +47,9 @@ This rule favors **attribution integrity over attribution persistence**:
 
 ## Merchant Control (Event Hooks)
 
-Because Qredex Agent uses **event hooks** (not auto-detection), **merchants control when `onCartEmpty()` is called**. This is critical for correct attribution.
+Because Qredex Agent uses **event hooks** (not auto-detection), **merchants control when `handleCartEmpty()` is called**. This is critical for correct attribution.
 
-### ✅ When TO Signal `onCartEmpty()`
+### ✅ When TO Signal `handleCartEmpty()`
 
 | Scenario | Why |
 |----------|-----|
@@ -58,7 +58,7 @@ Because Qredex Agent uses **event hooks** (not auto-detection), **merchants cont
 | User logs out (cart cleared) | User session ended |
 | Checkout abandoned + cart cleared | Journey abandoned, not returning |
 
-### ❌ When NOT to Signal `onCartEmpty()`
+### ❌ When NOT to Signal `handleCartEmpty()`
 
 | Scenario | Why |
 |----------|-----|
@@ -69,7 +69,7 @@ Because Qredex Agent uses **event hooks** (not auto-detection), **merchants cont
 
 ### Key Principle
 
-> **Signal `onCartEmpty()` when the purchase journey definitively ends, not just when cart item count hits zero.**
+> **Signal `handleCartEmpty()` when the purchase journey definitively ends, not just when cart item count hits zero.**
 
 ---
 
@@ -81,15 +81,15 @@ Because Qredex Agent uses **event hooks** (not auto-detection), **merchants cont
 // ✅ GOOD: Signal on definitive cart end
 function clearCart() {
   cart.clear();
-  
+
   // Signal to Qredex (attribution cleared)
-  QredexAgent.onCartEmpty();
+  QredexAgent.handleCartEmpty();
 }
 
 // ✅ GOOD: Don't signal on partial removal
 function removeItem(itemId) {
   cart.remove(itemId);
-  
+
   // Cart still has items, don't signal
   // Attribution preserved
 }
@@ -98,19 +98,19 @@ function removeItem(itemId) {
 ### Example 2: Checkout Flow
 
 ```javascript
-// ⚠️ During checkout, cart might be "empty" 
+// ⚠️ During checkout, cart might be "empty"
 // but order is in progress - DON'T clear yet
 function startCheckout() {
   const cartItems = cart.getItems();
   cart.clear();  // Move to order
-  
-  // DON'T call onCartEmpty() - order in progress
+
+  // DON'T call handleCartEmpty() - order in progress
   // Attribution preserved until payment complete
 }
 
 // ✅ NOW signal - journey complete
 function onPaymentSuccess(order) {
-  QredexAgent.onPaymentSuccess({ orderId: order.id });
+  QredexAgent.handlePaymentSuccess({ orderId: order.id });
   // Agent clears PIT automatically
 }
 ```
@@ -122,16 +122,16 @@ function onPaymentSuccess(order) {
 function logout() {
   cart.clear();
   session.destroy();
-  
+
   // Signal - user session ended
-  QredexAgent.onCartEmpty();
+  QredexAgent.handleCartEmpty();
 }
 
 // ✅ Clear on timeout
 function onSessionTimeout() {
   if (cart.isEmpty()) {
     // Session expired + cart empty = journey ended
-    QredexAgent.onCartEmpty();
+    QredexAgent.handleCartEmpty();
   }
 }
 ```

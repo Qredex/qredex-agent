@@ -261,7 +261,7 @@ QredexAgent.onError(({ error, context }) => {
 });
 
 // Trigger events
-QredexAgent.handleCartAdd({ productId: 'test', quantity: 1, price: 99.99 });
+QredexAgent.handleCartAdd(cart.itemCount, { productId: 'test', quantity: 1, price: 99.99 });
 // Should fire: 🔒 LOCKED: { ... }
 
 QredexAgent.handleCartEmpty();
@@ -321,20 +321,28 @@ QredexAgent.getInfluenceIntentToken()        // null (ignored)
 
 ---
 
-### Scenario 10: Status API
+### Scenario 10: First-Touch Attribution
 
-**Purpose:** Verify status API returns correct state.
+**Purpose:** Verify first-touch attribution is maintained.
 
-**Console Commands:**
+**Steps:**
+1. Complete checkout flow (PIT exists)
+2. Navigate with new `?qdx_intent=new_token`
+3. Verify new IIT ignored, PIT preserved
+
+**Expected Results:**
+- ✅ Original PIT preserved
+- ❌ New IIT ignored
+- First-touch attribution maintained
+
+**Console Verification:**
 ```javascript
-// Initial state
-QredexAgent.getStatus()
-// { initialized: true, running: true, destroyed: false }
+// Before new IIT
+QredexAgent.getPurchaseIntentToken() // "pit_original"
 
-// After destroy
-QredexAgent.destroy()
-QredexAgent.getStatus()
-// { initialized: true, running: false, destroyed: true }
+// After new IIT arrives
+QredexAgent.getPurchaseIntentToken() // "pit_original" (unchanged)
+QredexAgent.getInfluenceIntentToken()        // null (ignored)
 ```
 
 ---
@@ -399,7 +407,6 @@ QredexAgent.hasPurchaseIntentToken()   // boolean
 
 // Status
 QredexAgent.isInitialized()            // boolean
-QredexAgent.getStatus()                // AgentStatus
 ```
 
 ### Commands
@@ -421,10 +428,10 @@ QredexAgent.stop()                     // void
 
 ```javascript
 // Cart events
-QredexAgent.handleCartAdd(event?)      // void
-QredexAgent.handleCartEmpty(event?)    // void
-QredexAgent.handleCartChange(event)    // void
-QredexAgent.handlePaymentSuccess(event) // void
+QredexAgent.handleCartAdd(itemCount, meta?)      // void
+QredexAgent.handleCartEmpty()                    // void
+QredexAgent.handleCartChange(event)              // void
+QredexAgent.handlePaymentSuccess(event)          // void
 ```
 
 ### Event Listeners (Agent → Merchant)
@@ -497,7 +504,6 @@ console.log({
   hasPIT: QredexAgent.hasPurchaseIntentToken(),
   iit: QredexAgent.getInfluenceIntentToken(),
   pit: QredexAgent.getPurchaseIntentToken(),
-  status: QredexAgent.getStatus(),
 });
 ```
 

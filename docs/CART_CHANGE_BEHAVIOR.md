@@ -18,13 +18,15 @@
 
 | Transition | `itemCount` | `previousCount` | Action | Description |
 |------------|-------------|-----------------|--------|-------------|
-| `0 → 1` | 1 | 0 | 🔒 Lock | First item added |
-| `0 → 3` | 3 | 0 | 🔒 Lock | Multiple items added at once |
-| `1 → 3` | 3 | 1 | — | Adding more items |
+| `0 → 1` | 1 | 0 | 🔒 Lock (if IIT exists, no PIT) | First item added |
+| `0 → 3` | 3 | 0 | 🔒 Lock (if IIT exists, no PIT) | Multiple items added at once |
+| `1 → 3` | 3 | 1 | — | Adding more items (already locked) |
 | `3 → 2` | 2 | 3 | — | Removing one item |
-| `1 → 0` | 0 | 1 | 🗑️ Clear | Last item removed |
-| `3 → 0` | 0 | 3 | 🗑️ Clear | Cart emptied |
+| `1 → 0` | 0 | 1 | 🗑️ Clear (if PIT exists) | Last item removed |
+| `3 → 0` | 0 | 3 | 🗑️ Clear (if PIT exists) | Cart emptied |
 | `0 → 0` | 0 | 0 | — | Cart stays empty |
+
+**Important:** Lock only occurs if IIT exists AND PIT doesn't exist. Clear only occurs if PIT exists.
 
 ---
 
@@ -54,18 +56,22 @@ export function handleCartChange(event: {
   }
 
   // Lock when cart goes from 0 → >0 (first item added)
+  // IMPORTANT: Only locks if IIT exists AND PIT doesn't exist
   if (itemCount > 0 && previousCount === 0) {
-    lockIntent(meta)
-      .then((result) => {
-        if (result.success) {
-          emitLocked(result.purchaseToken, result.alreadyLocked);
-        } else {
-          emitError(result.error);
-        }
-      })
-      .catch((err) => {
-        emitError(err.message);
-      });
+    if (hasInfluenceIntentToken() && !hasPurchaseIntentToken()) {
+      lockIntent(meta)
+        .then((result) => {
+          if (result.success) {
+            emitLocked(result.purchaseToken, result.alreadyLocked);
+          } else {
+            emitError(result.error);
+          }
+        })
+        .catch((err) => {
+          emitError(err.message);
+        });
+    }
+    // No IIT or PIT already exists → no lock needed
   }
 
   // Clear when cart goes from >0 → 0 (emptied) and PIT exists
@@ -75,6 +81,11 @@ export function handleCartChange(event: {
   }
 }
 ```
+
+**Key Preconditions:**
+- **Lock requires:** IIT exists AND PIT doesn't exist
+- **Clear requires:** PIT exists
+- **No action:** If preconditions not met
 
 ---
 

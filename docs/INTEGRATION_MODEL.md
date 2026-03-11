@@ -144,7 +144,7 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
 
 ```javascript
 // Merchant tells agent when cart add happens
-QredexAgent.handleCartAdd({
+QredexAgent.handleCartAdd(cart.itemCount, {
   productId: '123',
   quantity: 1,
   price: 99.99,
@@ -207,7 +207,7 @@ function useQredexAgent() {
     await api.post('/cart', { productId: product.id });
 
     // Tell agent cart add happened (auto-locks)
-    QredexAgent.handleCartAdd({
+    QredexAgent.handleCartAdd(cart.itemCount, {
       productId: product.id,
       quantity: 1,
       price: product.price,
@@ -344,10 +344,10 @@ const pit = QredexAgent.getPurchaseIntentToken();
 Merchant tells agent when events happen:
 
 ```typescript
-handleCartAdd(event?: CartAddEvent): void
-handleCartEmpty(event?: CartEmptyEvent): void
-handleCartChange(event?: CartChangeEvent): void
-handlePaymentSuccess(event?: PaymentSuccessEvent): void
+handleCartAdd(itemCount: number, meta?: CartAddMeta): void
+handleCartEmpty(): void
+handleCartChange(event: CartChangeEvent): void
+handlePaymentSuccess(event: PaymentSuccessEvent): void
 ```
 
 ### Event Listeners (Agent → Merchant) - Optional
@@ -367,14 +367,10 @@ offError(handler: ErrorHandler): void
 
 **Event Types:**
 ```typescript
-interface CartAddEvent {
+interface CartAddMeta {
   productId?: string;
   quantity?: number;
   price?: number;
-  timestamp?: number;
-}
-
-interface CartEmptyEvent {
   timestamp?: number;
 }
 
@@ -435,10 +431,10 @@ type ErrorHandler = (event: ErrorEvent) => void;
 | `hasPurchaseIntentToken()` | Manual | Check PIT exists |
 | `lockIntent(meta?)` | Manual | Lock IIT → PIT |
 | `clearIntent()` | Manual | Clear local IIT/PIT state |
-| `handleCartAdd(event?)` | Event Input | Merchant tells agent cart got item(s) |
-| `handleCartEmpty(event?)` | Event Input | Merchant tells agent cart is empty |
-| `handleCartChange(event?)` | Event Input | Merchant sends cart state change |
-| `handlePaymentSuccess(event?)` | Event Input | Merchant tells agent checkout/payment succeeded |
+| `handleCartAdd(itemCount, meta?)` | Event Input | Merchant tells agent cart got item(s) |
+| `handleCartEmpty()` | Event Input | Merchant tells agent cart is empty |
+| `handleCartChange(event)` | Event Input | Merchant sends cart state change |
+| `handlePaymentSuccess(event)` | Event Input | Merchant tells agent checkout/payment succeeded |
 | `onLocked(handler)` | Hook | Listen for successful lock |
 | `onCleared(handler)` | Hook | Listen for cleared state |
 | `onError(handler)` | Hook | Listen for agent errors |

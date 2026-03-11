@@ -128,6 +128,7 @@ Set `window.QredexAgentConfig` **before** the script loads:
 |--------|------|---------|-------------|
 | `lockEndpoint` | `string` | Production URL | ⚠️ **Dev/Staging only** - Override ignored in production |
 | `debug` | `boolean` | `false` | Enable debug logging |
+| `useMockEndpoint` | `boolean` | `false` | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
 | `influenceIntentToken` | `string` | `'__qdx_iit'` | IIT storage key |
 | `purchaseIntentToken` | `string` | `'__qdx_pit'` | PIT storage key |
 | `cookieExpireDays` | `number` | `30` | Cookie expiration |
