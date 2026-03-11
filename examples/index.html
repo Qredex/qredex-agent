@@ -3,56 +3,200 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Qredex Agent</title>
+  <title>Qredex Agent Cart Harness</title>
   <link rel="stylesheet" href="./styles.css"/>
 </head>
 <body>
-  <h1>🔐 Qredex Agent</h1>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Qredex Agent Example</p>
+        <h1>Cart behavior test bench</h1>
+        <p class="hero-copy">
+          Persistent cart state, replayed cart events, IIT to PIT locking, and refresh-safe testing in one place.
+        </p>
+        <div class="hero-notes">
+          <span>Refresh-safe cart</span>
+          <span>Add and remove flow</span>
+          <span>Generated IIFE bundle</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="set-intent-button" type="button">Set Random IIT</button>
+        <button class="btn btn-secondary" id="reload-button" type="button">Refresh Page</button>
+      </div>
+    </section>
 
-  <div class="card">
-    <h2>📋 Instructions</h2>
-    <ol>
-      <li>Run <code>npm run dev</code> from the repo root</li>
-      <li>Open <code>http://localhost:5173/examples/index.html</code></li>
-      <li>Click "➕ Set Random IIT" to add a random <code>qdx_intent</code> token to the URL</li>
-      <li>Click "🛒 Add to Cart" to lock IIT → PIT with the local mock path</li>
-      <li>Click "🗑️ Clear Cart" to clear all tokens</li>
-    </ol>
-    <p style="margin-top: 15px; font-size: 14px; color: #666;">
-      <strong>Note:</strong> This example loads the source entry through the Vite dev server and initializes
-      <code>useMockEndpoint: true</code> programmatically. It is for local development only.
-    </p>
-  </div>
+    <section class="layout">
+      <div class="stack">
+        <section class="panel panel-soft">
+          <div class="panel-header">
+            <div>
+              <p class="panel-label">Agent Runtime</p>
+              <h2>Current session</h2>
+            </div>
+            <span class="badge">Bundle-first example</span>
+          </div>
 
-  <div class="card">
-    <h2>Current URL</h2>
-    <code id="current-url" style="word-break: break-all;"></code>
-    <div style="margin-top: 10px;">
-      <button class="btn" onclick="addIntentToUrl()">➕ Set Random IIT</button>
-    </div>
-  </div>
+          <div class="status-grid">
+            <article class="metric">
+              <span class="metric-label">IIT</span>
+              <strong class="metric-value" id="status-iit">Checking…</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">PIT</span>
+              <strong class="metric-value" id="status-pit">Checking…</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">Cart items</span>
+              <strong class="metric-value" id="status-count">0</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">Cart state</span>
+              <strong class="metric-value" id="status-cart-state">unknown</strong>
+            </article>
+          </div>
 
-  <div class="card">
-    <h2>Status</h2>
-    <span class="status-item info" id="status-iit">IIT: Checking...</span>
-    <span class="status-item info" id="status-pit">PIT: Checking...</span>
-  </div>
+          <div class="state-box">
+            <p class="state-title">Visible URL</p>
+            <code id="current-url"></code>
+          </div>
 
-  <div class="card">
-    <h2>Test Cart</h2>
-    <p>Current cart items: <strong id="cart-count">0</strong></p>
-    <button class="btn" onclick="addToCart()">🛒 Add to Cart</button>
-    <button class="btn btn-danger" onclick="clearCart()">🗑️ Clear Cart</button>
-  </div>
+          <div class="state-box">
+            <p class="state-title">Example persistence</p>
+            <p id="persistence-note">
+              Cart line items are kept in <code>localStorage</code>. This page loads the generated
+              <code>dist/qredex-agent.iife.min.js</code> bundle with pre-load config, just like a merchant script tag setup.
+            </p>
+          </div>
+        </section>
 
-  <div class="card">
-    <h2>Console</h2>
-    <div class="log" id="log"></div>
-  </div>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-label">Product Shelf</p>
+              <h2>Add test products</h2>
+            </div>
+          </div>
+          <div class="catalog" id="catalog"></div>
+        </section>
 
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-label">Event feed</p>
+              <h2>Agent and cart activity</h2>
+            </div>
+          </div>
+          <div class="log" id="log"></div>
+        </section>
+      </div>
+
+      <aside class="panel cart-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-label">Cart</p>
+            <h2>Persistent cart</h2>
+          </div>
+          <button class="btn btn-danger" id="empty-cart-button" type="button">Empty cart</button>
+        </div>
+
+        <div class="cart-summary">
+          <div>
+            <span class="summary-label">Lines</span>
+            <strong id="summary-lines">0</strong>
+          </div>
+          <div>
+            <span class="summary-label">Units</span>
+            <strong id="summary-units">0</strong>
+          </div>
+          <div>
+            <span class="summary-label">Subtotal</span>
+            <strong id="summary-subtotal">£0.00</strong>
+          </div>
+        </div>
+
+        <div class="cart-list" id="cart-list"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    window.QredexAgentConfig = {
+      debug: true,
+      useMockEndpoint: true,
+    };
+  </script>
+  <script src="../dist/qredex-agent.iife.min.js"></script>
   <script type="module">
+    const CART_STORAGE_KEY = 'qredex-example-cart-v1';
+    const PRODUCTS = [
+      { id: 'crewneck', name: 'Signal Crewneck', price: 89, description: 'Soft heavyweight layer for testing cart state.' },
+      { id: 'cap', name: 'Intent Cap', price: 34, description: 'Low-friction low-price item for first add testing.' },
+      { id: 'tote', name: 'Audit Tote', price: 42, description: 'Good for quantity changes and refresh persistence.' },
+      { id: 'journal', name: 'Lock Journal', price: 24, description: 'Cheap SKU for quick IIT to PIT lock checks.' },
+    ];
+
     let agent = null;
-    let cartItemCount = 0;
+    let cart = loadCart();
+
+    function currency(value) {
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+        maximumFractionDigits: 2,
+      }).format(value);
+    }
+
+    function getProduct(productId) {
+      return PRODUCTS.find((product) => product.id === productId) ?? null;
+    }
+
+    function loadCart() {
+      try {
+        const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+
+        return parsed.filter((item) =>
+          item &&
+          typeof item.productId === 'string' &&
+          typeof item.quantity === 'number' &&
+          item.quantity > 0
+        );
+      } catch {
+        return [];
+      }
+    }
+
+    function saveCart() {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    }
+
+    function totalUnits() {
+      return cart.reduce((sum, item) => sum + item.quantity, 0);
+    }
+
+    function subtotal() {
+      return cart.reduce((sum, item) => {
+        const product = getProduct(item.productId);
+        return sum + (product ? product.price * item.quantity : 0);
+      }, 0);
+    }
+
+    function snippet(token) {
+      if (!token) {
+        return 'Not present';
+      }
+
+      return `${token.slice(0, 18)}…`;
+    }
 
     function log(message, type = 'info') {
       const logEl = document.getElementById('log');
@@ -61,20 +205,79 @@
       const entry = document.createElement('div');
       entry.className = `log-entry log-${type}`;
       entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      logEl.appendChild(entry);
-      logEl.scrollTop = logEl.scrollHeight;
+      logEl.prepend(entry);
     }
 
     function updateStatus() {
+      const state = agent ? agent.getState() : null;
       const iit = agent ? agent.getInfluenceIntentToken() : null;
       const pit = agent ? agent.getPurchaseIntentToken() : null;
 
-      document.getElementById('status-iit').textContent = iit ? `IIT: ${iit.substring(0, 30)}...` : 'IIT: Not found';
-      document.getElementById('status-iit').className = 'status-item ' + (iit ? 'success' : 'info');
-      document.getElementById('status-pit').textContent = pit ? `PIT: ${pit.substring(0, 30)}...` : 'PIT: Not found';
-      document.getElementById('status-pit').className = 'status-item ' + (pit ? 'success' : 'info');
-      document.getElementById('cart-count').textContent = String(cartItemCount);
+      document.getElementById('status-iit').textContent = snippet(iit);
+      document.getElementById('status-pit').textContent = snippet(pit);
+      document.getElementById('status-count').textContent = String(totalUnits());
+      document.getElementById('status-cart-state').textContent = state ? state.cartState : 'unknown';
       document.getElementById('current-url').textContent = window.location.href;
+      document.getElementById('summary-lines').textContent = String(cart.length);
+      document.getElementById('summary-units').textContent = String(totalUnits());
+      document.getElementById('summary-subtotal').textContent = currency(subtotal());
+    }
+
+    function renderCatalog() {
+      const catalog = document.getElementById('catalog');
+      if (!catalog) return;
+
+      catalog.innerHTML = PRODUCTS.map((product) => `
+        <article class="product-card">
+          <div>
+            <p class="product-price">${currency(product.price)}</p>
+            <h3>${product.name}</h3>
+            <p class="product-copy">${product.description}</p>
+          </div>
+          <button class="btn btn-primary" type="button" data-add-product="${product.id}">
+            Add to cart
+          </button>
+        </article>
+      `).join('');
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cart-list');
+      if (!list) return;
+
+      if (cart.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <p>Your cart is empty.</p>
+            <span>Add a product to trigger the agent against a non-empty cart.</span>
+          </div>
+        `;
+        updateStatus();
+        return;
+      }
+
+      list.innerHTML = cart.map((line) => {
+        const product = getProduct(line.productId);
+        if (!product) {
+          return '';
+        }
+
+        return `
+          <article class="cart-line">
+            <div>
+              <p class="cart-line-title">${product.name}</p>
+              <p class="cart-line-meta">${currency(product.price)} each</p>
+            </div>
+            <div class="quantity-controls">
+              <button class="qty-btn" type="button" data-decrement-product="${product.id}">−</button>
+              <span>${line.quantity}</span>
+              <button class="qty-btn" type="button" data-increment-product="${product.id}">+</button>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      updateStatus();
     }
 
     function generateRandomToken() {
@@ -88,87 +291,187 @@
       return token;
     }
 
-    window.addIntentToUrl = function addIntentToUrl() {
-      const url = new URL(window.location.href);
-      url.searchParams.set('qdx_intent', generateRandomToken());
-      window.location.href = url.toString();
-    };
-
-    window.addToCart = function addToCart() {
+    function syncAgentCart(previousCount, itemCount, meta) {
       if (!agent) {
-        log('❌ QredexAgent not loaded', 'error');
         return;
       }
 
-      if (!agent.hasInfluenceIntentToken() && !agent.hasPurchaseIntentToken()) {
-        log('⚠️ No IIT found. Click "Set Random IIT" first.', 'error');
-        return;
-      }
-
-      const previousCount = cartItemCount;
-      cartItemCount += 1;
       agent.handleCartChange({
-        itemCount: cartItemCount,
         previousCount,
-        meta: { productId: 'test-product', quantity: 1, price: 99.99 },
+        itemCount,
+        meta,
       });
-      log(`Added item. Cart: ${cartItemCount}`, 'success');
-      updateStatus();
-    };
+    }
 
-    window.clearCart = function clearCart() {
+    function addProduct(productId) {
       if (!agent) {
-        log('❌ QredexAgent not loaded', 'error');
+        log('Agent not loaded', 'error');
         return;
       }
 
-      const previousCount = cartItemCount;
-      cartItemCount = 0;
-      agent.handleCartChange({ itemCount: 0, previousCount });
-      log('Cart cleared', 'info');
-      updateStatus();
-    };
+      const product = getProduct(productId);
+      if (!product) {
+        return;
+      }
+
+      const previousCount = totalUnits();
+      const existing = cart.find((item) => item.productId === productId);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ productId, quantity: 1 });
+      }
+
+      saveCart();
+      renderCart();
+      syncAgentCart(previousCount, totalUnits(), {
+        productId,
+        quantity: 1,
+        price: product.price,
+      });
+      log(`Added ${product.name}. Units: ${totalUnits()}`, 'success');
+    }
+
+    function decrementProduct(productId) {
+      if (!agent) {
+        log('Agent not loaded', 'error');
+        return;
+      }
+
+      const product = getProduct(productId);
+      const previousCount = totalUnits();
+      const existing = cart.find((item) => item.productId === productId);
+
+      if (!product || !existing) {
+        return;
+      }
+
+      existing.quantity -= 1;
+      if (existing.quantity <= 0) {
+        cart = cart.filter((item) => item.productId !== productId);
+      }
+
+      saveCart();
+      renderCart();
+      syncAgentCart(previousCount, totalUnits(), {
+        productId,
+        quantity: -1,
+        price: product.price,
+      });
+      log(`Removed ${product.name}. Units: ${totalUnits()}`, 'info');
+    }
+
+    function emptyCart() {
+      if (!agent) {
+        log('Agent not loaded', 'error');
+        return;
+      }
+
+      const previousCount = totalUnits();
+      if (previousCount === 0) {
+        return;
+      }
+
+      cart = [];
+      saveCart();
+      renderCart();
+      syncAgentCart(previousCount, 0);
+      log('Cart emptied', 'warning');
+    }
+
+    function restoreCartState() {
+      if (!agent) {
+        return;
+      }
+
+      const units = totalUnits();
+      if (units === 0) {
+        return;
+      }
+
+      syncAgentCart(0, units, {
+        productId: 'restored-cart',
+        quantity: units,
+      });
+      log(`Restored ${units} cart unit${units === 1 ? '' : 's'} from localStorage`, 'info');
+    }
+
+    function bindUi() {
+      document.getElementById('set-intent-button')?.addEventListener('click', () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('qdx_intent', generateRandomToken());
+        window.location.href = url.toString();
+      });
+
+      document.getElementById('reload-button')?.addEventListener('click', () => {
+        window.location.reload();
+      });
+
+      document.getElementById('empty-cart-button')?.addEventListener('click', () => {
+        emptyCart();
+      });
+
+      document.body.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+
+        const addProductId = target.getAttribute('data-add-product') || target.getAttribute('data-increment-product');
+        if (addProductId) {
+          addProduct(addProductId);
+          return;
+        }
+
+        const decrementProductId = target.getAttribute('data-decrement-product');
+        if (decrementProductId) {
+          decrementProduct(decrementProductId);
+        }
+      });
+    }
 
     async function main() {
       try {
-        const module = await import('../src/index.ts');
-        agent = module.default;
-        agent.init({
-          debug: true,
-          useMockEndpoint: true,
-        });
+        agent = window.QredexAgent;
+        if (!agent) {
+          throw new Error('Generated IIFE bundle not loaded');
+        }
+
+        agent.init();
 
         agent.onLocked(({ purchaseToken, alreadyLocked }) => {
-          log(`✅ Locked! PIT: ${purchaseToken.substring(0, 20)}...`, 'success');
-          if (alreadyLocked) {
-            log('Already locked; using cached PIT', 'info');
-          }
+          log(`Locked PIT ${purchaseToken.substring(0, 18)}…`, alreadyLocked ? 'info' : 'success');
           updateStatus();
         });
 
         agent.onCleared(() => {
-          log('🗑️ Cleared', 'info');
+          log('Agent cleared IIT and PIT after cart emptied', 'warning');
           updateStatus();
         });
 
         agent.onError(({ error, context }) => {
-          log(`❌ Error${context ? ` in ${context}` : ''}: ${error}`, 'error');
+          log(`${context ?? 'agent'}: ${error}`, 'error');
         });
 
+        renderCatalog();
+        renderCart();
+        bindUi();
+        restoreCartState();
         updateStatus();
-        if (!agent.hasInfluenceIntentToken()) {
-          log('⚠️ No IIT found. Click "Set Random IIT" to start.', 'warning');
+
+        if (!agent.hasInfluenceIntentToken() && !agent.hasPurchaseIntentToken()) {
+          log('No IIT or PIT present. Set a random IIT before first add-to-cart.', 'warning');
         }
-        log('Qredex Agent loaded in development mock mode', 'success');
+        log('Example ready. Cart persists across refresh.', 'success');
       } catch (error) {
         document.body.innerHTML = `
           <div style="padding: 40px; font-family: monospace;">
-            <h1>❌ Example Failed to Load</h1>
-            <p><strong>Problem:</strong> This page must run through the Vite dev server.</p>
-            <p><strong>Solution:</strong></p>
+            <h1>Example failed to load</h1>
+            <p><strong>Problem:</strong> This page expects the generated IIFE bundle.</p>
             <ol>
-              <li><code>npm run dev</code></li>
-              <li>Open <code>http://localhost:5173/examples/index.html</code></li>
+              <li><code>npm run build:dev</code></li>
+              <li><code>npx serve .</code></li>
+              <li>Open <code>http://localhost:3000/examples/index.html</code></li>
             </ol>
             <p><strong>Error:</strong> <code>${String(error)}</code></p>
           </div>

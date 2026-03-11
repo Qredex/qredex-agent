@@ -1,21 +1,24 @@
 # Qredex Agent - Examples
 
-**Quick testing for Qredex Agent using the Vite development server.**
+**Quick testing for Qredex Agent using the generated IIFE bundle.**
 
-> ⚠️ **IMPORTANT:** Run this page through `npm run dev`. Opening the file directly (`file://`) or serving it without Vite will not work.
+> ⚠️ **IMPORTANT:** Build the bundle first, then serve the repo over HTTP. Opening the file directly (`file://`) will not work.
 
 ---
 
 ## Quick Start
 
-### Option 1: Using `npm run dev` (Recommended)
+### Option 1: Build the development IIFE bundle (Recommended)
 
 ```bash
-# 1. Start the dev server
-npm run dev
+# 1. Build the generated development bundle
+npm run build:dev
 
-# 2. Open in browser
-open http://localhost:5173/examples/index.html
+# 2. Serve the repo root
+npx serve .
+
+# 3. Open in browser
+open http://localhost:3000/examples/index.html
 ```
 
 ### Option 2: Build a staging bundle
@@ -38,7 +41,7 @@ The test page demonstrates the complete Qredex Agent flow:
 2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
 3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
 
-**Note:** Uses `useMockEndpoint: true` through the Vite dev server - generates fake PIT tokens locally (no network calls).
+**Note:** Uses `useMockEndpoint: true` through the generated development bundle - generates fake PIT tokens locally (no network calls).
 
 Once loaded, the agent is available globally via `window.QredexAgent`:
 

@@ -353,11 +353,14 @@ useMockEndpoint: true  // ⚠️ DEVELOPMENT ONLY
 The fastest way to test Qredex Agent:
 
 ```bash
-# 1. Start the dev server
-npm run dev
+# 1. Build the development IIFE bundle
+npm run build:dev
 
-# 2. Open the test page
-open http://localhost:5173/examples/index.html
+# 2. Serve the repo root
+npx serve .
+
+# 3. Open the test page
+open http://localhost:3000/examples/index.html
 
 # 3. Simulate intent URL
 # Add ?qdx_intent=test123 to the URL and press Enter
@@ -529,7 +532,7 @@ Open DevTools → Application → Storage:
 
 | Example | Description | Quick Start |
 |---------|-------------|-------------|
-| [examples/index.html](examples/index.html) | Quick testing page | `npm run dev` → open `/examples/index.html` |
+| [examples/index.html](examples/index.html) | Quick testing page | `npm run build:dev` → `npx serve .` → open `/examples/index.html` |
 
 Each example includes:
 - Complete working demo
