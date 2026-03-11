@@ -3,20 +3,24 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Qredex Agent - CDN Test</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <title>Qredex Agent</title>
+  <link rel="stylesheet" href="./styles.css"/>
 </head>
 <body>
-  <h1>🔐 Qredex Agent - CDN Test</h1>
+  <h1>🔐 Qredex Agent</h1>
 
   <div class="card">
     <h2>📋 Instructions</h2>
     <ol>
-      <li>Click "Set Random IIT" to add a random <code>qdx_intent</code> token to the URL</li>
+      <li>Click "➕ Set Random IIT" to add a random <code>qdx_intent</code> token to the URL</li>
       <li>Verify IIT appears in the Status panel below</li>
-      <li>Click "Add to Cart" to lock IIT → PIT</li>
-      <li>Click "Clear Cart" to clear tokens</li>
+      <li>Click "🛒 Add to Cart" to lock IIT → PIT (exchange intent for purchase token)</li>
+      <li>Click "🗑️ Clear Cart" to clear all tokens</li>
     </ol>
+    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+      <strong>Note:</strong> This test uses <code>useMockEndpoint: true</code> - no network calls are made.
+      Mock PIT tokens are generated locally for testing.
+    </p>
   </div>
 
   <div class="card">
@@ -45,8 +49,6 @@
     <div class="log" id="log"></div>
   </div>
 
-  <!-- Qredex Agent from local dist -->
-  <script src="../dist/qredex-agent.iife.min.js"></script>
   <!-- Configure Qredex Agent BEFORE loading (optional) -->
   <script>
     window.QredexAgentConfig = {
@@ -54,8 +56,16 @@
       useMockEndpoint: true,  // Mock PIT tokens for local testing (no network calls)
     };
   </script>
+  <!-- Qredex Agent from local dist -->
+  <script src="../dist/qredex-agent.iife.min.js" onerror="document.body.innerHTML = '<div style=\'padding: 40px; font-family: monospace;\'><h1>❌ Script Failed to Load</h1><p><strong>Problem:</strong> The script path is incorrect or file doesn\'t exist.</p><p><strong>Solution:</strong> Run these commands:</p><ol><li><code>npm run build</code></li><li><code>npx serve .</code></li><li>Open <code>http://localhost:3000/examples/index.html</code></li></ol><p>Current path: <code>' + window.location.pathname + '</code></p><p>Script path: <code>../dist/qredex-agent.iife.min.js</code></p></div>'"></script>
 
   <script>
+    // Check if QredexAgent loaded
+    if (!window.QredexAgent) {
+      document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>❌ Qredex Agent Failed to Load</h1><p>Make sure you ran <code>npm run build</code> first.</p><p>File path: <code>' + window.location.pathname + '</code></p></div>';
+      throw new Error('QredexAgent not loaded');
+    }
+
     // Get reference to QredexAgent (cleaner than window.QredexAgent everywhere)
     const QredexAgent = window.QredexAgent;
 
@@ -69,6 +79,9 @@
     const hasIntent = QredexAgent.hasInfluenceIntentToken();
     if (!hasIntent) {
       log('⚠️ No intent token found. Add ?qdx_intent=xxx to URL or use the button above.', 'warning');
+    } else {
+      log('✅ Intent token found in URL!', 'success');
+      updateStatus();
     }
 
     // Listen for events
@@ -127,9 +140,12 @@
     }
 
     function addIntentToUrl() {
+      log('🔄 Generating random token...', 'info');
       const url = new URL(window.location.href);
       const randomToken = generateRandomToken();
+      log('🎫 Generated token: ' + randomToken, 'info');
       url.searchParams.set('qdx_intent', randomToken);
+      log('🔗 Redirecting to: ' + url.toString(), 'info');
       window.location.href = url.toString();
     }
 

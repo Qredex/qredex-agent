@@ -1,41 +1,56 @@
-# Qredex Agent - CDN Test
+# Qredex Agent - Examples
 
-**Quick testing page for Qredex Agent using the minified IIFE bundle.**
+**Quick testing for Qredex Agent using the minified IIFE bundle.**
 
-This example demonstrates how to use Qredex Agent via a `<script>` tag, loading the minified bundle from the local `dist/` directory.
+> ⚠️ **IMPORTANT:** You must use a local HTTP server. Opening the file directly (`file://`) won't work due to browser security restrictions.
 
 ---
 
 ## Quick Start
 
-### Option 1: Open Directly
+### Option 1: Using `npx serve` (Recommended)
 
 ```bash
-# Build the project first
+# 1. Build the project first
 npm run build
 
-# Open in browser
-open examples/cdn-test/index.html
+# 2. Start local server
+npx serve .
+
+# 3. Open in browser
+open http://localhost:3000/examples/index.html
 ```
 
-### Option 2: Serve Locally
+### Option 2: Using Python
 
 ```bash
-# Serve the examples directory
-npx serve examples
+# 1. Build the project
+npm run build
 
-# Navigate to: http://localhost:3000/cdn-test/
+# 2. Start Python server
+python3 -m http.server 3000
+
+# 3. Open in browser
+open http://localhost:3000/examples/index.html
 ```
+
+### Option 3: Using VS Code Live Server
+
+1. Install "Live Server" extension
+2. Right-click `examples/index.html`
+3. Click "Open with Live Server"
 
 ---
 
-## How It Works
+## What This Example Does
 
-The test page loads Qredex Agent from the local dist folder:
+The test page demonstrates the complete Qredex Agent flow:
 
-```html
-<script src="../../dist/qredex-agent.iife.min.js"></script>
-```
+1. **IIT Capture** - Simulates landing with `?qdx_intent=xxx` URL parameter
+2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
+3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
+
+**Note:** Uses `useMockEndpoint: true` - generates fake PIT tokens locally (no network calls).
 
 Once loaded, the agent is available globally via `window.QredexAgent`:
 
