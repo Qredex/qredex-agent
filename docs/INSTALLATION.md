@@ -51,7 +51,6 @@ For custom configuration:
 <script>
   window.QredexAgentConfig = {
     debug: false,
-    autoDetect: true,
   };
 </script>
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
@@ -111,17 +110,14 @@ Set `window.QredexAgentConfig` **before** the script loads:
   window.QredexAgentConfig = {
     // API endpoint
     lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
-    
+
     // Debug logging (silent by default, safe for production)
     debug: false,
-    
-    // Automatic add-to-cart detection
-    autoDetect: true,
-    
+
     // Storage keys (usually not needed)
     influenceIntentToken: '__qdx_iit',
     purchaseIntentToken: '__qdx_pit',
-    
+
     // Cookie expiration in days
     cookieExpireDays: 30,
   };
@@ -135,7 +131,6 @@ Set `window.QredexAgentConfig` **before** the script loads:
 |--------|------|---------|-------------|
 | `lockEndpoint` | `string` | Production URL | API endpoint for lock requests |
 | `debug` | `boolean` | `false` | Enable debug logging |
-| `autoDetect` | `boolean` | `true` | Enable automatic cart detection |
 | `influenceIntentToken` | `string` | `'__qdx_iit'` | IIT storage key |
 | `purchaseIntentToken` | `string` | `'__qdx_pit'` | PIT storage key |
 | `cookieExpireDays` | `number` | `30` | Cookie expiration |

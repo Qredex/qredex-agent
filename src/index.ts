@@ -43,6 +43,48 @@ import { setCartState, hasCartItems as checkHasCartItems } from './core/state.js
 import type { AgentConfig } from './bootstrap/config.js';
 import type { LockResult, LockMeta } from './api/types.js';
 
+// ============================================
+// EVENT HANDLER TYPES
+// ============================================
+
+type LockedHandler = (event: {
+  purchaseToken: string;
+  alreadyLocked: boolean;
+  timestamp: number;
+}) => void;
+
+type ClearedHandler = (event: {
+  timestamp: number;
+}) => void;
+
+type ErrorHandler = (event: {
+  error: string;
+  context?: string;
+}) => void;
+
+type StateChangeHandler = (event: {
+  hasIIT: boolean;
+  hasPIT: boolean;
+  locked: boolean;
+  cartState: 'unknown' | 'empty' | 'non-empty';
+  timestamp: number;
+}) => void;
+
+type IntentCapturedHandler = (event: {
+  hasIIT: true;
+  timestamp: number;
+}) => void;
+
+// ============================================
+// EVENT HANDLER ARRAYS (must be declared before auto-start)
+// ============================================
+
+const lockedHandlers: LockedHandler[] = [];
+const clearedHandlers: ClearedHandler[] = [];
+const errorHandlers: ErrorHandler[] = [];
+const stateChangeHandlers: StateChangeHandler[] = [];
+const intentCapturedHandlers: IntentCapturedHandler[] = [];
+
 // Auto-start: capture intent token from URL immediately
 const intentCapturedOnStart = autoStart();
 if (intentCapturedOnStart) {
@@ -673,25 +715,6 @@ export function handlePaymentSuccess(event: {
 // EVENT LISTENERS (Agent → Merchant) - Optional
 // ============================================
 
-type LockedHandler = (event: {
-  purchaseToken: string;
-  alreadyLocked: boolean;
-  timestamp: number;
-}) => void;
-
-type ClearedHandler = (event: {
-  timestamp: number;
-}) => void;
-
-type ErrorHandler = (event: {
-  error: string;
-  context?: string;
-}) => void;
-
-const lockedHandlers: LockedHandler[] = [];
-const clearedHandlers: ClearedHandler[] = [];
-const errorHandlers: ErrorHandler[] = [];
-
 /**
  * Listen for successful lock events.
  *
@@ -834,22 +857,6 @@ export function offError(handler: ErrorHandler): void {
 // ============================================
 // STATE CHANGE EVENTS
 // ============================================
-
-type StateChangeHandler = (event: {
-  hasIIT: boolean;
-  hasPIT: boolean;
-  locked: boolean;
-  cartState: 'unknown' | 'empty' | 'non-empty';
-  timestamp: number;
-}) => void;
-
-type IntentCapturedHandler = (event: {
-  hasIIT: true;
-  timestamp: number;
-}) => void;
-
-const stateChangeHandlers: StateChangeHandler[] = [];
-const intentCapturedHandlers: IntentCapturedHandler[] = [];
 
 /**
  * Listen for attribution state changes.

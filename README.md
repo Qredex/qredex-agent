@@ -92,7 +92,6 @@ Qredex Agent is a **lightweight browser runtime** (~5KB minified) that:
 - **Idempotent operations** - Safe to call multiple times
 - **Retry on failure** - Automatically retries lock if it fails
 - **Storage fallback** - Uses sessionStorage first, cookies as fallback
-- **Framework agnostic** - Works with React, Vue, Next.js, jQuery, or vanilla JS
 
 ---
 
@@ -372,51 +371,6 @@ open examples/index.html
 
 **See:** [examples/TESTING.md](examples/TESTING.md) for complete testing scenarios.
 
-### React/Next.js
-
-```jsx
-import { useEffect } from 'react';
-
-function useQredexAgent() {
-  useEffect(() => {
-    // Optional: listen for agent events
-    QredexAgent.onLocked(({ purchaseToken }) => {
-      console.log('Locked:', purchaseToken);
-    });
-
-    return () => {
-      // Cleanup for SPA route changes
-      QredexAgent.destroy();
-    };
-  }, []);
-
-  const addToCart = async (product) => {
-    await api.post('/cart', product);
-    QredexAgent.handleCartChange({
-      itemCount: cart.itemCount,
-      previousCount: cart.previousCount,
-      meta: {
-        productId: product.id,
-        quantity: product.quantity,
-        price: product.price,
-      },
-    });
-  };
-
-  const checkout = async (order) => {
-    const pit = QredexAgent.getPurchaseIntentToken();
-    await api.post('/orders', { ...order, qredex_pit: pit });
-    QredexAgent.handlePaymentSuccess({
-      orderId: order.id,
-      amount: order.total,
-      currency: 'USD',
-    });
-  };
-
-  return { addToCart, checkout };
-}
-```
-
 ### Vanilla JS
 
 ```javascript
@@ -566,19 +520,6 @@ Open DevTools → Application → Storage:
 | **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
 | **[Testing Guide](examples/TESTING.md)** | Complete testing scenarios |
 | **[AGENTS.md](AGENTS.md)** | Development guidelines |
-
----
-
-## Framework Integrations
-
-> **Coming Soon:** Framework-specific packages for React, Vue, Next.js, and more.
->
-> These will be published as separate packages:
-> - `@qredex/react` - React hooks & components
-> - `@qredex/vue` - Vue composables & plugin
-> - `@qredex/next` - Next.js integration
->
-> Each will have its own repository with dedicated examples and documentation.
 
 ---
 
