@@ -18,16 +18,25 @@
  */
 
 /**
- * Unit tests for configuration.
+ * Unit tests for configuration policy and defaults.
  */
 
-import {beforeEach, describe, expect, it} from 'vitest';
-import {getConfig, getConfigValue, initConfig, isConfigInitialized, resetConfig} from '../../src/bootstrap/config.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getConfigPolicy } from '../../src/bootstrap/config-policy.js';
+import {
+  getConfig,
+  getConfigValue,
+  initConfig,
+  isConfigInitialized,
+  resetConfig,
+  resolveConfig,
+} from '../../src/bootstrap/config.js';
 
 describe('Configuration', () => {
   beforeEach(() => {
     resetConfig();
     delete window.QredexAgentConfig;
+    vi.restoreAllMocks();
   });
 
   it('should use default values when no config provided', () => {
@@ -35,12 +44,13 @@ describe('Configuration', () => {
 
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(false);
+    expect(config.useMockEndpoint).toBe(false);
     expect(config.influenceIntentToken).toBe('__qdx_iit');
     expect(config.purchaseIntentToken).toBe('__qdx_pit');
     expect(config.cookieExpireDays).toBe(30);
   });
 
-  it('should merge user config with defaults', () => {
+  it('should merge user config with defaults in test mode', () => {
     const config = initConfig({
       debug: true,
       lockEndpoint: 'https://custom.endpoint.com/lock',
@@ -48,7 +58,7 @@ describe('Configuration', () => {
 
     expect(config.debug).toBe(true);
     expect(config.lockEndpoint).toBe('https://custom.endpoint.com/lock');
-    expect(config.influenceIntentToken).toBe('__qdx_iit'); // default
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
   });
 
   it('should respect pre-load global config', () => {
@@ -58,20 +68,85 @@ describe('Configuration', () => {
     };
 
     const config = initConfig({
-      debug: false, // should be overridden by pre-load config
+      debug: false,
     });
 
     expect(config.debug).toBe(true);
     expect(config.influenceIntentToken).toBe('custom_intent');
   });
 
-  it('should validate URL config values', () => {
+  it('should allow relative lockEndpoint overrides in non-production runtimes', () => {
+    const config = resolveConfig(
+      {
+        lockEndpoint: '/api/v1/agent/intents/lock',
+      },
+      getConfigPolicy('staging')
+    );
+
+    expect(config.lockEndpoint).toBe('/api/v1/agent/intents/lock');
+  });
+
+  it('should ignore lockEndpoint and debug overrides in production', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const config = resolveConfig(
+      {
+        lockEndpoint: 'https://custom.endpoint.com/lock',
+        debug: true,
+      },
+      getConfigPolicy('production')
+    );
+
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
+    expect(config.debug).toBe(false);
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('should allow lockEndpoint and debug in staging but reject mock endpoint', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const config = resolveConfig(
+      {
+        lockEndpoint: 'https://staging.example.com/api/v1/agent/intents/lock',
+        debug: true,
+        useMockEndpoint: true,
+      },
+      getConfigPolicy('staging')
+    );
+
+    expect(config.lockEndpoint).toBe('https://staging.example.com/api/v1/agent/intents/lock');
+    expect(config.debug).toBe(true);
+    expect(config.useMockEndpoint).toBe(false);
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('should allow mock endpoint in development', () => {
+    const config = resolveConfig(
+      {
+        useMockEndpoint: true,
+      },
+      getConfigPolicy('development')
+    );
+
+    expect(config.useMockEndpoint).toBe(true);
+  });
+
+  it('should fall back to default for invalid lockEndpoint', () => {
     const config = initConfig({
       lockEndpoint: 'not-a-valid-url',
     });
 
-    // Should fall back to default for invalid URL
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
+  });
+
+  it('should revert duplicate storage key overrides to defaults', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const config = resolveConfig({
+      influenceIntentToken: '__qdx_shared',
+      purchaseIntentToken: '__qdx_shared',
+    });
+
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
+    expect(config.purchaseIntentToken).toBe('__qdx_pit');
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   it('should provide getConfigValue for individual values', () => {
@@ -98,43 +173,5 @@ describe('Configuration', () => {
     const config = getConfig();
     expect(config.debug).toBe(false);
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
-  });
-
-  it('should allow lockEndpoint override in development mode', () => {
-    // Note: Tests run with __DEV__ = true, simulating dev/staging/test environments
-    // In production (__DEV__ = false), lockEndpoint overrides are ignored
-    const config = initConfig({
-      lockEndpoint: 'https://dev.example.com/lock',
-    });
-
-    expect(config.lockEndpoint).toBe('https://dev.example.com/lock');
-  });
-
-  it('should use default lockEndpoint when invalid URL provided', () => {
-    const config = initConfig({
-      lockEndpoint: 'not-a-valid-url',
-    });
-
-    // Invalid URLs always fall back to default
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
-  });
-
-  it('should document production lockEndpoint behavior', () => {
-    // Production behavior test (documented, not executable in test suite):
-    //
-    // In production builds (__DEV__ = false):
-    // - lockEndpoint overrides are IGNORED
-    // - Default Qredex AGENT endpoint is ALWAYS used
-    // - This prevents merchants from accidentally using non-standard backends
-    //
-    // Example production config (override ignored):
-    // window.QredexAgentConfig = {
-    //   lockEndpoint: 'https://custom.example.com/lock'  // IGNORED in production
-    // };
-    //
-    // Result: config.lockEndpoint === 'https://api.qredex.com/api/v1/agent/intents/lock'
-    //
-    // This is enforced at build time via __DEV__ constant.
-    expect(true).toBe(true); // Placeholder documenting expected behavior
   });
 });

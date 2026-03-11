@@ -1,44 +1,32 @@
 # Qredex Agent - Examples
 
-**Quick testing for Qredex Agent using the minified IIFE bundle.**
+**Quick testing for Qredex Agent using the Vite development server.**
 
-> ⚠️ **IMPORTANT:** You must use a local HTTP server. Opening the file directly (`file://`) won't work due to browser security restrictions.
+> ⚠️ **IMPORTANT:** Run this page through `npm run dev`. Opening the file directly (`file://`) or serving it without Vite will not work.
 
 ---
 
 ## Quick Start
 
-### Option 1: Using `npx serve` (Recommended)
+### Option 1: Using `npm run dev` (Recommended)
 
 ```bash
-# 1. Build the project first
-npm run build
+# 1. Start the dev server
+npm run dev
 
-# 2. Start local server
-npx serve .
-
-# 3. Open in browser
-open http://localhost:3000/examples/index.html
+# 2. Open in browser
+open http://localhost:5173/examples/index.html
 ```
 
-### Option 2: Using Python
+### Option 2: Build a staging bundle
 
 ```bash
-# 1. Build the project
-npm run build
+# 1. Build the staging bundle
+npm run build:stage
 
-# 2. Start Python server
-python3 -m http.server 3000
-
-# 3. Open in browser
-open http://localhost:3000/examples/index.html
+# 2. Deliver /dist with your staging site
+#    Use lockEndpoint to point at the staging Qredex backend
 ```
-
-### Option 3: Using VS Code Live Server
-
-1. Install "Live Server" extension
-2. Right-click `examples/index.html`
-3. Click "Open with Live Server"
 
 ---
 
@@ -50,7 +38,7 @@ The test page demonstrates the complete Qredex Agent flow:
 2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
 3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
 
-**Note:** Uses `useMockEndpoint: true` - generates fake PIT tokens locally (no network calls).
+**Note:** Uses `useMockEndpoint: true` through the Vite dev server - generates fake PIT tokens locally (no network calls).
 
 Once loaded, the agent is available globally via `window.QredexAgent`:
 
@@ -149,13 +137,13 @@ Or use a specific version:
 
 ## Configuration (Optional)
 
-Configure before the script loads:
+For production or staging delivery, configure before the script loads:
 
 ```html
 <script>
   window.QredexAgentConfig = {
-    debug: true,              // Enable debug logging
-    lockEndpoint: '/api/...', // Custom lock endpoint
+    debug: true,              // Non-production only
+    lockEndpoint: '/api/v1/agent/intents/lock', // Same-origin non-production override
     cookieExpireDays: 30,     // Cookie expiration
   };
 </script>

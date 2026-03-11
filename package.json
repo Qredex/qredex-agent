@@ -21,7 +21,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && node scripts/copy-iife-min.js",
-    "build:dev": "tsc && vite build --mode development",
+    "build:dev": "tsc && vite build --mode development && node scripts/copy-iife-min.js",
+    "build:stage": "tsc && vite build --mode staging && node scripts/copy-iife-min.js",
     "preview": "vite preview",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*.ts\" \"examples/**/*.html\"",

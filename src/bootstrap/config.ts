@@ -23,7 +23,14 @@
  */
 
 import { debug, warn } from '../utils/log.js';
-import { isObject, isNonEmptyString, isValidUrl } from '../utils/guards.js';
+import { isObject, isNonEmptyString } from '../utils/guards.js';
+import { getCurrentConfigPolicy, type AgentConfigPolicy } from './config-policy.js';
+import {
+  DEFAULT_COOKIE_EXPIRE_DAYS,
+  DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  DEFAULT_LOCK_ENDPOINT,
+  DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+} from '../utils/constants.js';
 
 /**
  * Configuration options for the Qredex Agent.
@@ -32,33 +39,30 @@ export interface AgentConfig {
   /**
    * The lock endpoint URL.
    *
-   * ⚠️ **Development/Staging Only** - Override is ignored in production.
+   * ⚠️ **Development/Staging/Test Only** - Override is ignored in production.
    *
    * In production builds, the default Qredex AGENT endpoint is always used
-   * regardless of this setting. This ensures consistent runtime behavior
-   * and prevents merchants from accidentally pointing to non-standard backends.
+   * regardless of this setting. This keeps the browser agent aligned to the
+   * canonical Qredex lock flow instead of becoming a generic transport client.
    *
-   * For local development, staging, or testing environments, you may override
-   * this to point to your own backend or test endpoint.
+   * Root-relative paths are allowed for same-origin non-production testing.
    *
    * @default 'https://api.qredex.com/api/v1/agent/intents/lock'
    */
   lockEndpoint?: string;
 
   /**
-   * Enable debug logging.
+   * Enable debug logging in non-production runtimes.
+   * Production always forces this to false.
    * @default false
    */
   debug?: boolean;
 
   /**
-   * Use mock endpoint for local development (no network calls).
+   * Use mock endpoint for local development/test (no network calls).
    * When true, generates fake PIT tokens locally for testing.
    *
-   * ⚠️ **DEVELOPMENT ONLY - Never use in production.**
-   * - Throws runtime error if used in production build
-   * - Logs console warning when enabled
-   * - Always set to `false` or remove before deploying
+   * ⚠️ **DEVELOPMENT/TEST ONLY** - Ignored elsewhere.
    *
    * @default false
    */
@@ -93,16 +97,97 @@ declare global {
 }
 
 const DEFAULT_CONFIG: Required<AgentConfig> = {
-  lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
+  lockEndpoint: DEFAULT_LOCK_ENDPOINT,
   debug: false,
   useMockEndpoint: false,
-  influenceIntentToken: '__qdx_iit',
-  purchaseIntentToken: '__qdx_pit',
-  cookieExpireDays: 30,
+  influenceIntentToken: DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  purchaseIntentToken: DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+  cookieExpireDays: DEFAULT_COOKIE_EXPIRE_DAYS,
 };
 
 let currentConfig: Required<AgentConfig> = { ...DEFAULT_CONFIG };
 let isInitialized = false;
+
+function isValidLockEndpoint(value: string): boolean {
+  const isRelativePath = value.startsWith('/');
+  const isAbsoluteHttpUrl = /^https?:\/\//.test(value);
+
+  if (!isRelativePath && !isAbsoluteHttpUrl) {
+    return false;
+  }
+
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://qredex.invalid';
+
+  try {
+    const url = new URL(value, baseUrl);
+    if (isRelativePath) {
+      return url.pathname.length > 0;
+    }
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+export function resolveConfig(
+  userConfig: AgentConfig = {},
+  policy: AgentConfigPolicy = getCurrentConfigPolicy()
+): Required<AgentConfig> {
+  const config: Required<AgentConfig> = { ...DEFAULT_CONFIG };
+
+  if (!isObject(userConfig)) {
+    return config;
+  }
+
+  if (userConfig.lockEndpoint !== undefined && isNonEmptyString(userConfig.lockEndpoint)) {
+    if (policy.allowLockEndpointOverride) {
+      if (isValidLockEndpoint(userConfig.lockEndpoint)) {
+        config.lockEndpoint = userConfig.lockEndpoint;
+        debug('lockEndpoint overridden for non-production runtime');
+      } else {
+        warn('Invalid lockEndpoint URL, using default');
+      }
+    } else {
+      warn('lockEndpoint override ignored in production');
+    }
+  }
+
+  if (typeof userConfig.debug === 'boolean') {
+    if (policy.allowDebug) {
+      config.debug = userConfig.debug;
+    } else if (userConfig.debug) {
+      warn('debug=true ignored in production');
+    }
+  }
+
+  if (typeof userConfig.useMockEndpoint === 'boolean') {
+    if (policy.allowMockEndpoint) {
+      config.useMockEndpoint = userConfig.useMockEndpoint;
+    } else if (userConfig.useMockEndpoint) {
+      warn('useMockEndpoint ignored outside development/test');
+    }
+  }
+
+  if (isNonEmptyString(userConfig.influenceIntentToken)) {
+    config.influenceIntentToken = userConfig.influenceIntentToken;
+  }
+
+  if (isNonEmptyString(userConfig.purchaseIntentToken)) {
+    config.purchaseIntentToken = userConfig.purchaseIntentToken;
+  }
+
+  if (typeof userConfig.cookieExpireDays === 'number' && userConfig.cookieExpireDays > 0) {
+    config.cookieExpireDays = userConfig.cookieExpireDays;
+  }
+
+  if (config.influenceIntentToken === config.purchaseIntentToken) {
+    warn('Storage key overrides must use distinct IIT and PIT keys, reverting to defaults');
+    config.influenceIntentToken = DEFAULT_INFLUENCE_INTENT_TOKEN_KEY;
+    config.purchaseIntentToken = DEFAULT_PURCHASE_INTENT_TOKEN_KEY;
+  }
+
+  return config;
+}
 
 /**
  * Ensure configuration is initialized from pre-load global config if available.
@@ -113,66 +198,12 @@ function ensureConfigInitialized(): void {
     return;
   }
 
-  // Check for pre-load global config
   const preloadConfig = window.QredexAgentConfig;
   if (preloadConfig) {
-    currentConfig = mergeConfig(preloadConfig);
+    currentConfig = resolveConfig(preloadConfig);
     isInitialized = true;
     debug('Configuration initialized from pre-load global config');
   }
-}
-
-/**
- * Merge user config with defaults, validating known fields.
- *
- * Note: lockEndpoint override is only allowed in development mode.
- * In production, the default Qredex AGENT endpoint is always used.
- */
-function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
-  const config: Required<AgentConfig> = { ...DEFAULT_CONFIG };
-
-  if (isObject(userConfig)) {
-    // Validate and merge lockEndpoint (DEV ONLY - production always uses default)
-    if (userConfig.lockEndpoint !== undefined && isNonEmptyString(userConfig.lockEndpoint)) {
-      if (__DEV__) {
-        // Allow override in development/staging/test environments
-        if (isValidUrl(userConfig.lockEndpoint)) {
-          config.lockEndpoint = userConfig.lockEndpoint;
-          debug('lockEndpoint overridden (development mode):', userConfig.lockEndpoint);
-        } else {
-          warn('Invalid lockEndpoint URL, using default');
-        }
-      } else {
-        // Ignore override in production - always use default Qredex AGENT endpoint
-        debug('lockEndpoint override ignored in production, using default');
-      }
-    }
-
-    // Validate and merge boolean options
-    if (typeof userConfig.debug === 'boolean') {
-      config.debug = userConfig.debug;
-    }
-
-    if (typeof userConfig.useMockEndpoint === 'boolean') {
-      config.useMockEndpoint = userConfig.useMockEndpoint;
-    }
-
-    // Validate and merge token key options
-    if (isNonEmptyString(userConfig.influenceIntentToken)) {
-      config.influenceIntentToken = userConfig.influenceIntentToken;
-    }
-
-    if (isNonEmptyString(userConfig.purchaseIntentToken)) {
-      config.purchaseIntentToken = userConfig.purchaseIntentToken;
-    }
-
-    // Validate and merge numeric options
-    if (typeof userConfig.cookieExpireDays === 'number' && userConfig.cookieExpireDays > 0) {
-      config.cookieExpireDays = userConfig.cookieExpireDays;
-    }
-  }
-
-  return config;
 }
 
 /**
@@ -180,12 +211,9 @@ function mergeConfig(userConfig: AgentConfig = {}): Required<AgentConfig> {
  * Pre-load config takes precedence over programmatic config.
  */
 export function initConfig(userConfig?: AgentConfig): Required<AgentConfig> {
-  // Check for pre-load global config first
   const preloadConfig = window.QredexAgentConfig;
-
-  // Merge: defaults <- userConfig <- preloadConfig
-  const merged = mergeConfig(userConfig);
-  const finalConfig = preloadConfig ? mergeConfig({ ...merged, ...preloadConfig }) : merged;
+  const merged = resolveConfig(userConfig);
+  const finalConfig = preloadConfig ? resolveConfig({ ...merged, ...preloadConfig }) : merged;
 
   currentConfig = finalConfig;
   isInitialized = true;

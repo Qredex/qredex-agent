@@ -26,6 +26,11 @@ import { setCookie, getCookie, removeCookie } from './cookie.js';
 import { setSession, getSession, removeSession } from './session.js';
 import { debug } from '../utils/log.js';
 import { isValidToken } from '../utils/guards.js';
+import {
+  DEFAULT_COOKIE_EXPIRE_DAYS,
+  DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+} from '../utils/constants.js';
 
 export interface TokenStorageConfig {
   influenceIntentToken: string;
@@ -34,9 +39,9 @@ export interface TokenStorageConfig {
 }
 
 const DEFAULT_CONFIG: TokenStorageConfig = {
-  influenceIntentToken: '__qdx_iit',
-  purchaseIntentToken: '__qdx_pit',
-  cookieExpireDays: 30,
+  influenceIntentToken: DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  purchaseIntentToken: DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+  cookieExpireDays: DEFAULT_COOKIE_EXPIRE_DAYS,
 };
 
 /**

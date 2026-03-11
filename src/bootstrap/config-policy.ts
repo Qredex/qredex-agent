@@ -17,20 +17,26 @@
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
-import { defineConfig } from 'vitest/config';
+/**
+ * Build-time configuration policy for the Qredex Agent.
+ */
 
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-    include: ['tests/unit/**/*.test.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
-    },
-  },
-  define: {
-    __QDX_ENV__: JSON.stringify('test'),
-  },
-});
+export type AgentRuntimeEnvironment = 'development' | 'staging' | 'production' | 'test';
+
+export interface AgentConfigPolicy {
+  allowLockEndpointOverride: boolean;
+  allowDebug: boolean;
+  allowMockEndpoint: boolean;
+}
+
+export function getConfigPolicy(environment: AgentRuntimeEnvironment): AgentConfigPolicy {
+  return {
+    allowLockEndpointOverride: environment !== 'production',
+    allowDebug: environment !== 'production',
+    allowMockEndpoint: environment === 'development' || environment === 'test',
+  };
+}
+
+export function getCurrentConfigPolicy(): AgentConfigPolicy {
+  return getConfigPolicy(__QDX_ENV__);
+}

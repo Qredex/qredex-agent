@@ -21,6 +21,19 @@ import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
+function resolveRuntimeEnvironment(mode: string): 'development' | 'staging' | 'production' | 'test' {
+  if (mode === 'development') {
+    return 'development';
+  }
+  if (mode === 'staging') {
+    return 'staging';
+  }
+  if (mode === 'test') {
+    return 'test';
+  }
+  return 'production';
+}
+
 export default defineConfig(({ mode }) => ({
   plugins: [
     dts({
@@ -68,7 +81,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    __DEV__: mode === 'development' ? 'true' : 'false',
+    __QDX_ENV__: JSON.stringify(resolveRuntimeEnvironment(mode)),
     __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
   },
 }));

@@ -36,8 +36,8 @@ Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` tok
 1.  Shopper clicks a Qredex tracking link.
 2.  Qredex redirects to the merchant destination and appends `?qdx_intent=<IIT>`.
 3.  Qredex Agent reads `qdx_intent` from the URL.
-4.  Agent stores the IIT in browser session storage and cookie fallback.
-5.  Agent removes `qdx_intent` from the visible URL.
+4.  Agent removes `qdx_intent` from the visible URL after inspection, even if PIT already exists and the IIT is ignored.
+5.  If no PIT exists, agent stores the IIT in browser session storage and cookie fallback.
 6.  Shopper browses the storefront.
 7.  Merchant calls `handleCartChange()` or `handleCartAdd()` when cart state changes.
 8.  Agent checks whether:

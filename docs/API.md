@@ -34,17 +34,17 @@ function init(config?: AgentConfig): void
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
-| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING ONLY** - Override ignored in production |
-| `debug` | `boolean` | `false` | ✅ Safe | Enable debug logging |
-| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
+| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING/TEST ONLY** - Controlled override ignored in production |
+| `debug` | `boolean` | `false` | ❌ Forced Off | Enable debug logging outside production only |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens (no network calls) |
 | `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
 | `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
 | `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
 
 **⚠️ Production Safety:**
-- `useMockEndpoint: true` is for development only - never deploy to production
+- `useMockEndpoint: true` is for development/test only - ignored elsewhere
 - `lockEndpoint` override ignored in production (always uses Qredex AGENT endpoint)
-- Console warning logged when mock endpoint enabled on non-localhost domains
+- `debug: true` is ignored in production
 
 **Example:**
 ```javascript
@@ -61,7 +61,7 @@ QredexAgentConfig = {
 };
 
 // Production - use defaults (no config needed)
-// QredexAgentConfig omitted entirely, or only set debug: true for troubleshooting
+// QredexAgentConfig omitted entirely
 ```
 
 **Note:** Usually not needed - agent auto-starts on script load with default configuration.
@@ -581,9 +581,9 @@ if (QredexAgent.isInitialized()) {
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
-| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING ONLY** - Override ignored in production |
-| `debug` | `boolean` | `false` | ✅ Safe | Enable debug logging |
-| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
+| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING/TEST ONLY** - Controlled override ignored in production |
+| `debug` | `boolean` | `false` | ❌ Forced Off | Enable debug logging outside production only |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens (no network calls) |
 | `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
 | `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
 | `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
@@ -593,16 +593,16 @@ if (QredexAgent.isInitialized()) {
 interface AgentConfig {
   /**
    * API endpoint for lock requests
-   * ⚠️ DEV/STAGING ONLY - Ignored in production builds
+   * ⚠️ DEV/STAGING/TEST ONLY - Ignored in production builds
    */
   lockEndpoint?: string;
 
-  /** Enable debug logging (safe for all environments) */
+  /** Enable debug logging in non-production builds. */
   debug?: boolean;
 
   /**
    * Use mock endpoint for local development (generates fake PIT tokens)
-   * ⚠️ DEVELOPMENT ONLY - Never deploy to production
+   * ⚠️ DEVELOPMENT/TEST ONLY - Ignored elsewhere
    */
   useMockEndpoint?: boolean;
 
@@ -622,7 +622,7 @@ interface AgentConfig {
 {
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
-  useMockEndpoint: false,  // ⚠️ DEV ONLY - Never use in production
+  useMockEndpoint: false,  // ⚠️ DEV/TEST ONLY - Ignored elsewhere
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
@@ -638,7 +638,7 @@ interface AgentConfig {
 { debug: true, lockEndpoint: 'https://staging.your-backend.com/...' }
 
 // Production (use defaults - no config needed)
-{}  // Omit entirely or just { debug: true } for troubleshooting
+{}  // Omit entirely in production
 ```
 
 ---

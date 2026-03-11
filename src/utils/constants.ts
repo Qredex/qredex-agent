@@ -17,20 +17,11 @@
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
-import { defineConfig } from 'vitest/config';
+/**
+ * Canonical runtime defaults shared across configuration and storage helpers.
+ */
 
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-    include: ['tests/unit/**/*.test.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
-    },
-  },
-  define: {
-    __QDX_ENV__: JSON.stringify('test'),
-  },
-});
+export const DEFAULT_LOCK_ENDPOINT = 'https://api.qredex.com/api/v1/agent/intents/lock';
+export const DEFAULT_INFLUENCE_INTENT_TOKEN_KEY = '__qdx_iit';
+export const DEFAULT_PURCHASE_INTENT_TOKEN_KEY = '__qdx_pit';
+export const DEFAULT_COOKIE_EXPIRE_DAYS = 30;

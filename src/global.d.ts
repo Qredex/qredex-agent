@@ -20,5 +20,5 @@
 /**
  * Global build-time constants injected by Vite.
  */
-declare const __DEV__: boolean;
+declare const __QDX_ENV__: 'development' | 'staging' | 'production' | 'test';
 declare const __VERSION__: string;

@@ -853,7 +853,7 @@ Use the minimum context, tokens, tool calls, edits, and validation needed to com
 - Edit narrowly, but include every directly connected change required for the result to be correct.
 - Validate with the lightest check that gives real confidence the work is correct and safe.
 - Do not scan the whole codebase unless the task truly requires it.
-- Do not perform broad refactors, broad searches, or speculative cleanup unless requested or clearly necessary.
+- Do not perform broad refactors, broad searches, speculative cleanup, or optional exploration unless requested or clearly necessary.
 - Do not invent new flows, abstractions, endpoints, or patterns if the existing architecture already supports the task.
 - Reuse existing code paths, commands, adapters, and conventions wherever possible.
 - Keep responses short, direct, and action-focused.
@@ -862,15 +862,32 @@ Use the minimum context, tokens, tool calls, edits, and validation needed to com
 - Accuracy is mandatory.
 - Completeness matters more than superficial minimalism.
 - Minimal work does not mean shallow work.
-- If a wider check is required for safety, correctness, or integration integrity, do it — but keep it scoped.
+- If a wider check is required for safety, correctness, or integration integrity, do it — but keep it tightly scoped.
 - If a requested change likely affects adjacent logic, inspect the smallest necessary connected surface before editing.
 - Make the narrowest correct change, not the fastest careless change.
 
 ### Qredex guardrails
-- Preserve determinism, idempotency, zoning, and tenant/store scoping.
+- Preserve determinism, idempotency, zoning, tenant scoping, and store scoping.
 - Keep changes layer-correct and aligned with the existing architecture.
 - Prefer canonical flows over parallel implementations.
-- Avoid duplicate logic and unnecessary abstractions.
+- Avoid duplicate logic, fragmented behavior, and unnecessary abstractions.
+
+### Infrastructure and platform judgment
+- Act like a senior infrastructure/platform engineer, not a code generator.
+- Proactively recommend the most durable, secure, operationally safe, and platform-aligned path when it is materially better than the requested implementation.
+- Favor standardization, observability, deterministic behavior, contract clarity, and clean boundaries over clever shortcuts.
+- Call out drift, weak boundaries, duplicated responsibility, leaky abstractions, and anything that undermines Qredex as a platform.
+- Treat naming, packaging, SDK boundaries, auth surfaces, API shape, and execution flow as strategic platform decisions, not local implementation details.
+- When several options are viable, recommend the one that best improves long-term reliability, maintainability, developer experience, and platform leverage.
+
+### Model usage limit discipline
+- Treat Codex and other model/agent usage limits as a hard engineering constraint.
+- Optimize for minimum usage without degrading correctness, safety, or architectural quality.
+- Stop exploring once sufficient evidence exists. Do not keep reading or probing after the safe implementation path is already clear.
+- Use the fewest files, shortest useful command output, and narrowest validation that still provides real confidence.
+- Avoid speculative work. Do not expand scope unless the task or integration risk requires it.
+- Keep communication compressed, direct, and high-signal.
+- Escalate only when necessary. If materially more usage would be required to increase certainty, state the trade-off briefly before doing broader exploration or heavier validation.
 
 ---
 

@@ -79,6 +79,13 @@ export const cleanUrl = (): void => {
  * Once PIT exists, no new IIT will be captured.
  */
 export function captureIntentToken(): boolean {
+  const token = extractIntentFromUrl();
+
+  if (!token) {
+    debug('No qdx_intent token found in URL');
+    return false;
+  }
+
   // Check if PIT already exists (lock has happened)
   const existingPit = getPurchaseToken({
     influenceIntentToken: getConfigValue('influenceIntentToken'),
@@ -87,14 +94,8 @@ export function captureIntentToken(): boolean {
   });
 
   if (existingPit) {
+    cleanUrl();
     debug('PIT already exists (lock completed), skipping IIT capture');
-    return false;
-  }
-
-  const token = extractIntentFromUrl();
-
-  if (!token) {
-    debug('No qdx_intent token found in URL');
     return false;
   }
 

@@ -28,7 +28,7 @@
  */
 
 import { setDebugMode, debug } from './utils/log.js';
-import { getConfig } from './bootstrap/config.js';
+import { getConfig, initConfig } from './bootstrap/config.js';
 import { autoStart } from './bootstrap/auto-start.js';
 import {
   getInfluenceIntentToken as getStoredInfluenceIntentToken,
@@ -84,6 +84,9 @@ const clearedHandlers: ClearedHandler[] = [];
 const errorHandlers: ErrorHandler[] = [];
 const stateChangeHandlers: StateChangeHandler[] = [];
 const intentCapturedHandlers: IntentCapturedHandler[] = [];
+
+const startupConfig = getConfig();
+setDebugMode(startupConfig.debug);
 
 // Auto-start: capture intent token from URL immediately
 const intentCapturedOnStart = autoStart();
@@ -972,7 +975,7 @@ export function offIntentCaptured(handler: IntentCapturedHandler): void {
  * @param _config
  */
 export function init(_config?: AgentConfig): void {
-  const cfg = getConfig();
+  const cfg = initConfig(_config);
   setDebugMode(cfg.debug);
   debug('Agent initialized');
 }
@@ -1086,7 +1089,7 @@ if (typeof window !== 'undefined') {
  * QredexAgent.handleCartChange({ itemCount: 1, previousCount: 0 });
  * ```
  */
-let QredexAgent = {
+const QredexAgent = {
   // Read/State
   getInfluenceIntentToken,
   getPurchaseIntentToken,

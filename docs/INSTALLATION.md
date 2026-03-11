@@ -108,7 +108,7 @@ Set `window.QredexAgentConfig` **before** the script loads:
 ```html
 <script>
   window.QredexAgentConfig = {
-    // Debug logging (silent by default, safe for production)
+    // Debug logging (non-production only)
     debug: false,
 
     // Storage keys (usually not needed)
@@ -126,9 +126,9 @@ Set `window.QredexAgentConfig` **before** the script loads:
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
-| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING ONLY** - Override ignored in production |
-| `debug` | `boolean` | `false` | ✅ Safe | Enable debug logging |
-| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
+| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING/TEST ONLY** - Controlled override ignored in production |
+| `debug` | `boolean` | `false` | ❌ Forced Off | Non-production logging only |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens (no network calls) |
 | `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
 | `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
 | `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
@@ -139,17 +139,17 @@ Set `window.QredexAgentConfig` **before** the script loads:
 
 ### Development
 
-```html
-<script>
-  window.QredexAgentConfig = {
-    debug: true,  // Enable logs
-    useMockEndpoint: true,  // Mock PIT tokens (no network calls)
-  };
-</script>
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+```bash
+npm run dev
+# Open http://localhost:5173/examples/index.html
 ```
 
 ### Staging
+
+```bash
+npm run build:stage
+# Deploy /dist/qredex-agent.iife.min.js to your staging site
+```
 
 ```html
 <script>
@@ -158,7 +158,7 @@ Set `window.QredexAgentConfig` **before** the script loads:
     lockEndpoint: 'https://staging-api.your-backend.com/api/v1/agent/intents/lock',
   };
 </script>
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script src="/assets/qredex-agent.iife.min.js"></script>
 ```
 
 ### Production
@@ -187,13 +187,15 @@ The agent uses standardized keys for browser storage:
 
 ## Debug Logging
 
-Debug logging is **safe for production** - silent by default:
+Debug logging is available only in non-production builds:
 
 ```html
 <script>
   window.QredexAgentConfig = { debug: true };
 </script>
 ```
+
+Production ignores `debug: true` and keeps logging disabled.
 
 **Example output:**
 ```

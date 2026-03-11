@@ -99,20 +99,8 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
 
       // Use mock endpoint for local development
       if (config.useMockEndpoint) {
-        // Only warn in development (check for localhost or file protocol)
-        const isLocalhost = typeof window !== 'undefined' &&
-          (window.location.hostname === 'localhost' ||
-           window.location.hostname === '127.0.0.1' ||
-           window.location.protocol === 'file:');
-
-        if (!isLocalhost) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            '[QredexAgent] ⚠️ MOCK ENDPOINT ENABLED - Development mode only! ' +
-            'Do not deploy to production with useMockEndpoint: true'
-          );
-        }
-        debug('Using mock endpoint (development mode)');
+        warn('useMockEndpoint enabled; generating mock PIT locally');
+        debug('Using mock endpoint');
         const mockPit = generateMockPIT();
 
         // Store the mock PIT

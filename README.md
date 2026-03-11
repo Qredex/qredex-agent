@@ -251,7 +251,7 @@ QredexAgent.clearIntent();
 // Initialize with custom config (usually not needed - auto-starts)
 QredexAgent.init({
   debug: true,
-  lockEndpoint: 'https://your-backend.com/api/lock',
+  lockEndpoint: 'https://staging.your-backend.com/api/v1/agent/intents/lock',
 });
 
 // Check if initialized
@@ -311,9 +311,9 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 ```html
 <script>
   window.QredexAgentConfig = {
-    debug: true,                     // Enable debug logging
-    lockEndpoint: '/api/v1/...',     // Lock API endpoint (staging/dev only)
-    useMockEndpoint: true,           // ⚠️ DEV ONLY: mock PIT tokens (no network calls)
+    debug: true,                     // Non-production only
+    lockEndpoint: '/api/v1/agent/intents/lock', // Same-origin staging/dev only
+    useMockEndpoint: true,           // ⚠️ DEV/TEST ONLY: mock PIT tokens
     influenceIntentToken: '__qdx_iit',  // IIT storage key
     purchaseIntentToken: '__qdx_pit',   // PIT storage key
     cookieExpireDays: 30,            // Cookie expiration in days
@@ -326,11 +326,11 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `debug` | boolean | `false` | Enable debug logging in console |
-| `lockEndpoint` | string | `'https://api.qredex.com/api/v1/agent/intents/lock'` | Lock API URL (override ignored in production) |
-| `useMockEndpoint` | boolean | `false` | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
-| `influenceIntentToken` | string | `'__qdx_iit'` | Storage key for IIT |
-| `purchaseIntentToken` | string | `'__qdx_pit'` | Storage key for PIT |
+| `debug` | boolean | `false` | Non-production logging. Forced to `false` in production |
+| `lockEndpoint` | string | `'https://api.qredex.com/api/v1/agent/intents/lock'` | Controlled non-production override. Ignored in production |
+| `useMockEndpoint` | boolean | `false` | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens locally |
+| `influenceIntentToken` | string | `'__qdx_iit'` | Stable IIT storage key. Override only for advanced integrations |
+| `purchaseIntentToken` | string | `'__qdx_pit'` | Stable PIT storage key. Override only for advanced integrations |
 | `cookieExpireDays` | number | `30` | Cookie expiration in days |
 
 ### ⚠️ Mock Endpoint Warning
@@ -341,8 +341,8 @@ useMockEndpoint: true  // ⚠️ DEVELOPMENT ONLY
 
 - Generates fake PIT tokens locally (no network calls)
 - Only use for local development/testing
-- Console warning is logged when used on non-localhost domains
-- **Never deploy to production with `useMockEndpoint: true`**
+- Ignored outside development/test builds
+- **Never rely on `useMockEndpoint` in staging or production**
 
 ---
 
@@ -353,11 +353,11 @@ useMockEndpoint: true  // ⚠️ DEVELOPMENT ONLY
 The fastest way to test Qredex Agent:
 
 ```bash
-# 1. Build the project
-npm run build
+# 1. Start the dev server
+npm run dev
 
 # 2. Open the test page
-open examples/index.html
+open http://localhost:5173/examples/index.html
 
 # 3. Simulate intent URL
 # Add ?qdx_intent=test123 to the URL and press Enter
@@ -403,7 +403,7 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
 
 ```
 1. User lands with ?qdx_intent=xxx
-   → Agent captures IIT, stores in sessionStorage + cookie
+   → Agent inspects qdx_intent, removes it from the visible URL, and stores IIT in sessionStorage + cookie when no PIT already exists
 
 2. User adds first item to cart (itemCount: 0 → 1)
    → handleCartChange() locks IIT → PIT via API
@@ -467,11 +467,13 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
 
 ### Debug Mode
 
-Enable debug logging:
+Enable debug logging in development, staging, or test:
 
 ```javascript
 window.QredexAgentConfig = { debug: true };
 ```
+
+Production always forces `debug` back to `false`.
 
 **Example output:**
 ```
@@ -527,7 +529,7 @@ Open DevTools → Application → Storage:
 
 | Example | Description | Quick Start |
 |---------|-------------|-------------|
-| [examples/index.html](examples/index.html) | Quick testing page | `npm run build` → open in browser |
+| [examples/index.html](examples/index.html) | Quick testing page | `npm run dev` → open `/examples/index.html` |
 
 Each example includes:
 - Complete working demo
