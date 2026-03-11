@@ -59,7 +59,7 @@ autoStart();
  * @returns The IIT token string, or `null` if not found.
  *
  * @example
- * ```typescript
+ * ```TypeScript
  * const iit = QredexAgent.getInfluenceIntentToken();
  * if (iit) {
  *   console.log('IIT:', iit);
@@ -87,7 +87,7 @@ export function getInfluenceIntentToken(): string | null {
  * @returns The PIT token string, or `null` if not found.
  *
  * @example
- * ```typescript
+ * ```TypeScript
  * const pit = QredexAgent.getPurchaseIntentToken();
  * if (pit) {
  *   console.log('PIT:', pit);
@@ -229,8 +229,6 @@ function clearTokens(): void {
   });
   debug('Tokens cleared');
 }
-
-export default clearTokens
 
 // ============================================
 // EVENT HANDLERS (Merchant → Agent)
@@ -845,3 +843,51 @@ if (typeof window !== 'undefined') {
     stop,
   };
 }
+
+// ============================================
+// DEFAULT EXPORT (ESM alias)
+// ============================================
+
+/**
+ * Default export for ESM imports.
+ *
+ * @example
+ * ```typescript
+ * import QredexAgent from 'qredex-agent';
+ *
+ * QredexAgent.getInfluenceIntentToken();
+ * QredexAgent.handleCartChange({ itemCount: 1, previousCount: 0 });
+ * ```
+ */
+const QredexAgent = {
+  // Read/State
+  getInfluenceIntentToken,
+  getPurchaseIntentToken,
+  hasInfluenceIntentToken,
+  hasPurchaseIntentToken,
+
+  // Commands
+  lockIntent,
+  clearTokens,
+
+  // Event Handlers (Merchant → Agent)
+  handleCartChange,
+  handleCartAdd,
+  handleCartEmpty,
+  handlePaymentSuccess,
+
+  // Event Listeners (Agent → Merchant)
+  onLocked,
+  onCleared,
+  onError,
+  offLocked,
+  offCleared,
+  offError,
+
+  // Lifecycle
+  init,
+  destroy,
+  stop,
+};
+
+export default QredexAgent;
