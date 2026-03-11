@@ -39,11 +39,11 @@ export interface LockResponse {
   /** The purchase intent token (PIT) */
   token: string;
 
-  /** Token expiration timestamp */
-  expiresAt: string;
+  /** Token expiration timestamp (ISO 8601) */
+  expires_at: string;
 
-  /** Token lock timestamp */
-  lockedAt: string;
+  /** Token lock timestamp (ISO 8601) */
+  locked_at: string;
 }
 
 /**
