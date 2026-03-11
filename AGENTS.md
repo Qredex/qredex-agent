@@ -18,7 +18,7 @@ Qredex is a source-agnostic attribution and integrity system for modern commerce
 ## Non‑negotiables
 
 - **Do not invent flows.** If it's not in the canonical spec, stop and ask.
-- **Browser agent is thin.** Capture/store/detect/lock logic belongs in dedicated modules (`storage/`, `detect/`, `api/`).
+- **Browser agent is thin.** Capture/store/lock logic belongs in dedicated modules (`storage/`, `api/`, `core/`).
 - **All API calls use versioned endpoints.** Only `/api/v1/...` is allowed.
 - **Storage isolation is mandatory.** Each merchant's tokens are scoped to their session/cookie context.
 - **Idempotency is mandatory.** Lock operations and detection pipelines must be safe on retries.
@@ -33,7 +33,7 @@ Qredex is a source-agnostic attribution and integrity system for modern commerce
 - **Classify every claim with one verdict only:** `VALID`, `MISPLACED_LAYER`, `INVALID`, or `UNVERIFIED`.
 - **No verdict without evidence:** always include exact file references with line numbers.
 - **Do not implement before verdict:** first prove the claim, then patch.
-- **If `MISPLACED_LAYER`, name the correct layer** (`bootstrap`, `core`, `storage`, `detect`, `api`, `utils`).
+- **If `MISPLACED_LAYER`, name the correct layer** (`bootstrap`, `core`, `storage`, `api`, `utils`).
 - **Fail closed for mandatory operations:** do not swallow lock failures unless product explicitly approves fail-open design.
 - **Validate token state at entry boundaries:** pipeline must validate IIT/PIT state; do not defer null handling deep into helpers.
 - **Every behavior-changing fix must include tests that reproduce the failure scenario.**
@@ -126,12 +126,11 @@ After any user correction, capture the lesson to prevent repeating mistakes.
 ## Package / Layer Rules
 
 - `bootstrap/` → Auto-start logic, configuration loading, URL capture
-- `core/` → Centralized state management, lifecycle control
+- `core/` → Centralized state management, lifecycle control, cart event handling
 - `storage/` → Browser storage (sessionStorage, cookies), token coordination
-- `detect/` → Add-to-cart detection (click, form, manual), pipeline orchestration
 - `api/` → HTTP client for Qredex endpoints (lock, etc.)
 - `utils/` → Shared utilities (logging, DOM helpers, type guards)
-- `index.ts` → Public API exports, window attachment
+- `index.ts` → Public API exports, window attachment, event handler orchestration
 
 ## Naming Rules
 
@@ -146,6 +145,9 @@ After any user correction, capture the lesson to prevent repeating mistakes.
     - `qdx_intent` = URL parameter name for IIT
 - Canonical API endpoint:
     - `/api/v1/agent/intents/lock` = Lock endpoint for IIT → PIT exchange
+- **Deprecated API names:**
+    - `getIntentToken()` → Use `getInfluenceIntentToken()`
+    - `hasIntentToken()` → Use `hasInfluenceIntentToken()`
 
 ## Security Rules
 
@@ -218,7 +220,7 @@ After any user correction, capture the lesson to prevent repeating mistakes.
 ### Code Review Checklist
 
 - [ ] Modules are focused and delegate appropriately
-- [ ] Business logic is in correct module (`detect/`, `api/`, `storage/`)
+- [ ] Business logic is in correct module (`core/`, `api/`, `storage/`)
 - [ ] Storage isolation is enforced (sessionStorage + cookie scoping)
 - [ ] API endpoints are versioned (`/api/v1/...`)
 - [ ] Tests are comprehensive (unit + edge cases)
@@ -276,7 +278,8 @@ export function lockIntent(meta?: Record<string, unknown>): Promise<LockResult> 
   // Implementation
 }
 
-export function getIntentToken(): string | null {
+// ✅ Use getInfluenceIntentToken() - getIntentToken() is deprecated
+export function getInfluenceIntentToken(): string | null {
   // Implementation
 }
 ```
@@ -285,17 +288,18 @@ export function getIntentToken(): string | null {
 
 ```typescript
 // ✅ Good: sessionStorage primary, cookie fallback
-export function getIntentToken(config: TokenStorageConfig): string | null {
+// ✅ Use getInfluenceIntentToken() - getIntentToken() is deprecated
+export function getInfluenceIntentToken(config: TokenStorageConfig): string | null {
   const sessionToken = getSession(config.influenceIntentToken);
   if (isValidToken(sessionToken)) {
     return sessionToken;
   }
-  
+
   const cookieToken = getCookie(config.influenceIntentToken);
   if (isValidToken(cookieToken)) {
     return cookieToken;
   }
-  
+
   return null;
 }
 ```
@@ -338,26 +342,6 @@ export function storeToken(token: string): void {
   info('Token captured'); // Always logs important events
 }
 ```
-
-## Security Guidelines
-
-### 1. Storage Isolation
-
-- sessionStorage is scoped to tab/window context
-- Cookies must use appropriate `SameSite` and `path` attributes
-- Never expose tokens to other domains via CORS or referrer
-
-### 2. API Communication
-
-- Use HTTPS for all API calls
-- Include token in request body, not URL or headers
-- Handle network errors gracefully
-
-### 3. Data Protection
-
-- Validate token format before storage
-- Clear tokens on `destroy()`
-- Don't persist tokens longer than necessary
 
 ## Testing Guidelines
 
@@ -407,10 +391,11 @@ The library produces two bundles:
 Required configuration:
 - `lockEndpoint` = Qredex lock API URL
 - `debug` = Enable debug logging (default: false)
-- `autoDetect` = Enable automatic detection (default: true)
 - `influenceIntentToken` = IIT storage key (default: `__qdx_iit`)
 - `purchaseIntentToken` = PIT storage key (default: `__qdx_pit`)
 - `cookieExpireDays` = Cookie expiration (default: 30)
+
+**Note:** Auto-detection is not implemented. Merchants must explicitly call `handleCartChange()` or `handleCartAdd()` when cart state changes.
 
 ### Monitoring
 
@@ -434,8 +419,8 @@ Required configuration:
 
 3. **Detection Not Triggering**
    - Verify add-to-cart button matches selectors
-   - Check if `autoDetect` is enabled
-   - Use manual `handleAddToCart()` for guaranteed detection
+   - Ensure `handleCartChange()` or `handleCartAdd()` is called when cart state changes
+   - Use manual `lockIntent()` for explicit control
 
 4. **URL Not Cleaned**
    - Check `history.replaceState` is available
@@ -480,12 +465,11 @@ Required configuration:
 #### Module Responsibilities
 ```
 bootstrap/    → Auto-start, config loading, URL capture
-core/         → State management, lifecycle control
+core/         → State management, lifecycle control, cart event handling
 storage/      → Browser storage (session, cookies), token coordination
-detect/       → Add-to-cart detection (click, form, manual)
 api/          → HTTP client for Qredex endpoints
 utils/        → Shared utilities (logging, DOM, type guards)
-index.ts      → Public API exports, window attachment
+index.ts      → Public API exports, window attachment, event handler orchestration
 ```
 
 #### Module Rules
@@ -529,7 +513,7 @@ function processToken(token: string | null) { ... }
 
 #### Use Constants For
 - Storage keys: `DEFAULT_CONFIG.influenceIntentToken`
-- Config keys: `lockEndpoint`, `debug`, `autoDetect`
+- Config keys: `lockEndpoint`, `debug`
 - URL parameters: `qdx_intent`
 - API endpoints: `/api/v1/agent/intents/lock`
 
@@ -561,7 +545,7 @@ const token = getSession(config.influenceIntentToken);
 - [ ] DRY: Is logic centralized or duplicated?
 - [ ] Modules are focused (no business logic in bootstrap)
 - [ ] Storage logic is in `storage/` module
-- [ ] Detection logic is in `detect/` module
+- [ ] Cart event handling is in `core/` module or `index.ts`
 - [ ] API logic is in `api/` module
 - [ ] Constants used (no magic strings)
 - [ ] Error messages are clear and specific
@@ -881,16 +865,3 @@ Clearly separate:
 - **Be concise, precise, and implementation-focused**
 - **When a request would degrade the system, challenge it and suggest a better path**
 - **Always optimize for systems that remain reliable and understandable years from now**
-
----
-
-## Review Decision Protocol (Mandatory)
-
-- **Classify every claim with one verdict only:** `VALID`, `MISPLACED_LAYER`, `INVALID`, or `UNVERIFIED`.
-- **No verdict without evidence:** always include exact file references with line numbers.
-- **Do not implement before verdict:** first prove the claim, then patch.
-- **If `MISPLACED_LAYER`, name the correct layer** (`bootstrap`, `core`, `storage`, `detect`, `api`, `utils`).
-- **Fail closed for mandatory operations:** do not swallow lock failures unless product explicitly approves fail-open design.
-- **Validate token state at entry boundaries:** pipeline must validate IIT/PIT state; do not defer null handling deep into helpers.
-- **Every behavior-changing fix must include tests that reproduce the failure scenario.**
-- **Do not close work without running both commands and reporting result:** `npm run test` and `npm run build`.
