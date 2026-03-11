@@ -176,6 +176,121 @@ After any user correction, capture the lesson to prevent repeating mistakes.
 - **Sanitize inputs**: All DOM interactions must be safe from injection
 - **Content Security Policy**: Agent must work with strict CSP headers
 
+## Error Handling & Edge Cases
+
+### Private Browsing Mode
+
+**Problem:** `sessionStorage` may be unavailable or cleared on page close in private/incognito mode.
+
+**Solution:**
+```typescript
+try {
+  sessionStorage.setItem(key, value);
+} catch (err) {
+  // Fall back to cookie-only storage
+  setCookie(key, value, config.cookieExpireDays);
+}
+```
+
+**Expected behavior:**
+- IIT/PIT stored in cookies only
+- Tokens persist for cookie duration (default 30 days)
+- No errors thrown to user
+
+### CORS Configuration
+
+**Problem:** Lock API calls fail due to CORS restrictions.
+
+**Backend requirements:**
+```http
+Access-Control-Allow-Origin: *  # Or specific merchant domains
+Access-Control-Allow-Methods: POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+```
+
+**Frontend handling:**
+```typescript
+try {
+  const response = await fetch(config.lockEndpoint, { ... });
+} catch (err) {
+  // Check for CORS error
+  if (err.message.includes('CORS')) {
+    console.error('[QredexAgent] CORS error - check backend configuration');
+  }
+}
+```
+
+### Content Security Policy (CSP)
+
+**Problem:** Script blocked by strict CSP headers.
+
+**Required CSP directives:**
+```http
+# For CDN delivery
+script-src 'self' https://cdn.qredex.com
+
+# For self-hosted
+script-src 'self' 'unsafe-inline'  # Only if inline script needed for config
+```
+
+**Solution:** Use non-inline script tag:
+```html
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script>
+  window.QredexAgentConfig = { debug: false };
+</script>
+```
+
+### Network Failures
+
+**Problem:** Lock API fails due to network issues.
+
+**Behavior:**
+1. IIT preserved in storage (not cleared)
+2. Error emitted via `onError()` handler
+3. Retry on next `handleCartChange()` call (idempotent)
+
+**Merchant guidance:**
+```javascript
+QredexAgent.onError(({ error, context }) => {
+  // Log error, but don't block UX
+  // Lock will retry automatically on next cart event
+  analytics.track('qredex_lock_error', { error, context });
+});
+```
+
+### Storage Quota Exceeded
+
+**Problem:** `sessionStorage` quota exceeded (rare, ~5-10MB limit).
+
+**Solution:**
+```typescript
+try {
+  sessionStorage.setItem(key, value);
+} catch (err) {
+  if (err.name === 'QuotaExceededError') {
+    // Clear old data or fall back to cookie
+    setCookie(key, value, config.cookieExpireDays);
+  }
+}
+```
+
+### Token Validation Failures
+
+**Problem:** Invalid token format captured from URL.
+
+**Validation:**
+```typescript
+function isValidToken(token: unknown): token is string {
+  return typeof token === 'string' && token.length > 0 && /^[a-zA-Z0-9_-]+$/.test(token);
+}
+```
+
+**Behavior:**
+- Invalid tokens ignored (not stored)
+- No error thrown (silent fail)
+- Debug log if `config.debug === true`
+
 ## Development Workflow
 
 ### Before Starting Work
@@ -460,24 +575,6 @@ Required configuration:
 - **Interface Segregation**: Many specific interfaces > one general interface
 - **Dependency Inversion**: Depend on abstractions, not concretions
 
-### Code Organization
-
-#### Module Responsibilities
-```
-bootstrap/    → Auto-start, config loading, URL capture
-core/         → State management, lifecycle control, cart event handling
-storage/      → Browser storage (session, cookies), token coordination
-api/          → HTTP client for Qredex endpoints
-utils/        → Shared utilities (logging, DOM, type guards)
-index.ts      → Public API exports, window attachment, event handler orchestration
-```
-
-#### Module Rules
-- **Focused modules**: Each module has a single responsibility
-- **No circular dependencies**: Import graph must be acyclic
-- **Explicit exports**: All public APIs exported from `index.ts`
-- **Type safety**: Use TypeScript types, avoid `any`
-
 ### TypeScript Guidelines
 
 #### Use Records/Interfaces for Types
@@ -512,16 +609,9 @@ function processToken(token: string | null) { ... }
 
 ### Documentation
 
-#### Update Documentation When
-- Adding new public API methods
-- Changing storage behavior
-- Modifying detection strategy
-- Adding configuration options
+**Update when:** Adding new public APIs, changing storage behavior, modifying detection strategy, or adding configuration options.
 
-#### Code Comments
-- Comment **why**, not **what**
-- Remove commented-out code
-- Keep JSDoc for public APIs
+**Code comments:** Comment **why**, not **what**. Remove commented-out code. Keep JSDoc for public APIs.
 
 ### Code Review Checklist
 
