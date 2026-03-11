@@ -29,22 +29,7 @@ export interface LockRequest {
   token: string;
 
   /** Optional metadata to include with the lock request */
-  meta?: {
-    /** Product ID if available */
-    productId?: string;
-
-    /** Product name if available */
-    productName?: string;
-
-    /** Quantity if available */
-    quantity?: number;
-
-    /** Price if available */
-    price?: number;
-
-    /** Additional custom fields */
-    [key: string]: unknown;
-  };
+  meta?: Record<string, unknown>;
 }
 
 /**
@@ -81,19 +66,4 @@ export interface LockResult {
 /**
  * Metadata for lock request.
  */
-export interface LockMeta {
-  /** Product ID if available */
-  productId?: string;
-
-  /** Product name if available */
-  productName?: string;
-
-  /** Quantity if available */
-  quantity?: number;
-
-  /** Price if available */
-  price?: number;
-
-  /** Additional custom fields */
-  [key: string]: unknown;
-}
+export type LockMeta = Record<string, unknown>;

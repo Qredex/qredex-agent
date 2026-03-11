@@ -95,9 +95,9 @@ await QredexAgent.lockIntent(meta)
 // Example with metadata
 await QredexAgent.lockIntent({
   productId: 'widget-001',
-  productName: 'Premium Widget',
   quantity: 2,
-  price: 99.99,
+  customField: 'custom value',
+  // ... any other key-value pairs
 })
 
 QredexAgent.clearTokens()  // Clear all tokens
