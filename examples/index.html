@@ -137,7 +137,7 @@
       { id: 'journal', name: 'Lock Journal', price: 24, description: 'Cheap SKU for quick IIT to PIT lock checks.' },
     ];
 
-    let agent = null;
+    let QredexAgent = null;
     let cart = loadCart();
 
     function currency(value) {
@@ -209,9 +209,9 @@
     }
 
     function updateStatus() {
-      const state = agent ? agent.getState() : null;
-      const iit = agent ? agent.getInfluenceIntentToken() : null;
-      const pit = agent ? agent.getPurchaseIntentToken() : null;
+      const state = QredexAgent ? QredexAgent.getState() : null;
+      const iit = QredexAgent ? QredexAgent.getInfluenceIntentToken() : null;
+      const pit = QredexAgent ? QredexAgent.getPurchaseIntentToken() : null;
 
       document.getElementById('status-iit').textContent = snippet(iit);
       document.getElementById('status-pit').textContent = snippet(pit);
@@ -292,11 +292,11 @@
     }
 
     function syncAgentCart(previousCount, itemCount, meta) {
-      if (!agent) {
+      if (!QredexAgent) {
         return;
       }
 
-      agent.handleCartChange({
+      QredexAgent.handleCartChange({
         previousCount,
         itemCount,
         meta,
@@ -304,7 +304,7 @@
     }
 
     function addProduct(productId) {
-      if (!agent) {
+      if (!QredexAgent) {
         log('Agent not loaded', 'error');
         return;
       }
@@ -333,7 +333,7 @@
     }
 
     function decrementProduct(productId) {
-      if (!agent) {
+      if (!QredexAgent) {
         log('Agent not loaded', 'error');
         return;
       }
@@ -362,7 +362,7 @@
     }
 
     function emptyCart() {
-      if (!agent) {
+      if (!QredexAgent) {
         log('Agent not loaded', 'error');
         return;
       }
@@ -380,7 +380,7 @@
     }
 
     function restoreCartState() {
-      if (!agent) {
+      if (!QredexAgent) {
         return;
       }
 
@@ -432,24 +432,26 @@
 
     async function main() {
       try {
-        agent = window.QredexAgent;
-        if (!agent) {
+        QredexAgent = window.QredexAgent;
+
+
+        if (!QredexAgent) {
           throw new Error('Generated IIFE bundle not loaded');
         }
 
-        agent.init();
+        QredexAgent.init();
 
-        agent.onLocked(({ purchaseToken, alreadyLocked }) => {
+        QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
           log(`Locked PIT ${purchaseToken.substring(0, 18)}…`, alreadyLocked ? 'info' : 'success');
           updateStatus();
         });
 
-        agent.onCleared(() => {
+        QredexAgent.onCleared(() => {
           log('Agent cleared IIT and PIT after cart emptied', 'warning');
           updateStatus();
         });
 
-        agent.onError(({ error, context }) => {
+        QredexAgent.onError(({ error, context }) => {
           log(`${context ?? 'agent'}: ${error}`, 'error');
         });
 
@@ -459,7 +461,7 @@
         restoreCartState();
         updateStatus();
 
-        if (!agent.hasInfluenceIntentToken() && !agent.hasPurchaseIntentToken()) {
+        if (!QredexAgent.hasInfluenceIntentToken() && !QredexAgent.hasPurchaseIntentToken()) {
           log('No IIT or PIT present. Set a random IIT before first add-to-cart.', 'warning');
         }
         log('Example ready. Cart persists across refresh.', 'success');

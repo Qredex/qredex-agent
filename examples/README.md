@@ -21,6 +21,20 @@ npx serve .
 open http://localhost:3000/examples/index.html
 ```
 
+### Browser smoke test
+
+```bash
+npm run test:browser
+```
+
+This builds the development IIFE bundle, serves the repo root, opens the example in a real browser, and verifies:
+- preload config + generated bundle load
+- `window.QredexAgent` global attachment
+- IIT capture and URL cleanup
+- add to cart -> PIT lock
+- refresh persistence
+- remove from cart -> PIT clear
+
 ### Option 2: Build a staging bundle
 
 ```bash
