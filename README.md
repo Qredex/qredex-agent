@@ -311,12 +311,12 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 ```html
 <script>
   window.QredexAgentConfig = {
-    debug: false,                    // Enable debug logging (default: false)
-    lockEndpoint: '/api/v1/...',     // Lock API endpoint
-    cookieExpireDays: 30,            // Cookie expiration (default: 30)
-    useMockEndpoint: false,          // ⚠️ DEV ONLY: mock PIT tokens
+    debug: true,                     // Enable debug logging
+    lockEndpoint: '/api/v1/...',     // Lock API endpoint (staging/dev only)
+    useMockEndpoint: true,           // ⚠️ DEV ONLY: mock PIT tokens (no network calls)
     influenceIntentToken: '__qdx_iit',  // IIT storage key
     purchaseIntentToken: '__qdx_pit',   // PIT storage key
+    cookieExpireDays: 30,            // Cookie expiration in days
   };
 </script>
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
@@ -327,11 +327,11 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `debug` | boolean | `false` | Enable debug logging in console |
-| `lockEndpoint` | string | `'https://api.qredex.com/api/v1/agent/intents/lock'` | Lock API URL |
-| `cookieExpireDays` | number | `30` | Cookie expiration in days |
+| `lockEndpoint` | string | `'https://api.qredex.com/api/v1/agent/intents/lock'` | Lock API URL (override ignored in production) |
 | `useMockEndpoint` | boolean | `false` | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
 | `influenceIntentToken` | string | `'__qdx_iit'` | Storage key for IIT |
 | `purchaseIntentToken` | string | `'__qdx_pit'` | Storage key for PIT |
+| `cookieExpireDays` | number | `30` | Cookie expiration in days |
 
 ### ⚠️ Mock Endpoint Warning
 

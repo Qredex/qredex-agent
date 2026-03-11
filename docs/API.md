@@ -43,9 +43,8 @@ interface AgentConfig {
 ```
 
 **⚠️ Production Safety:**
-- `useMockEndpoint: true` throws runtime error in production builds
-- Never deploy with `useMockEndpoint: true`
-- Console warning logged when mock endpoint enabled
+- `useMockEndpoint: true` is for development only - never deploy to production
+- Console warning logged when mock endpoint enabled on non-localhost domains
 
 **Example:**
 ```javascript
@@ -55,11 +54,8 @@ QredexAgentConfig = {
   useMockEndpoint: true,  // Mock PIT, no network calls
 };
 
-// Production
-QredexAgentConfig = {
-  debug: false,
-  // useMockEndpoint omitted or false
-};
+// Production - use defaults (no config needed)
+// QredexAgentConfig omitted entirely, or only set debug: true for troubleshooting
 ```
 
 **Note:** Usually not needed - agent auto-starts on script load with default configuration.
