@@ -129,7 +129,7 @@ After any user correction, capture the lesson to prevent repeating mistakes.
 - `core/` → Centralized state management, lifecycle control, cart event handling
 - `storage/` → Browser storage (sessionStorage, cookies), token coordination
 - `api/` → HTTP client for Qredex endpoints (lock, etc.)
-- `utils/` → Shared utilities (logging, DOM helpers, type guards)
+- `utils/` → Shared utilities (logging, type guards, storage helpers)
 - `index.ts` → Public API exports, window attachment, event handler orchestration
 
 ## Naming Rules
@@ -188,7 +188,11 @@ try {
   sessionStorage.setItem(key, value);
 } catch (err) {
   // Fall back to cookie-only storage
-  setCookie(key, value, config.cookieExpireDays);
+  setCookie(key, value, {
+    maxAge: config.cookieExpireDays * 86400, // Convert days to seconds
+    path: '/',
+    sameSite: 'Strict',
+  });
 }
 ```
 
@@ -270,7 +274,11 @@ try {
 } catch (err) {
   if (err.name === 'QuotaExceededError') {
     // Clear old data or fall back to cookie
-    setCookie(key, value, config.cookieExpireDays);
+    setCookie(key, value, {
+      maxAge: config.cookieExpireDays * 86400, // Convert days to seconds
+      path: '/',
+      sameSite: 'Strict',
+    });
   }
 }
 ```
@@ -282,7 +290,8 @@ try {
 **Validation:**
 ```typescript
 function isValidToken(token: unknown): token is string {
-  return typeof token === 'string' && token.length > 0 && /^[a-zA-Z0-9_-]+$/.test(token);
+  // Tokens must be non-empty string, 8-2048 characters
+  return typeof token === 'string' && token.length >= 8 && token.length <= 2048;
 }
 ```
 
@@ -593,7 +602,8 @@ export type LockResult =
 #### Type Guards for Validation
 ```typescript
 export function isValidToken(token: unknown): token is string {
-  return typeof token === 'string' && token.length > 0;
+  // Tokens must be non-empty string, 8-2048 characters
+  return typeof token === 'string' && token.length >= 8 && token.length <= 2048;
 }
 ```
 
