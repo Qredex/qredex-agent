@@ -32,7 +32,7 @@ import {
 import {
   hasInfluenceIntentToken,
   hasPurchaseToken,
-  storeIntentToken,
+  storeInfluenceIntentToken,
   storePurchaseToken,
   clearAllTokens,
 } from '../../src/storage/tokens.js';
@@ -134,7 +134,7 @@ describe('Token Helpers', () => {
     });
 
     it('should return true when token exists in sessionStorage', () => {
-      storeIntentToken('test_iit_12345', testConfig);
+      storeInfluenceIntentToken('test_iit_12345', testConfig);
       expect(hasInfluenceIntentToken(testConfig)).toBe(true);
     });
 
@@ -150,7 +150,7 @@ describe('Token Helpers', () => {
 
     it('should return false for invalid tokens', () => {
       // Too short
-      storeIntentToken('short', testConfig);
+      storeInfluenceIntentToken('short', testConfig);
       expect(hasInfluenceIntentToken(testConfig)).toBe(false);
     });
   });

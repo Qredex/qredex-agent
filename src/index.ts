@@ -79,13 +79,6 @@ export function getInfluenceIntentToken(): string | null {
 }
 
 /**
- * @deprecated Use {@link getInfluenceIntentToken()} instead. Will be removed in v2.0.
- */
-export function getIntentToken(): string | null {
-  return getInfluenceIntentToken();
-}
-
-/**
  * Get the current Purchase Intent Token (PIT).
  *
  * Checks sessionStorage first, then falls back to cookie.
@@ -138,13 +131,6 @@ export const hasInfluenceIntentToken = (): boolean => {
     purchaseIntentToken: config.purchaseIntentToken,
     cookieExpireDays: config.cookieExpireDays,
   });
-};
-
-/**
- * @deprecated Use {@link hasInfluenceIntentToken()} instead. Will be removed in v2.0.
- */
-export const hasIntentToken = (): boolean => {
-  return hasInfluenceIntentToken();
 };
 
 /**
@@ -831,10 +817,8 @@ if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).QredexAgent = {
     // Read/State
     getInfluenceIntentToken,
-    getIntentToken,  // deprecated
     getPurchaseIntentToken,
     hasInfluenceIntentToken,
-    hasIntentToken,  // deprecated
     hasPurchaseIntentToken,
 
     // Commands

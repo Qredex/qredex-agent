@@ -23,7 +23,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { lockIntent } from '../../src/api/lock.js';
-import { storeIntentToken, storePurchaseToken, clearAllTokens } from '../../src/storage/tokens.js';
+import { storeInfluenceIntentToken, storePurchaseToken, clearAllTokens } from '../../src/storage/tokens.js';
 import { initConfig, resetConfig } from '../../src/bootstrap/config.js';
 import { resetState } from '../../src/core/state.js';
 
@@ -84,7 +84,7 @@ describe('Lock API', () => {
 
     it('should return same promise for concurrent calls', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -120,7 +120,7 @@ describe('Lock API', () => {
 
     it('should handle successful lock response', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieExpireDays: testConfig.cookieExpireDays,
@@ -157,7 +157,7 @@ describe('Lock API', () => {
 
     it('should successfully lock intent', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -189,7 +189,7 @@ describe('Lock API', () => {
 
     it('should handle HTTP errors', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -214,7 +214,7 @@ describe('Lock API', () => {
 
     it('should handle network errors', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -235,7 +235,7 @@ describe('Lock API', () => {
 
     it('should handle invalid response without token', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         cookieExpireDays: testConfig.cookieExpireDays,
@@ -261,7 +261,7 @@ describe('Lock API', () => {
 
     it('should include metadata in request', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -297,7 +297,7 @@ describe('Lock API', () => {
   describe('State Management', () => {
     it('should reset in-flight state after completion', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -327,7 +327,7 @@ describe('Lock API', () => {
 
     it('should allow new lock after state reset', async () => {
       // Store IIT
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,
@@ -358,7 +358,7 @@ describe('Lock API', () => {
       });
 
       // Re-store IIT since clearAllTokens clears both
-      storeIntentToken('test_intent_12345', {
+      storeInfluenceIntentToken('test_intent_12345', {
         influenceIntentToken: testConfig.influenceIntentToken,
         purchaseIntentToken: testConfig.purchaseIntentToken,
         influenceIntentToken: testConfig.influenceIntentToken,

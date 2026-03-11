@@ -25,8 +25,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { setCookie, getCookie, removeCookie } from '../../src/storage/cookie.js';
 import { setSession, getSession, removeSession, sessionAvailable } from '../../src/storage/session.js';
 import {
-  storeIntentToken,
-  getIntentToken,
+  storeInfluenceIntentToken,
+  getInfluenceIntentToken,
   storePurchaseToken,
   getPurchaseToken,
   clearAllTokens,
@@ -114,9 +114,9 @@ describe('Token Storage', () => {
 
   it('should store and retrieve intent token', () => {
     const token = 'test_intent_token_12345';
-    storeIntentToken(token, testConfig);
+    storeInfluenceIntentToken(token, testConfig);
 
-    const retrieved = getIntentToken(testConfig);
+    const retrieved = getInfluenceIntentToken(testConfig);
     expect(retrieved).toBe(token);
   });
 
@@ -135,7 +135,7 @@ describe('Token Storage', () => {
     setSession(testConfig.influenceIntentToken, sessionToken);
     setCookie(testConfig.influenceIntentToken, cookieToken, { path: '/', maxAge: 86400 });
 
-    const retrieved = getIntentToken(testConfig);
+    const retrieved = getInfluenceIntentToken(testConfig);
     expect(retrieved).toBe(sessionToken);
   });
 
@@ -143,24 +143,24 @@ describe('Token Storage', () => {
     const cookieToken = 'cookie_fallback_token';
     setCookie(testConfig.influenceIntentToken, cookieToken, { path: '/', maxAge: 86400 });
 
-    const retrieved = getIntentToken(testConfig);
+    const retrieved = getInfluenceIntentToken(testConfig);
     expect(retrieved).toBe(cookieToken);
   });
 
   it('should clear all tokens', () => {
-    storeIntentToken('intent_token', testConfig);
+    storeInfluenceIntentToken('intent_token', testConfig);
     storePurchaseToken('purchase_token', testConfig);
 
     clearAllTokens(testConfig);
 
-    expect(getIntentToken(testConfig)).toBeNull();
+    expect(getInfluenceIntentToken(testConfig)).toBeNull();
     expect(getPurchaseToken(testConfig)).toBeNull();
   });
 
   it('should reject invalid tokens', () => {
-    storeIntentToken('', testConfig);
-    storeIntentToken('short', testConfig);
+    storeInfluenceIntentToken('', testConfig);
+    storeInfluenceIntentToken('short', testConfig);
 
-    expect(getIntentToken(testConfig)).toBeNull();
+    expect(getInfluenceIntentToken(testConfig)).toBeNull();
   });
 });

@@ -99,27 +99,6 @@ export function removeInfluenceIntentToken(config: TokenStorageConfig = DEFAULT_
 }
 
 /**
- * @deprecated Use `storeInfluenceIntentToken()` instead. Will be removed in v2.0.
- */
-export function storeIntentToken(token: string, config: TokenStorageConfig = DEFAULT_CONFIG): void {
-  storeInfluenceIntentToken(token, config);
-}
-
-/**
- * @deprecated Use `getInfluenceIntentToken()` instead. Will be removed in v2.0.
- */
-export function getIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): string | null {
-  return getInfluenceIntentToken(config);
-}
-
-/**
- * @deprecated Use `removeInfluenceIntentToken()` instead. Will be removed in v2.0.
- */
-export function removeIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): void {
-  removeInfluenceIntentToken(config);
-}
-
-/**
  * Get the purchase intent token (PIT) in both sessionStorage and cookie.
  */
 export function storePurchaseToken(
@@ -196,17 +175,10 @@ export function hasInfluenceIntentToken(config: TokenStorageConfig = DEFAULT_CON
 }
 
 /**
- * @deprecated Use `hasInfluenceIntentToken()` instead. Will be removed in v2.0.
- */
-export function hasIntentToken(config: TokenStorageConfig = DEFAULT_CONFIG): boolean {
-  return hasInfluenceIntentToken(config);
-}
-
-/**
  * Clear all tokens from storage.
  */
 export function clearAllTokens(config: TokenStorageConfig = DEFAULT_CONFIG): void {
-  removeIntentToken(config);
+  removeInfluenceIntentToken(config);
   removePurchaseToken(config);
   debug('All tokens cleared');
 }
