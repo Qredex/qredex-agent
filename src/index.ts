@@ -44,7 +44,23 @@ import type { AgentConfig } from './bootstrap/config.js';
 import type { LockResult, LockMeta } from './api/types.js';
 
 // Auto-start: capture intent token from URL immediately
-autoStart();
+const intentCapturedOnStart = autoStart();
+if (intentCapturedOnStart) {
+  // Emit intent captured event
+  const intentCapturedEvent = {
+    hasIIT: true as const,
+    timestamp: Date.now(),
+  };
+  for (const handler of intentCapturedHandlers) {
+    try {
+      handler(intentCapturedEvent);
+    } catch (err) {
+      console.error('[QredexAgent] onIntentCaptured handler error:', err);
+    }
+  }
+  // Emit state changed event
+  emitStateChanged();
+}
 
 // ============================================
 // READ / STATE (Manual)
@@ -154,6 +170,89 @@ export function hasPurchaseIntentToken(): boolean {
     purchaseIntentToken: config.purchaseIntentToken,
     cookieExpireDays: config.cookieExpireDays,
   });
+}
+
+// ============================================
+// STATE INSPECTION
+// ============================================
+
+/**
+ * Get the current attribution state.
+ *
+ * Returns a snapshot of the agent's runtime state for debugging and inspection.
+ * Useful for wrappers, sandbox/workbench, support, and merchant debugging.
+ *
+ * @returns Current attribution state object.
+ *
+ * @example
+ * ```TypeScript
+ * const state = QredexAgent.getState();
+ * console.log('Attribution state:', state);
+ *
+ * // Example output:
+ * // {
+ * //   hasIIT: true,
+ * //   hasPIT: false,
+ * //   iit: 'abc123...',
+ * //   pit: null,
+ * //   cartState: 'empty',
+ * //   locked: false,
+ * //   timestamp: 1234567890
+ * // }
+ * ```
+ */
+export function getState(): {
+  hasIIT: boolean;
+  hasPIT: boolean;
+  iit: string | null;
+  pit: string | null;
+  cartState: 'unknown' | 'empty' | 'non-empty';
+  locked: boolean;
+  timestamp: number;
+} {
+  const config = getConfig();
+  const iit = getStoredInfluenceIntentToken({
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
+    cookieExpireDays: config.cookieExpireDays,
+  });
+  const pit = getStoredPurchaseToken({
+    influenceIntentToken: config.influenceIntentToken,
+    purchaseIntentToken: config.purchaseIntentToken,
+    cookieExpireDays: config.cookieExpireDays,
+  });
+
+  return {
+    hasIIT: iit !== null,
+    hasPIT: pit !== null,
+    iit,
+    pit,
+    cartState: checkHasCartItems() ? 'non-empty' : 'empty',
+    locked: pit !== null,
+    timestamp: Date.now(),
+  };
+}
+
+/**
+ * Emit state changed event to all registered handlers.
+ * @internal
+ */
+function emitStateChanged(): void {
+  const state = getState();
+  const event = {
+    hasIIT: state.hasIIT,
+    hasPIT: state.hasPIT,
+    locked: state.locked,
+    cartState: state.cartState,
+    timestamp: state.timestamp,
+  };
+  for (const handler of stateChangeHandlers) {
+    try {
+      handler(event);
+    } catch (err) {
+      console.error('[QredexAgent] onStateChanged handler error:', err);
+    }
+  }
 }
 
 // ============================================
@@ -357,6 +456,9 @@ export function handleCartChange(event: {
               console.error('[QredexAgent] onLocked handler error:', err);
             }
           }
+
+          // Emit state changed event
+          emitStateChanged();
         } else {
           // Emit error event
           const errorEvent = {
@@ -411,6 +513,9 @@ export function handleCartChange(event: {
         console.error('[QredexAgent] onCleared handler error:', err);
       }
     }
+
+    // Emit state changed event
+    emitStateChanged();
   }
 }
 
@@ -559,6 +664,9 @@ export function handlePaymentSuccess(event: {
       console.error('[QredexAgent] onCleared handler error:', err);
     }
   }
+
+  // Emit state changed event
+  emitStateChanged();
 }
 
 // ============================================
@@ -724,6 +832,115 @@ export function offError(handler: ErrorHandler): void {
 }
 
 // ============================================
+// STATE CHANGE EVENTS
+// ============================================
+
+type StateChangeHandler = (event: {
+  hasIIT: boolean;
+  hasPIT: boolean;
+  locked: boolean;
+  cartState: 'unknown' | 'empty' | 'non-empty';
+  timestamp: number;
+}) => void;
+
+type IntentCapturedHandler = (event: {
+  hasIIT: true;
+  timestamp: number;
+}) => void;
+
+const stateChangeHandlers: StateChangeHandler[] = [];
+const intentCapturedHandlers: IntentCapturedHandler[] = [];
+
+/**
+ * Listen for attribution state changes.
+ *
+ * Register a handler that will be called when the agent's attribution state changes.
+ * Fires when IIT is captured, PIT is locked, or state is cleared.
+ *
+ * @param handler - Callback function that receives the state change event data.
+ *
+ * @example
+ * ```TypeScript
+ * QredexAgent.onStateChanged(({ hasIIT, hasPIT, locked, cartState }) => {
+ *   console.log('State changed:', { hasIIT, hasPIT, locked, cartState });
+ *   // Update UI based on attribution state
+ * });
+ * ```
+ *
+ * @see {@link offStateChanged} - Unregister the handler
+ * @see {@link getState} - Get current state
+ */
+export function onStateChanged(handler: StateChangeHandler): void {
+  stateChangeHandlers.push(handler);
+}
+
+/**
+ * Listen for IIT capture events.
+ *
+ * Register a handler that will be called when an Influence Intent Token is captured
+ * from the URL or runtime context.
+ *
+ * @param handler - Callback function that receives the intent captured event data.
+ *
+ * @example
+ * ```TypeScript
+ * QredexAgent.onIntentCaptured(({ timestamp }) => {
+ *   console.log('✅ Intent captured at:', new Date(timestamp));
+ *   // Track attribution capture in analytics
+ * });
+ * ```
+ *
+ * @see {@link offIntentCaptured} - Unregister the handler
+ */
+export function onIntentCaptured(handler: IntentCapturedHandler): void {
+  intentCapturedHandlers.push(handler);
+}
+
+/**
+ * Unregister a state change handler.
+ *
+ * @param handler - The handler function to remove.
+ *
+ * @example
+ * ```TypeScript
+ * const handler = ({ hasPIT }) => console.log('PIT:', hasPIT);
+ * QredexAgent.onStateChanged(handler);
+ * // ... later
+ * QredexAgent.offStateChanged(handler);
+ * ```
+ *
+ * @see {@link onStateChanged} - Register the handler
+ */
+export function offStateChanged(handler: StateChangeHandler): void {
+  const index = stateChangeHandlers.indexOf(handler);
+  if (index !== -1) {
+    stateChangeHandlers.splice(index, 1);
+  }
+}
+
+/**
+ * Unregister an intent captured handler.
+ *
+ * @param handler - The handler function to remove.
+ *
+ * @example
+ * ```TypeScript
+ * const handler = () => console.log('Intent captured!');
+ * QredexAgent.onIntentCaptured(handler);
+ * // ... later
+ * QredexAgent.offIntentCaptured(handler);
+ * ```
+ *
+ * @see {@link onIntentCaptured} - Register the handler
+ */
+export function offIntentCaptured(handler: IntentCapturedHandler): void {
+  const index = intentCapturedHandlers.indexOf(handler);
+  if (index !== -1) {
+    intentCapturedHandlers.splice(index, 1);
+  }
+}
+
+// ============================================
 // LIFECYCLE
 // ============================================
 
@@ -816,6 +1033,7 @@ if (typeof window !== 'undefined') {
     getPurchaseIntentToken,
     hasInfluenceIntentToken,
     hasPurchaseIntentToken,
+    getState,
 
     // Commands
     lockIntent,
@@ -834,6 +1052,10 @@ if (typeof window !== 'undefined') {
     offLocked,
     offCleared,
     offError,
+    onStateChanged,
+    offStateChanged,
+    onIntentCaptured,
+    offIntentCaptured,
 
     // Lifecycle
     init,
@@ -863,6 +1085,7 @@ let QredexAgent = {
   getPurchaseIntentToken,
   hasInfluenceIntentToken,
   hasPurchaseIntentToken,
+  getState,
 
   // Commands
   lockIntent,
@@ -881,6 +1104,10 @@ let QredexAgent = {
   offLocked,
   offCleared,
   offError,
+  onStateChanged,
+  offStateChanged,
+  onIntentCaptured,
+  offIntentCaptured,
 
   // Lifecycle
   init,

@@ -116,8 +116,9 @@ export function captureIntentToken(): boolean {
 /**
  * Auto-start hook: runs immediately when the script loads.
  * This is called by the main entry point.
+ * Returns true if intent was captured.
  */
-export function autoStart(): void {
+export function autoStart(): boolean {
   debug('Auto-start: capturing intent token from URL');
-  captureIntentToken();
+  return captureIntentToken();
 }

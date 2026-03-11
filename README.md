@@ -114,6 +114,23 @@ QredexAgent.hasInfluenceIntentToken()     // boolean
 QredexAgent.hasPurchaseIntentToken()      // boolean
 ```
 
+### State Inspection
+
+```javascript
+// Get current attribution state (for debugging/inspection)
+const state = QredexAgent.getState();
+// Returns:
+// {
+//   hasIIT: boolean,
+//   hasPIT: boolean,
+//   iit: string | null,
+//   pit: string | null,
+//   cartState: 'empty' | 'non-empty',
+//   locked: boolean,
+//   timestamp: number
+// }
+```
+
 ### Event Handlers (Merchant → Agent)
 
 Tell the agent when events happen:
@@ -180,6 +197,16 @@ QredexAgent.onCleared(({ timestamp }) => {
 QredexAgent.onError(({ error, context }) => {
   console.error('❌ Error in', context, ':', error);
 });
+
+// Listen for attribution state changes (NEW)
+QredexAgent.onStateChanged(({ hasIIT, hasPIT, locked, cartState }) => {
+  console.log('State changed:', { hasIIT, hasPIT, locked, cartState });
+});
+
+// Listen for IIT capture (NEW)
+QredexAgent.onIntentCaptured(({ timestamp }) => {
+  console.log('✅ Intent captured at:', new Date(timestamp));
+});
 ```
 
 ### Unregister Listeners
@@ -196,6 +223,8 @@ QredexAgent.offLocked(handler);
 // Similarly for other listeners
 QredexAgent.offCleared(handler);
 QredexAgent.offError(handler);
+QredexAgent.offStateChanged(handler);
+QredexAgent.offIntentCaptured(handler);
 ```
 
 ### Manual Commands
