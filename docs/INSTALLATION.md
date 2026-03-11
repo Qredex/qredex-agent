@@ -195,7 +195,7 @@ Debug logging is available only in non-production builds:
 </script>
 ```
 
-Production ignores `debug: true` and keeps logging disabled.
+Production ignores `debug: true` and suppresses agent `debug`/`info`/`warn` console output.
 
 **Example output:**
 ```

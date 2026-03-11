@@ -24,6 +24,26 @@
 
 let debugEnabled = false;
 
+export interface LogPolicy {
+  debug: boolean;
+  info: boolean;
+  warn: boolean;
+  error: boolean;
+}
+
+export function getLogPolicy(environment: 'development' | 'staging' | 'production' | 'test', enabled: boolean): LogPolicy {
+  return {
+    debug: environment !== 'production' && enabled,
+    info: environment !== 'production' && enabled,
+    warn: environment !== 'production',
+    error: true,
+  };
+}
+
+function getCurrentLogPolicy(): LogPolicy {
+  return getLogPolicy(__QDX_ENV__, debugEnabled);
+}
+
 /**
  * Enable or disable debug logging.
  */
@@ -35,7 +55,7 @@ export function setDebugMode(enabled: boolean): void {
  * Log a debug message. Only outputs if debug mode is enabled.
  */
 export function debug(...args: unknown[]): void {
-  if (!debugEnabled) return;
+  if (!getCurrentLogPolicy().debug) return;
   if (typeof console === 'undefined') return;
   console.debug('[QredexAgent]', ...args);
 }
@@ -44,6 +64,7 @@ export function debug(...args: unknown[]): void {
  * Log an info message. Always outputs if console exists.
  */
 export function info(...args: unknown[]): void {
+  if (!getCurrentLogPolicy().info) return;
   if (typeof console === 'undefined') return;
   console.info('[QredexAgent]', ...args);
 }
@@ -52,6 +73,7 @@ export function info(...args: unknown[]): void {
  * Log a warning message. Always outputs if console exists.
  */
 export function warn(...args: unknown[]): void {
+  if (!getCurrentLogPolicy().warn) return;
   if (typeof console === 'undefined') return;
   console.warn('[QredexAgent]', ...args);
 }
@@ -60,6 +82,7 @@ export function warn(...args: unknown[]): void {
  * Log an error message. Always outputs if console exists.
  */
 export function error(...args: unknown[]): void {
+  if (!getCurrentLogPolicy().error) return;
   if (typeof console === 'undefined') return;
   console.error('[QredexAgent]', ...args);
 }

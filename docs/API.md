@@ -44,7 +44,7 @@ function init(config?: AgentConfig): void
 **⚠️ Production Safety:**
 - `useMockEndpoint: true` is for development/test only - ignored elsewhere
 - `lockEndpoint` override ignored in production (always uses Qredex AGENT endpoint)
-- `debug: true` is ignored in production
+- `debug: true` is ignored in production and agent `debug`/`info`/`warn` console output is suppressed
 
 **Example:**
 ```javascript
@@ -597,7 +597,7 @@ interface AgentConfig {
    */
   lockEndpoint?: string;
 
-  /** Enable debug logging in non-production builds. */
+  /** Enable verbose agent diagnostics in non-production builds. */
   debug?: boolean;
 
   /**

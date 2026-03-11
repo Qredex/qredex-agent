@@ -473,7 +473,7 @@ Enable debug logging in development, staging, or test:
 window.QredexAgentConfig = { debug: true };
 ```
 
-Production always forces `debug` back to `false`.
+Production always forces `debug` back to `false` and suppresses agent `debug`/`info`/`warn` console output.
 
 **Example output:**
 ```
