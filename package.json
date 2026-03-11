@@ -1,8 +1,8 @@
 {
-  "name": "qredex-agent",
+  "name": "@qredex/agent",
   "version": "1.0.0",
   "description": "Lightweight browser agent for Qredex intent capture and locking",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "./dist/qredex-agent.iife.js",
   "module": "./dist/qredex-agent.es.js",
