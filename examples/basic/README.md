@@ -119,7 +119,7 @@ Access the agent from the browser console:
 
 ```javascript
 // Get tokens
-QredexAgent.getIntentToken()
+QredexAgent.getInfluenceIntentToken()
 QredexAgent.getPurchaseIntentToken()
 
 // Check token existence

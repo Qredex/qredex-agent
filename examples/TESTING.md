@@ -63,9 +63,9 @@ QredexAgent.hasPurchaseIntentToken() // false
 
 **Verify in Console:**
 ```javascript
-QredexAgent.getIntentToken()     // "test_token_abc123"
-QredexAgent.hasInfluenceIntentToken()     // true
-QredexAgent.hasPurchaseIntentToken() // false
+QredexAgent.getInfluenceIntentToken()  // "test_token_abc123"
+QredexAgent.hasInfluenceIntentToken()  // true
+QredexAgent.hasPurchaseIntentToken()   // false
 ```
 
 **Alternative:** Manually navigate to:
@@ -360,7 +360,7 @@ console.log({
   initialized: QredexAgent.isInitialized(),
   hasIIT: QredexAgent.hasInfluenceIntentToken(),
   hasPIT: QredexAgent.hasPurchaseIntentToken(),
-  iit: QredexAgent.getIntentToken(),
+  iit: QredexAgent.getInfluenceIntentToken(),
   pit: QredexAgent.getPurchaseIntentToken(),
 });
 
@@ -448,10 +448,10 @@ All available console commands:
 
 ```javascript
 // Read tokens
-QredexAgent.getIntentToken()              // Get IIT
-QredexAgent.getPurchaseIntentToken()      // Get PIT
-QredexAgent.hasInfluenceIntentToken()              // Check IIT exists
-QredexAgent.hasPurchaseIntentToken()      // Check PIT exists
+QredexAgent.getInfluenceIntentToken()  // Get IIT
+QredexAgent.getPurchaseIntentToken()   // Get PIT
+QredexAgent.hasInfluenceIntentToken()  // Check IIT exists
+QredexAgent.hasPurchaseIntentToken()   // Check PIT exists
 
 // Commands
 await QredexAgent.lockIntent(meta)        // Manual lock (idempotent)

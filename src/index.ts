@@ -859,7 +859,7 @@ if (typeof window !== 'undefined') {
  * QredexAgent.handleCartChange({ itemCount: 1, previousCount: 0 });
  * ```
  */
-const QredexAgent = {
+let QredexAgent = {
   // Read/State
   getInfluenceIntentToken,
   getPurchaseIntentToken,

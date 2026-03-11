@@ -60,8 +60,8 @@ window.QredexAgent.hasPurchaseIntentToken() // false
 
 **Verify in Console:**
 ```javascript
-window.QredexAgent.getIntentToken()      // "test_intent_abc123"
-window.QredexAgent.hasInfluenceIntentToken()      // true
+window.QredexAgent.getInfluenceIntentToken()  // "test_intent_abc123"
+window.QredexAgent.hasInfluenceIntentToken()  // true
 ```
 
 **Alternative:** Manually navigate to:
@@ -329,7 +329,7 @@ console.log({
   initialized: QredexAgent.isInitialized(),
   hasIIT: QredexAgent.hasInfluenceIntentToken(),
   hasPIT: QredexAgent.hasPurchaseIntentToken(),
-  iit: QredexAgent.getIntentToken(),
+  iit: QredexAgent.getInfluenceIntentToken(),
   pit: QredexAgent.getPurchaseIntentToken(),
 });
 
@@ -392,7 +392,7 @@ All available console commands:
 
 ```javascript
 // Read tokens
-QredexAgent.getIntentToken()
+QredexAgent.getInfluenceIntentToken()
 QredexAgent.getPurchaseIntentToken()
 QredexAgent.hasInfluenceIntentToken()
 QredexAgent.hasPurchaseIntentToken()

@@ -6,10 +6,8 @@
 
 import clearTokens, {
   getInfluenceIntentToken,
-  getIntentToken,  // deprecated
   getPurchaseIntentToken,
   hasInfluenceIntentToken,
-  hasIntentToken,  // deprecated
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,
@@ -25,10 +23,8 @@ import clearTokens, {
 // Make available globally for console access
 window.QredexAgent = {
   getInfluenceIntentToken,
-  getIntentToken,  // deprecated
   getPurchaseIntentToken,
   hasInfluenceIntentToken,
-  hasIntentToken,  // deprecated
   hasPurchaseIntentToken,
   handleCartChange,
   lockIntent,

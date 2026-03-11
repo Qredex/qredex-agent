@@ -41,7 +41,7 @@ Once loaded, the agent is available globally via `window.QredexAgent`:
 
 ```javascript
 // Check tokens
-QredexAgent.getIntentToken()           // Get IIT
+QredexAgent.getInfluenceIntentToken()  // Get IIT
 QredexAgent.getPurchaseIntentToken()   // Get PIT
 
 // Handle cart state changes
@@ -121,13 +121,13 @@ QredexAgent.onCleared(() => {
 In production, load from CDN instead of local dist:
 
 ```html
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script src="https://cdn.qredex.com/agent/v1/@qredex/agent.iife.min.js"></script>
 ```
 
 Or use a specific version:
 
 ```html
-<script src="https://cdn.qredex.com/agent/v1.0.0/qredex-agent.iife.min.js"></script>
+<script src="https://cdn.qredex.com/agent/v1.0.0/@qredex/agent.iife.min.js"></script>
 ```
 
 ---
@@ -154,9 +154,9 @@ Configure before the script loads:
 ### Read Tokens
 
 ```javascript
-QredexAgent.getIntentToken()           // string | null
+QredexAgent.getInfluenceIntentToken()  // string | null
 QredexAgent.getPurchaseIntentToken()   // string | null
-QredexAgent.hasInfluenceIntentToken()           // boolean
+QredexAgent.hasInfluenceIntentToken()  // boolean
 QredexAgent.hasPurchaseIntentToken()   // boolean
 ```
 
