@@ -170,9 +170,8 @@ Each example includes a complete working demo with testing instructions.
 |---------|-------------|------------|
 | [examples/cdn-test/](examples/cdn-test/) | Quick CDN testing page | `npm run build` → open in browser |
 | [examples/basic/](examples/basic/) | Comprehensive demo with visual testing UI | `npx serve examples` → `http://localhost:3000/basic/` |
-| [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo | `npx serve examples` → `http://localhost:3000/vanilla/` |
-| [examples/react/](examples/react/) | React/Next.js integration | `cd examples/react && npm install && npm run dev` |
-| [examples/vue/](examples/vue/) | Vue 3 + Vite integration | `cd examples/vue && npm install && npm run dev` |
+
+> **Note:** React, Vue, and other framework integrations will be available as separate packages (`@qredex/react`, `@qredex/vue`, etc.) in their own repositories.
 
 ### Quick Test (Basic Example)
 
@@ -231,7 +230,7 @@ function useQredexAgent() {
 }
 ```
 
-**See:** [examples/react/](examples/react/) for complete React/Next.js example with testing scenarios.
+**See:** [examples/basic/](examples/basic/) for complete vanilla JS example with testing scenarios.
 
 ### Vanilla JS
 
@@ -259,43 +258,20 @@ document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
 });
 ```
 
-**See:** [examples/vanilla/](examples/vanilla/) for complete vanilla JS e-commerce demo.
+**See:** [examples/basic/](examples/basic/) for complete vanilla JS e-commerce demo.
 
-### Vue/Nuxt
+---
 
-```vue
-<script setup>
-import { onMounted } from 'vue';
+## Framework Integrations
 
-onMounted(() => {
-  // Optional: listen for agent events
-  QredexAgent.onLocked(({ purchaseToken }) => {
-    console.log('Locked:', purchaseToken);
-  });
-});
-
-const addToCart = async (product) => {
-  await $api.post('/cart', product);
-  QredexAgent.handleCartChange({
-    itemCount: cart.itemCount,
-    previousCount: cart.previousCount,
-    meta: {
-      productId: product.id,
-      quantity: product.quantity,
-      price: product.price,
-    },
-  });
-};
-
-const checkout = async (order) => {
-  const pit = QredexAgent.getPurchaseIntentToken();
-  await $api.post('/orders', { ...order, qredex_pit: pit });
-  QredexAgent.handlePaymentSuccess(order);
-};
-</script>
-```
-
-**See:** [examples/vue/](examples/vue/) for complete Vue 3 + Vite example.
+> **Coming Soon:** Framework-specific packages for React, Vue, Next.js, and more.
+>
+> These will be published as separate packages:
+> - `@qredex/react` - React hooks & components
+> - `@qredex/vue` - Vue composables & plugin
+> - `@qredex/next` - Next.js integration
+>
+> Each will have its own repository with dedicated examples and documentation.
 
 ---
 
@@ -376,9 +352,7 @@ Requires ES2020+ support.
 | Example | Description | Quick Start |
 |---------|-------------|-------------|
 | [examples/basic/](examples/basic/) | Comprehensive demo with testing UI | `npx serve examples` |
-| [examples/vanilla/](examples/vanilla/) | Vanilla JS e-commerce demo | `npx serve examples` |
-| [examples/react/](examples/react/) | React/Next.js integration | `cd examples/react && npm run dev` |
-| [examples/vue/](examples/vue/) | Vue 3 + Vite integration | `cd examples/vue && npm run dev` |
+| [examples/cdn-test/](examples/cdn-test/) | Quick CDN testing | `npx serve examples` |
 
 Each example includes:
 - Complete working demo

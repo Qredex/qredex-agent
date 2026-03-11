@@ -23,9 +23,9 @@ This guide covers testing for all Qredex Agent examples:
 | Example | Framework | Port | URL |
 |---------|-----------|------|-----|
 | [basic/](../examples/basic/) | Vanilla JS | 3000 | `/basic/` |
-| [vanilla/](../examples/vanilla/) | Vanilla JS | 3000 | `/vanilla/` |
-| [react/](../examples/react/) | React/Next.js | 3000 | `/` |
-| [vue/](../examples/vue/) | Vue 3 | 3000 | `/` |
+| [cdn-test/](../examples/cdn-test/) | Vanilla JS (CDN) | 3000 | `/cdn-test/` |
+
+> **Note:** Framework-specific examples (React, Vue, etc.) will be available in separate repositories when `@qredex/react`, `@qredex/vue`, and other packages are released.
 
 ---
 
@@ -402,65 +402,17 @@ QredexAgent.getStatus()
 
 ---
 
-### React Example
-
-**URL:** `http://localhost:3000/` (run `npm run dev` in `examples/react/`)
-
-**Features:**
-- React components
-- Hooks for state management
-- Client-side rendering
-
-**Testing Checklist:**
-- [ ] App loads without errors
-- [ ] Status updates reactively
-- [ ] Cart state syncs with agent
-- [ ] Event listeners fire
-- [ ] No hydration errors
-
-**Console Check:**
-```javascript
-// Should be available in browser console
-window.QredexAgent
-```
-
----
-
-### Vue Example
-
-**URL:** `http://localhost:3000/` (run `npm run dev` in `examples/vue/`)
-
-**Features:**
-- Vue 3 Composition API
-- Reactive state
-- Component-based UI
-
-**Testing Checklist:**
-- [ ] App mounts correctly
-- [ ] Status reactive to changes
-- [ ] Cart updates with agent
-- [ ] Event listeners fire
-- [ ] No console errors
-
-**Console Check:**
-```javascript
-// Should be available in browser console
-window.QredexAgent
-```
-
----
-
 ## API Testing Reference
 
 ### Read Operations
 
 ```javascript
 // Get tokens
-QredexAgent.getIntentToken()           // string | null
+QredexAgent.getInfluenceIntentToken()  // string | null
 QredexAgent.getPurchaseIntentToken()   // string | null
 
 // Check existence
-QredexAgent.hasInfluenceIntentToken()           // boolean
+QredexAgent.hasInfluenceIntentToken()  // boolean
 QredexAgent.hasPurchaseIntentToken()   // boolean
 
 // Status

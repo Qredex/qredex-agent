@@ -11,9 +11,7 @@ Unified testing guide for all Qredex Agent examples.
 | Example | Best For | How to Run |
 |---------|----------|------------|
 | [basic/](basic/) | First-time testing, visual feedback | `npx serve ..` → `http://localhost:3000/basic/` |
-| [vanilla/](vanilla/) | Simple e-commerce simulation | `npx serve ..` → `http://localhost:3000/vanilla/` |
-| [react/](react/) | React/Next.js projects | `cd react && npm run dev` → `http://localhost:3000` |
-| [vue/](vue/) | Vue 3 + Vite projects | `cd vue && npm run dev` → `http://localhost:5173` |
+| [cdn-test/](cdn-test/) | Quick CDN testing | `npx serve ..` → `http://localhost:3000/cdn-test/` |
 
 ### Step 2: Run Testing Scenarios
 
