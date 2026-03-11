@@ -31,27 +31,33 @@ function init(config?: AgentConfig): void
 - `config` (optional) - Configuration options
 
 **Configuration Options:**
-```typescript
-interface AgentConfig {
-  lockEndpoint?: string;           // Default: 'https://api.qredex.com/api/v1/agent/intents/lock'
-  debug?: boolean;                 // Default: false
-  useMockEndpoint?: boolean;       // Default: false (⚠️ DEV ONLY)
-  influenceIntentToken?: string;   // Default: '__qdx_iit'
-  purchaseIntentToken?: string;    // Default: '__qdx_pit'
-  cookieExpireDays?: number;       // Default: 30
-}
-```
+
+| Option | Type | Default | Production | Description |
+|--------|------|---------|------------|-------------|
+| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING ONLY** - Override ignored in production |
+| `debug` | `boolean` | `false` | ✅ Safe | Enable debug logging |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
+| `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
+| `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
+| `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
 
 **⚠️ Production Safety:**
 - `useMockEndpoint: true` is for development only - never deploy to production
+- `lockEndpoint` override ignored in production (always uses Qredex AGENT endpoint)
 - Console warning logged when mock endpoint enabled on non-localhost domains
 
 **Example:**
 ```javascript
-// Development (local testing)
+// Development (local testing with mock)
 QredexAgentConfig = {
   debug: true,
   useMockEndpoint: true,  // Mock PIT, no network calls
+};
+
+// Staging (test against your backend)
+QredexAgentConfig = {
+  debug: true,
+  lockEndpoint: 'https://staging-api.your-backend.com/api/v1/agent/intents/lock',
 };
 
 // Production - use defaults (no config needed)
@@ -571,17 +577,32 @@ if (QredexAgent.isInitialized()) {
 
 ### AgentConfig
 
+**Configuration Options:**
+
+| Option | Type | Default | Production | Description |
+|--------|------|---------|------------|-------------|
+| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING ONLY** - Override ignored in production |
+| `debug` | `boolean` | `false` | ✅ Safe | Enable debug logging |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
+| `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
+| `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
+| `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
+
+**Type Definition:**
 ```typescript
 interface AgentConfig {
-  /** API endpoint for lock requests */
+  /**
+   * API endpoint for lock requests
+   * ⚠️ DEV/STAGING ONLY - Ignored in production builds
+   */
   lockEndpoint?: string;
 
-  /** Enable debug logging */
+  /** Enable debug logging (safe for all environments) */
   debug?: boolean;
 
-  /** 
+  /**
    * Use mock endpoint for local development (generates fake PIT tokens)
-   * ⚠️ DEVELOPMENT ONLY - throws error in production
+   * ⚠️ DEVELOPMENT ONLY - Never deploy to production
    */
   useMockEndpoint?: boolean;
 
@@ -601,11 +622,23 @@ interface AgentConfig {
 {
   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
-  useMockEndpoint: false,  // ⚠️ Never use in production
+  useMockEndpoint: false,  // ⚠️ DEV ONLY - Never use in production
   influenceIntentToken: '__qdx_iit',
   purchaseIntentToken: '__qdx_pit',
   cookieExpireDays: 30,
 }
+```
+
+**Environment Configs:**
+```typescript
+// Development (mock PIT, no network calls)
+{ debug: true, useMockEndpoint: true }
+
+// Staging (test against your backend)
+{ debug: true, lockEndpoint: 'https://staging.your-backend.com/...' }
+
+// Production (use defaults - no config needed)
+{}  // Omit entirely or just { debug: true } for troubleshooting
 ```
 
 ---

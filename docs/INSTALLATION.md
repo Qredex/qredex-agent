@@ -124,14 +124,14 @@ Set `window.QredexAgentConfig` **before** the script loads:
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `lockEndpoint` | `string` | Production URL | ⚠️ **Dev/Staging only** - Override ignored in production |
-| `debug` | `boolean` | `false` | Enable debug logging |
-| `useMockEndpoint` | `boolean` | `false` | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
-| `influenceIntentToken` | `string` | `'__qdx_iit'` | IIT storage key |
-| `purchaseIntentToken` | `string` | `'__qdx_pit'` | PIT storage key |
-| `cookieExpireDays` | `number` | `30` | Cookie expiration |
+| Option | Type | Default | Production | Description |
+|--------|------|---------|------------|-------------|
+| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING ONLY** - Override ignored in production |
+| `debug` | `boolean` | `false` | ✅ Safe | Enable debug logging |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV ONLY** - Generate fake PIT tokens (no network calls) |
+| `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
+| `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
+| `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
 
 ---
 
@@ -142,8 +142,8 @@ Set `window.QredexAgentConfig` **before** the script loads:
 ```html
 <script>
   window.QredexAgentConfig = {
-    lockEndpoint: 'https://dev-api.qredex.com/api/v1/agent/intents/lock',
     debug: true,  // Enable logs
+    useMockEndpoint: true,  // Mock PIT tokens (no network calls)
   };
 </script>
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
@@ -154,8 +154,8 @@ Set `window.QredexAgentConfig` **before** the script loads:
 ```html
 <script>
   window.QredexAgentConfig = {
-    lockEndpoint: 'https://staging-api.qredex.com/api/v1/agent/intents/lock',
-    debug: false,
+    debug: true,
+    lockEndpoint: 'https://staging-api.your-backend.com/api/v1/agent/intents/lock',
   };
 </script>
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
