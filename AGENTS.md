@@ -509,22 +509,6 @@ function processToken(token: any) { ... }
 function processToken(token: string | null) { ... }
 ```
 
-### Constants and Magic Strings
-
-#### Use Constants For
-- Storage keys: `DEFAULT_CONFIG.influenceIntentToken`
-- Config keys: `lockEndpoint`, `debug`
-- URL parameters: `qdx_intent`
-- API endpoints: `/api/v1/agent/intents/lock`
-
-```typescript
-// ❌ Bad
-const token = sessionStorage.getItem('__qdx_iit');
-
-// ✅ Good
-const config = getConfig();
-const token = getSession(config.influenceIntentToken);
-```
 
 ### Documentation
 
