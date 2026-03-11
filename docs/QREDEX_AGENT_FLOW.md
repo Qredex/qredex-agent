@@ -215,7 +215,7 @@ QredexAgent.handlePaymentSuccess({
 });
 
 // Or manually clear tokens
-QredexAgent.clearTokens();
+QredexAgent.clearIntent();
 ```
 
 ---

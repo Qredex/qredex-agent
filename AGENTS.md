@@ -145,9 +145,6 @@ After any user correction, capture the lesson to prevent repeating mistakes.
     - `qdx_intent` = URL parameter name for IIT
 - Canonical API endpoint:
     - `/api/v1/agent/intents/lock` = Lock endpoint for IIT → PIT exchange
-- **Deprecated API names:**
-    - `getIntentToken()` → Use `getInfluenceIntentToken()`
-    - `hasIntentToken()` → Use `hasInfluenceIntentToken()`
 
 ## Security Rules
 
@@ -402,7 +399,6 @@ export function lockIntent(meta?: Record<string, unknown>): Promise<LockResult> 
   // Implementation
 }
 
-// ✅ Use getInfluenceIntentToken() - getIntentToken() is deprecated
 export function getInfluenceIntentToken(): string | null {
   // Implementation
 }
@@ -412,7 +408,6 @@ export function getInfluenceIntentToken(): string | null {
 
 ```typescript
 // ✅ Good: sessionStorage primary, cookie fallback
-// ✅ Use getInfluenceIntentToken() - getIntentToken() is deprecated
 export function getInfluenceIntentToken(config: TokenStorageConfig): string | null {
   const sessionToken = getSession(config.influenceIntentToken);
   if (isValidToken(sessionToken)) {

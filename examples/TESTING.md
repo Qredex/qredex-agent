@@ -412,7 +412,7 @@ location.reload();
 **Solutions:**
 1. Verify `handleCartEmpty()` or `handlePaymentSuccess()` called
 2. Check both sessionStorage and cookies cleared
-3. Manually call `QredexAgent.clearTokens()`
+3. Manually call `QredexAgent.clearIntent()`
 
 ---
 
@@ -460,7 +460,7 @@ QredexAgent.hasPurchaseIntentToken()   // Check PIT exists
 
 // Commands
 await QredexAgent.lockIntent(meta)        // Manual lock (idempotent)
-QredexAgent.clearTokens()                 // Clear all tokens
+QredexAgent.clearIntent()                 // Clear all tokens
 
 // Event handlers (Merchant → Agent)
 QredexAgent.handleCartAdd(event)          // Cart add

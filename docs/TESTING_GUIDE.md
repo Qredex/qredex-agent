@@ -61,7 +61,7 @@ Open browser DevTools (F12):
 QredexAgent.isInitialized()      // true
 QredexAgent.hasInfluenceIntentToken()     // false
 QredexAgent.hasPurchaseIntentToken() // false
-QredexAgent.getIntentToken()     // null
+QredexAgent.getInfluenceIntentToken()     // null
 QredexAgent.getPurchaseIntentToken() // null
 ```
 
@@ -87,7 +87,7 @@ QredexAgent.getPurchaseIntentToken() // null
 
 **Console Verification:**
 ```javascript
-QredexAgent.getIntentToken()     // "test_intent_abc123"
+QredexAgent.getInfluenceIntentToken()     // "test_intent_abc123"
 QredexAgent.hasInfluenceIntentToken()     // true
 QredexAgent.hasPurchaseIntentToken() // false
 ```
@@ -137,7 +137,7 @@ Content-Type: application/json
 
 **Console Verification:**
 ```javascript
-QredexAgent.getIntentToken()        // null (cleared after lock)
+QredexAgent.getInfluenceIntentToken()        // null (cleared after lock)
 QredexAgent.getPurchaseIntentToken() // "pit_xyz789"
 QredexAgent.hasInfluenceIntentToken()        // false
 QredexAgent.hasPurchaseIntentToken() // true
@@ -188,7 +188,7 @@ console.log(result);
 
 **Console Verification:**
 ```javascript
-QredexAgent.getIntentToken()        // null
+QredexAgent.getInfluenceIntentToken()        // null
 QredexAgent.getPurchaseIntentToken() // null
 QredexAgent.hasInfluenceIntentToken()        // false
 QredexAgent.hasPurchaseIntentToken() // false
@@ -316,7 +316,7 @@ QredexAgent.getPurchaseIntentToken() // "pit_original"
 
 // After new IIT arrives
 QredexAgent.getPurchaseIntentToken() // "pit_original" (unchanged)
-QredexAgent.getIntentToken()        // null (ignored)
+QredexAgent.getInfluenceIntentToken()        // null (ignored)
 ```
 
 ---
@@ -409,7 +409,7 @@ QredexAgent.getStatus()                // AgentStatus
 await QredexAgent.lockIntent(meta?)    // Promise<LockResult>
 
 // Clear all tokens
-QredexAgent.clearTokens()              // void
+QredexAgent.clearIntent()              // void
 
 // Lifecycle
 QredexAgent.init(config?)              // void
@@ -495,7 +495,7 @@ console.log({
   initialized: QredexAgent.isInitialized(),
   hasIIT: QredexAgent.hasInfluenceIntentToken(),
   hasPIT: QredexAgent.hasPurchaseIntentToken(),
-  iit: QredexAgent.getIntentToken(),
+  iit: QredexAgent.getInfluenceIntentToken(),
   pit: QredexAgent.getPurchaseIntentToken(),
   status: QredexAgent.getStatus(),
 });
@@ -564,7 +564,7 @@ location.reload();
 **Solutions:**
 1. Verify `handleCartEmpty()` called
 2. Check `handlePaymentSuccess()` called
-3. Manually call `QredexAgent.clearTokens()`
+3. Manually call `QredexAgent.clearIntent()`
 4. Check both sessionStorage and cookies cleared
 
 ---

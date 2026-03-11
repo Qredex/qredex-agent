@@ -93,19 +93,6 @@ if (iit) {
 
 ---
 
-### `getIntentToken()` ⚠️ Deprecated
-
-**Deprecated:** Use [`getInfluenceIntentToken()`](#getinfluenceintenttoken) instead. Will be removed in v2.0.
-
-**Signature:**
-```typescript
-function getIntentToken(): string | null
-```
-
-**Alias for:** `getInfluenceIntentToken()`
-
----
-
 ### `hasInfluenceIntentToken()`
 
 Check if an Influence Intent Token (IIT) exists.
@@ -123,19 +110,6 @@ if (QredexAgent.hasInfluenceIntentToken()) {
   console.log('User came from Qredex link');
 }
 ```
-
----
-
-### `hasIntentToken()` ⚠️ Deprecated
-
-**Deprecated:** Use [`hasInfluenceIntentToken()`](#hasinfluenceintenttoken) instead. Will be removed in v2.0.
-
-**Signature:**
-```typescript
-function hasIntentToken(): boolean
-```
-
-**Alias for:** `hasInfluenceIntentToken()`
 
 ---
 
@@ -257,19 +231,19 @@ if (result.success) {
 
 ---
 
-### `clearTokens()`
+### `clearIntent()`
 
 Clear all tokens (IIT and PIT) from storage.
 
 **Signature:**
 ```typescript
-function clearTokens(): void
+function clearIntent(): void
 ```
 
 **Example:**
 ```javascript
 // After successful checkout
-QredexAgent.clearTokens();
+QredexAgent.clearIntent();
 ```
 
 **What it clears:**
@@ -769,14 +743,12 @@ interface ErrorEvent {
 | Method | Category | Returns | Description |
 |--------|----------|---------|-------------|
 | `init(config?)` | Lifecycle | `void` | Initialize with config |
-| `getInfluenceIntentToken()` | Token Access | `string \| null` | Get IIT (new name) |
-| `getIntentToken()` ⚠️ | Token Access | `string \| null` | Get IIT (deprecated) |
+| `getInfluenceIntentToken()` | Token Access | `string \| null` | Get IIT |
 | `getPurchaseIntentToken()` | Token Access | `string \| null` | Get PIT |
-| `hasInfluenceIntentToken()` | Token Access | `boolean` | Check IIT exists (new name) |
-| `hasIntentToken()` ⚠️ | Token Access | `boolean` | Check IIT exists (deprecated) |
+| `hasInfluenceIntentToken()` | Token Access | `boolean` | Check IIT exists |
 | `hasPurchaseIntentToken()` | Token Access | `boolean` | Check PIT exists |
 | `lockIntent(meta?)` | Lock | `Promise<LockResult>` | Lock IIT → PIT |
-| `clearTokens()` | Lock | `void` | Clear all tokens |
+| `clearIntent()` | Lock | `void` | Clear all tokens |
 | `handleCartChange(event)` | Event Handler | `void` | Cart state change |
 | `handleCartAdd(count, meta?)` | Event Handler | `void` | Add to cart |
 | `handleCartEmpty()` | Event Handler | `void` | Empty cart |
@@ -790,8 +762,6 @@ interface ErrorEvent {
 | `destroy()` | Lifecycle | `void` | Cleanup |
 | `stop()` | Lifecycle | `void` | Alias for destroy |
 | `isInitialized()` | Lifecycle | `boolean` | Check initialized |
-
-⚠️ Deprecated - will be removed in v2.0. Use new names instead.
 
 ---
 

@@ -96,7 +96,6 @@ export function getInfluenceIntentToken(): string | null {
  * ```
  *
  * @see {@link hasPurchaseIntentToken} - Check if PIT exists
- * @see {@link getIntentToken} - Get the IIT token
  */
 export function getPurchaseIntentToken(): string | null {
   const config = getConfig();
@@ -147,7 +146,6 @@ export const hasInfluenceIntentToken = (): boolean => {
  * ```
  *
  * @see {@link getPurchaseIntentToken} - Get the PIT token
- * @see {@link hasIntentToken} - Check if IIT exists
  */
 export function hasPurchaseIntentToken(): boolean {
   const config = getConfig();
@@ -193,34 +191,34 @@ export function hasPurchaseIntentToken(): boolean {
  * ```
  *
  * @see {@link handleCartChange} - Automatically locks/clears on cart state change
- * @see {@link clearTokens} - Clear tokens after checkout
+ * @see {@link clearIntent} - Clear tokens after checkout
  */
 export async function lockIntent(meta?: LockMeta): Promise<LockResult> {
   return apiLockIntent(meta);
 }
 
 /**
- * Clear all tokens (IIT and PIT) from storage.
+ * Clear intent state from storage.
  *
- * Removes both sessionStorage and cookie storage for IIT and PIT.
+ * Removes both IIT and PIT from sessionStorage and cookies.
  * Call this after successful checkout or when cart is emptied.
  *
  * @example
  * ```TypeScript
  * // After successful checkout
- * QredexAgent.clearTokens();
+ * QredexAgent.clearIntent();
  *
  * // When cart is emptied
  * function clearCart() {
  *   cart.clear();
- *   QredexAgent.clearTokens();
+ *   QredexAgent.clearIntent();
  * }
  * ```
  *
  * @see {@link handleCartChange} - Automatically clears on cart empty
  * @see {@link handlePaymentSuccess} - Automatically clears on payment success
  */
-function clearTokens(): void {
+function clearIntent(): void {
   const config = getConfig();
   clearAllTokens({
     influenceIntentToken: config.influenceIntentToken,
@@ -282,7 +280,7 @@ function clearTokens(): void {
  * @emits `onError` - If lock fails
  *
  * @see {@link lockIntent} - Manual lock operation
- * @see {@link clearTokens} - Manual token clearing
+ * @see {@link clearIntent} - Manual token clearing
  * @see {@link onLocked} - Listen for lock events
  * @see {@link onCleared} - Listen for clear events
  */
@@ -399,7 +397,7 @@ export function handleCartChange(event: {
     debug('Cart emptied, clearing tokens');
 
     // Auto-clear tokens
-    clearTokens();
+    clearIntent();
 
     // Emit cleared event to listeners
     const clearedEvent = {
@@ -534,7 +532,7 @@ function hasCartItems(): boolean {
  *
  * @emits `onCleared` - After tokens are cleared
  *
- * @see {@link clearTokens} - Manual token clearing
+ * @see {@link clearIntent} - Manual token clearing
  * @see {@link onCleared} - Listen for clear events
  * @see {@link handleCartChange} - Cart state change event
  */
@@ -547,7 +545,7 @@ export function handlePaymentSuccess(event: {
   debug('Payment success event received', event);
 
   // Auto-clear tokens
-  clearTokens();
+  clearIntent();
 
   // Emit cleared event to listeners
   const clearedEvent = {
@@ -821,7 +819,7 @@ if (typeof window !== 'undefined') {
 
     // Commands
     lockIntent,
-    clearTokens,
+    clearIntent,
 
     // Event Handlers (Merchant → Agent)
     handleCartChange,
@@ -868,7 +866,7 @@ let QredexAgent = {
 
   // Commands
   lockIntent,
-  clearTokens,
+  clearIntent,
 
   // Event Handlers (Merchant → Agent)
   handleCartChange,

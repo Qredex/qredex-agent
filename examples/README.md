@@ -194,7 +194,7 @@ QredexAgent.onError(({ error, context }) => { ... });
 
 ```javascript
 await QredexAgent.lockIntent(meta);  // Manual lock
-QredexAgent.clearTokens();           // Clear all tokens
+QredexAgent.clearIntent();           // Clear all tokens
 ```
 
 ---

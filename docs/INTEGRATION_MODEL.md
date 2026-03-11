@@ -258,7 +258,7 @@ function useQredexAgent() {
 
 ```javascript
 // Backend reads IIT from browser
-const iit = QredexAgent.getIntentToken();
+const iit = QredexAgent.getInfluenceIntentToken();
 
 // Backend calls its own capture API
 await fetch('/api/capture-iit', {
@@ -306,7 +306,7 @@ $('.add-to-cart').on('click', function() {
 getPurchaseIntentToken(): string | null
 
 // Get IIT (before locked)
-getIntentToken(): string | null
+getInfluenceIntentToken(): string | null
 
 // Check if IIT exists
 hasInfluenceIntentToken(): boolean
@@ -315,7 +315,7 @@ hasInfluenceIntentToken(): boolean
 hasPurchaseIntentToken(): boolean
 
 // Clear IIT/PIT tokens (after checkout or cart empty)
-clearTokens(): void
+clearIntent(): void
 
 // Manual lock (if not using handleCartAdd)
 lockIntent(meta?: LockMeta): Promise<LockResult>
@@ -333,7 +333,7 @@ const result = await QredexAgent.lockIntent({
 });
 
 // Clear IIT/PIT tokens manually
-QredexAgent.clearTokens();
+QredexAgent.clearIntent();
 
 // Read PIT
 const pit = QredexAgent.getPurchaseIntentToken();
@@ -429,12 +429,12 @@ type ErrorHandler = (event: ErrorEvent) => void;
 
 | Method | Type | Purpose |
 |--------|------|---------|
-| `getIntentToken()` | Manual | Read IIT |
+| `getInfluenceIntentToken()` | Manual | Read IIT |
 | `getPurchaseIntentToken()` | Manual | Read PIT |
 | `hasInfluenceIntentToken()` | Manual | Check IIT exists |
 | `hasPurchaseIntentToken()` | Manual | Check PIT exists |
 | `lockIntent(meta?)` | Manual | Lock IIT → PIT |
-| `clearTokens()` | Manual | Clear local IIT/PIT state |
+| `clearIntent()` | Manual | Clear local IIT/PIT state |
 | `handleCartAdd(event?)` | Event Input | Merchant tells agent cart got item(s) |
 | `handleCartEmpty(event?)` | Event Input | Merchant tells agent cart is empty |
 | `handleCartChange(event?)` | Event Input | Merchant sends cart state change |
@@ -459,7 +459,7 @@ type ErrorHandler = (event: ErrorEvent) => void;
 - [x] PIT storage (sessionStorage + cookie)
 - [x] Lock logic (IIT → PIT via `/api/v1/agent/intents/lock`)
 - [x] Clear logic (IIT/PIT cleanup)
-- [x] Basic APIs: `getIntentToken()`, `getPurchaseIntentToken()`, `lockIntent({ token })`, `clearTokens()`
+- [x] Basic APIs: `getInfluenceIntentToken()`, `getPurchaseIntentToken()`, `lockIntent({ token })`, `clearIntent()`
 
 ### Phase 2: Event Handlers
 - [x] `handleCartAdd()` implementation + auto-lock

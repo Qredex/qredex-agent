@@ -70,7 +70,7 @@ export function handleCartChange(event: {
 
   // Clear when cart goes from >0 → 0 (emptied) and PIT exists
   if (itemCount === 0 && previousCount > 0 && hasPurchaseIntentToken()) {
-    clearTokens();
+    clearIntent();
     emitCleared();
   }
 }
