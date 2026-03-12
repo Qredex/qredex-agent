@@ -23,14 +23,14 @@
   <rect x="40" y="40" width="220" height="70" rx="18" fill="#1f1b18"/>
   <rect x="300" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
   <rect x="580" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
-  <rect x="860" y="40" width="280" height="70" rx="18" fill="#d55b17"/>
+  <rect x="860" y="40" width="280" height="70" rx="18" fill="#BDFF1C"/>
   <text x="150" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
   <text x="420" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Cart UI</text>
   <text x="420" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Your existing surface</text>
   <text x="700" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">useQredexAgent()</text>
   <text x="700" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Thin framework adapter</text>
-  <text x="1000" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#fff">QredexAgent</text>
-  <text x="1000" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#fff">Core attribution runtime</text>
+  <text x="1000" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#000">QredexAgent</text>
+  <text x="1000" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#000">Core attribution runtime</text>
 
   <path d="M150 130 L150 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
   <path d="M420 130 L420 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>

@@ -23,14 +23,14 @@
   <rect x="40" y="40" width="250" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
   <rect x="330" y="40" width="260" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
   <rect x="630" y="40" width="240" height="70" rx="18" fill="#1f1b18"/>
-  <rect x="910" y="40" width="220" height="70" rx="18" fill="#d55b17"/>
+  <rect x="910" y="40" width="220" height="70" rx="18" fill="#BDFF1C"/>
   <text x="165" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">App bootstrap</text>
   <text x="165" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">provideQredexAgent()</text>
   <text x="460" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Cart component</text>
   <text x="460" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">injectQredexAgent()</text>
   <text x="750" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
-  <text x="1020" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#fff">QredexAgent</text>
-  <text x="1020" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#fff">Core runtime</text>
+  <text x="1020" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#000">QredexAgent</text>
+  <text x="1020" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#000">Core runtime</text>
 
   <path d="M165 130 L165 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
   <path d="M460 130 L460 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>

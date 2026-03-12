@@ -31,12 +31,31 @@
 
 ## Quick Start
 
-### 1. Install via Script Tag
+### 1. Choose an Install Path
+
+**CDN / script tag**
 
 ```html
 <!-- Add before </body> -->
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
+
+**Core package**
+
+```bash
+npm install @qredex/agent
+```
+
+**Framework wrappers**
+
+```bash
+npm install @qredex/react
+npm install @qredex/vue
+npm install @qredex/svelte
+npm install @qredex/angular
+```
+
+The wrapper packages include `@qredex/agent`, so framework consumers only need the wrapper package.
 
 ### 2. Attribution Sequence
 

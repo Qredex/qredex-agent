@@ -22,13 +22,13 @@
   <rect width="1180" height="360" fill="#f6f1e8"/>
   <rect x="40" y="40" width="220" height="70" rx="18" fill="#1f1b18"/>
   <rect x="320" y="40" width="280" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
-  <rect x="660" y="40" width="220" height="70" rx="18" fill="#d55b17"/>
+  <rect x="660" y="40" width="220" height="70" rx="18" fill="#BDFF1C"/>
   <rect x="940" y="40" width="200" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
   <text x="150" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
   <text x="460" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#1f1b18">Merchant Storefront</text>
   <text x="460" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Owns cart and checkout</text>
-  <text x="770" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#fff">QredexAgent</text>
-  <text x="770" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#fff">Captures IIT, locks to PIT</text>
+  <text x="770" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#000">QredexAgent</text>
+  <text x="770" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#000">Captures IIT, locks to PIT</text>
   <text x="1040" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#1f1b18">Merchant Backend</text>
   <text x="1040" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Receives PIT on order</text>
 
