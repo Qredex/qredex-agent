@@ -340,39 +340,24 @@ QredexAgent.handleCartChange({
 
 ---
 
-### `handlePaymentSuccess(event)`
+### `handlePaymentSuccess(event?)`
 
 Tell the agent that payment succeeded. Automatically clears PIT.
 
 **Signature:**
 ```typescript
-function handlePaymentSuccess(event: {
-  orderId: string;
-  amount: number;
-  currency: string;
+function handlePaymentSuccess(event?: {
   timestamp?: number;
+  [key: string]: unknown;
 }): void
 ```
 
 **Parameters:**
-- `event` - Payment success event data
+- `event` - Optional event metadata. Only `timestamp` is consumed by the agent.
 
 **Example:**
 ```javascript
-async function checkout(order) {
-  const pit = QredexAgent.getPurchaseIntentToken();
-
-  await api.post('/orders', {
-    ...order,
-    qredex_pit: pit,
-  });
-
-  QredexAgent.handlePaymentSuccess({
-    orderId: order.id,
-    amount: order.total,
-    currency: 'USD',
-  });
-}
+QredexAgent.handlePaymentSuccess();
 ```
 
 **What happens:**
@@ -722,10 +707,8 @@ interface CartChangeEvent {
 
 /** Payment success event (Merchant → Agent) */
 interface PaymentSuccessEvent {
-  orderId: string;
-  amount: number;
-  currency: string;
   timestamp?: number;
+  [key: string]: unknown;
 }
 
 /** Locked event (Agent → Merchant) */
@@ -763,7 +746,7 @@ interface ErrorEvent {
 | `handleCartChange(event)` | Event Handler | `void` | Cart state change |
 | `handleCartAdd(count, meta?)` | Event Handler | `void` | Add to cart |
 | `handleCartEmpty()` | Event Handler | `void` | Empty cart |
-| `handlePaymentSuccess(event)` | Event Handler | `void` | Payment success |
+| `handlePaymentSuccess(event?)` | Event Handler | `void` | Optional explicit post-payment clear |
 | `onLocked(handler)` | Event Listener | `void` | Listen for lock |
 | `onCleared(handler)` | Event Listener | `void` | Listen for clear |
 | `onError(handler)` | Event Listener | `void` | Listen for errors |

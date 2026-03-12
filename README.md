@@ -36,7 +36,18 @@
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-### 2. Handle Cart Events
+### 2. Attribution Sequence
+
+```text
+Landing URL with qdx_intent
+  -> agent captures IIT automatically
+  -> merchant reports cart changes
+  -> first lockable non-empty cart report locks IIT -> PIT
+  -> checkout sends PIT to backend
+  -> clearCart() empties the cart and clears attribution state
+```
+
+### 3. Connect Cart And Checkout
 
 ```javascript
 const agent = window.QredexAgent;
@@ -72,13 +83,8 @@ async function removeFromCart(line) {
 }
 
 async function clearCart() {
-  const previousCount = cart.itemCount;
   await api.post('/cart/clear');
-
-  agent.handleCartChange({
-    itemCount: 0,
-    previousCount,
-  });
+  agent.handleCartEmpty();
 }
 
 async function checkout(order) {
@@ -89,15 +95,11 @@ async function checkout(order) {
     qredex_pit: pit,
   });
 
-  agent.handlePaymentSuccess({
-    orderId: order.id,
-    amount: order.total,
-    currency: 'USD',
-  });
+  await clearCart();
 }
 ```
 
-### 3. Done!
+### 4. Done!
 
 The agent automatically:
 - ✅ Captures `qdx_intent` from URL
@@ -113,20 +115,9 @@ The agent automatically:
 | User lands from Qredex link | No manual call required | The agent captures `qdx_intent` automatically |
 | Cart becomes non-empty | `handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
 | Cart changes while still non-empty | `handleCartChange(...)` | Safe retry path if a previous lock failed |
-| Cart becomes empty | `handleCartChange({ itemCount: 0, previousCount })` | Clears IIT/PIT from the live session |
+| Clear cart action | `clearCart() -> handleCartEmpty()` | Clears IIT/PIT from the live session |
 | Need PIT for order submission | `getPurchaseIntentToken()` | Attach PIT to the order or checkout payload |
-| Checkout succeeds | `handlePaymentSuccess({ orderId, amount, currency })` | Clears attribution state after a completed purchase |
-
-### Attribution Sequence
-
-```text
-Landing URL with qdx_intent
-  -> agent captures IIT
-  -> merchant reports cart changes
-  -> first lockable non-empty cart report calls IIT -> PIT lock
-  -> PIT is used at checkout
-  -> payment success or cart empty clears attribution state
-```
+| Checkout completes without a cart-empty step | `handlePaymentSuccess()` | Optional explicit cleanup path |
 
 ---
 
@@ -223,10 +214,7 @@ QredexAgent.handleCartChange({
 });
 
 // Clear cart completely
-QredexAgent.handleCartChange({
-  itemCount: 0,
-  previousCount: 1,
-});
+QredexAgent.handleCartEmpty();
 
 // Optional convenience wrappers
 QredexAgent.handleCartAdd(1, {
@@ -237,11 +225,8 @@ QredexAgent.handleCartAdd(1, {
 
 QredexAgent.handleCartEmpty();
 
-QredexAgent.handlePaymentSuccess({
-  orderId: 'order-123',
-  amount: 99.99,
-  currency: 'USD',
-});
+// Optional explicit cleanup if your platform does not emit a cart-empty step
+QredexAgent.handlePaymentSuccess();
 ```
 
 **Behavior:**
@@ -252,7 +237,7 @@ QredexAgent.handlePaymentSuccess({
 | Merchant reports a live non-empty cart again | 1 item -> 2 items | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
 | Partial remove | 2 items -> 1 item | No clear; attribution stays attached to the live cart |
 | Full clear | non-empty cart -> empty cart | Clears IIT and PIT |
-| Checkout success | payment completed | Clears IIT and PIT |
+| Optional explicit post-payment clear | payment completed | Clears IIT and PIT |
 
 ### Event Listeners (Agent → Merchant)
 
@@ -544,10 +529,13 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
    → Lock can retry on later non-empty cart reports if previous lock failed
    → PIT persists once locked
 
-4. User empties cart (cart goes from non-empty to empty) OR completes checkout
-   → handleCartChange() or handlePaymentSuccess() clears PIT
+4. User empties cart
+   → handleCartEmpty() clears PIT
 
-5. Next purchase requires new Qredex link (new IIT)
+5. Optional explicit post-payment clear
+   → handlePaymentSuccess() clears PIT if checkout completes without a cart-empty step
+
+6. Next purchase requires new Qredex link (new IIT)
 ```
 
 ### Key Behaviors

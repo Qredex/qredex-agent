@@ -110,7 +110,7 @@ function startCheckout() {
 
 // ✅ NOW signal - journey complete
 function onPaymentSuccess(order) {
-  QredexAgent.handlePaymentSuccess({ orderId: order.id });
+  QredexAgent.handlePaymentSuccess();
   // Agent clears PIT automatically
 }
 ```

@@ -656,13 +656,20 @@ function hasCartItems(): boolean {
   return checkHasCartItems();
 }
 
+export interface PaymentSuccessEvent {
+  timestamp?: number;
+  [key: string]: unknown;
+}
+
 /**
  * Tell the agent that payment succeeded.
  *
- * This will automatically clear both IIT and PIT from storage.
- * Call this after successful order completion.
+ * Optional explicit post-checkout clear.
+ * Most shopping platforms can clear attribution by calling `handleCartEmpty()`
+ * when the cart is emptied after checkout. Use this when checkout completes
+ * without a cart-empty step that the merchant can report.
  *
- * @param event - Payment success event data (order ID, amount, currency)
+ * @param event - Optional event metadata. Only `timestamp` is consumed by the agent.
  *
  * @example
  * ```TypeScript
@@ -674,11 +681,7 @@ function hasCartItems(): boolean {
  *     qredex_pit: pit,
  *   });
  *
- *   QredexAgent.handlePaymentSuccess({
- *     orderId: order.id,
- *     amount: order.total,
- *     currency: 'USD',
- *   });
+ *   QredexAgent.handlePaymentSuccess();
  * }
  * ```
  *
@@ -688,12 +691,7 @@ function hasCartItems(): boolean {
  * @see {@link onCleared} - Listen for clear events
  * @see {@link handleCartChange} - Cart state change event
  */
-export function handlePaymentSuccess(event: {
-  orderId: string;
-  amount: number;
-  currency: string;
-  timestamp?: number;
-}): void {
+export function handlePaymentSuccess(event?: PaymentSuccessEvent): void {
   debug('Payment success event received', event);
 
   // Auto-clear tokens

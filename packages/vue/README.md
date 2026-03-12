@@ -27,6 +27,17 @@ Thin Vue bindings for `@qredex/agent`.
 npm install @qredex/vue
 ```
 
+## Attribution Flow
+
+```text
+User lands with ?qdx_intent=...
+  -> Qredex captures IIT automatically
+  -> your cart UI reports itemCount changes
+  -> first lockable non-empty cart report locks IIT -> PIT
+  -> checkout sends PIT to your backend
+  -> clearCart() empties the cart and clears attribution state
+```
+
 ## Recommended Integration
 
 Register the plugin once, then use `useQredexAgent()` inside the cart surface you already control.
@@ -59,20 +70,39 @@ watch(itemCount, (nextCount) => {
 
   previousCount.value = nextCount;
 }, { immediate: true });
+
+async function clearCart() {
+  await fetch('/api/cart/clear', {
+    method: 'POST',
+  });
+
+  agent.handleCartEmpty();
+}
+
+async function submitOrder() {
+  const pit = state.value.pit ?? agent.getPurchaseIntentToken();
+
+  await fetch('/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      orderId: 'order-123',
+      qredex_pit: pit,
+    }),
+  });
+
+  await clearCart();
+}
 </script>
 
 <template>
   <div>
     <span>Qredex status: {{ state.locked ? 'locked' : 'waiting' }}</span>
-    <button
-      :disabled="!state.hasPIT"
-      @click="agent.handlePaymentSuccess({
-        orderId: 'order-123',
-        amount: 99.99,
-        currency: 'USD',
-      })"
-    >
-      Complete checkout
+    <button @click="clearCart">Clear cart</button>
+    <button :disabled="!state.hasPIT" @click="submitOrder">
+      Send PIT to backend
     </button>
   </div>
 </template>
@@ -83,10 +113,10 @@ watch(itemCount, (nextCount) => {
 | Merchant event | Call | Why |
 |---|---|---|
 | Cart becomes non-empty | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart stays non-empty and changes again | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
-| Cart becomes empty | `agent.handleCartChange({ itemCount: 0, previousCount })` | Clears IIT/PIT from the live session |
-| Checkout succeeds | `agent.handlePaymentSuccess({ orderId, amount, currency })` | Clears attribution state after a completed purchase |
+| Cart changes while still non-empty | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Clear cart action | `clearCart() -> agent.handleCartEmpty()` | Clears IIT/PIT from the live session |
 | Need PIT for order submission | `state.value.pit` or `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
+| Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()` | Optional explicit cleanup path |
 
 ## API Surface
 
@@ -99,16 +129,3 @@ watch(itemCount, (nextCount) => {
 | `getQredexAgent()` | Direct access to the singleton runtime |
 | `initQredex()` | Explicit browser init when needed |
 | `QredexAgent` | Re-export of the core agent |
-
-## Attribution Flow
-
-```text
-User lands with ?qdx_intent=...
-  -> Qredex captures IIT
-  -> Vue cart surface reports itemCount changes
-  -> handleCartChange() sees non-empty cart + IIT
-  -> Qredex locks IIT -> PIT
-  -> state.value.hasPIT/state.value.locked become true
-  -> checkout uses PIT
-  -> handlePaymentSuccess() clears attribution state
-```

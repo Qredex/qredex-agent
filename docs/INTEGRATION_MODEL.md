@@ -157,12 +157,8 @@ QredexAgent.handleCartAdd(cart.itemCount, {
 QredexAgent.handleCartEmpty();
 // → Agent auto-clears PIT from storage
 
-// Merchant tells agent when payment succeeds
-QredexAgent.handlePaymentSuccess({
-  orderId: 'order_789',
-  amount: 99.99,
-  currency: 'USD',
-});
+// Optional explicit clear if checkout completes without a cart-empty step
+QredexAgent.handlePaymentSuccess();
 // → Agent auto-clears PIT from storage
 ```
 
@@ -222,11 +218,8 @@ function useQredexAgent() {
       qredex_pit: pit,
     });
 
-    // Tell agent payment succeeded (auto-clears)
-    QredexAgent.handlePaymentSuccess({
-      orderId: result.orderId,
-      amount: orderData.total,
-    });
+    // Optional explicit clear if checkout completes without a cart-empty step
+    QredexAgent.handlePaymentSuccess();
 
     return result;
   };
@@ -434,7 +427,7 @@ type ErrorHandler = (event: ErrorEvent) => void;
 | `handleCartAdd(itemCount, meta?)` | Event Input | Merchant tells agent cart got item(s) |
 | `handleCartEmpty()` | Event Input | Merchant tells agent cart is empty |
 | `handleCartChange(event)` | Event Input | Merchant sends cart state change |
-| `handlePaymentSuccess(event)` | Event Input | Merchant tells agent checkout/payment succeeded |
+| `handlePaymentSuccess(event?)` | Event Input | Optional explicit post-payment clear |
 | `onLocked(handler)` | Hook | Listen for successful lock |
 | `onCleared(handler)` | Hook | Listen for cleared state |
 | `onError(handler)` | Hook | Listen for agent errors |

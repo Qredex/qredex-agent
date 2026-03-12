@@ -27,6 +27,17 @@ Thin Svelte bindings for `@qredex/agent`.
 npm install @qredex/svelte
 ```
 
+## Attribution Flow
+
+```text
+User lands with ?qdx_intent=...
+  -> Qredex captures IIT automatically
+  -> your cart UI reports itemCount changes
+  -> first lockable non-empty cart report locks IIT -> PIT
+  -> checkout sends PIT to your backend
+  -> clearCart() empties the cart and clears attribution state
+```
+
 ## Recommended Integration
 
 Use `useQredexAgent()` inside the existing cart surface you already own. The wrapper stays headless.
@@ -49,19 +60,37 @@ Use `useQredexAgent()` inside the existing cart surface you already own. The wra
     previousCount = itemCount;
   }
 
-  function completeCheckout() {
-    agent.handlePaymentSuccess({
-      orderId: 'order-123',
-      amount: 99.99,
-      currency: 'USD',
+  async function clearCart() {
+    await fetch('/api/cart/clear', {
+      method: 'POST',
     });
+
+    agent.handleCartEmpty();
+  }
+
+  async function submitOrder() {
+    const pit = $state.pit ?? agent.getPurchaseIntentToken();
+
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId: 'order-123',
+        qredex_pit: pit,
+      }),
+    });
+
+    await clearCart();
   }
 </script>
 
 <div>
   <span>Qredex status: {$state.locked ? 'locked' : 'waiting'}</span>
-  <button disabled={!$state.hasPIT} on:click={completeCheckout}>
-    Complete checkout
+  <button on:click={clearCart}>Clear cart</button>
+  <button disabled={!$state.hasPIT} on:click={submitOrder}>
+    Send PIT to backend
   </button>
 </div>
 ```
@@ -71,10 +100,10 @@ Use `useQredexAgent()` inside the existing cart surface you already own. The wra
 | Merchant event | Call | Why |
 |---|---|---|
 | Cart becomes non-empty | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart stays non-empty and changes again | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
-| Cart becomes empty | `agent.handleCartChange({ itemCount: 0, previousCount })` | Clears IIT/PIT from the live session |
-| Checkout succeeds | `agent.handlePaymentSuccess({ orderId, amount, currency })` | Clears attribution state after a completed purchase |
+| Cart changes while still non-empty | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Clear cart action | `clearCart() -> agent.handleCartEmpty()` | Clears IIT/PIT from the live session |
 | Need PIT for order submission | `$state.pit` or `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
+| Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()` | Optional explicit cleanup path |
 
 ## API Surface
 
@@ -86,16 +115,3 @@ Use `useQredexAgent()` inside the existing cart surface you already own. The wra
 | `getQredexAgent()` | Direct access to the singleton runtime |
 | `initQredex()` | Explicit browser init when needed |
 | `QredexAgent` | Re-export of the core agent |
-
-## Attribution Flow
-
-```text
-User lands with ?qdx_intent=...
-  -> Qredex captures IIT
-  -> Svelte cart surface reports itemCount changes
-  -> handleCartChange() sees non-empty cart + IIT
-  -> Qredex locks IIT -> PIT
-  -> $state.hasPIT/$state.locked become true
-  -> checkout uses PIT
-  -> handlePaymentSuccess() clears attribution state
-```

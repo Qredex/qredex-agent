@@ -27,6 +27,17 @@ Thin Angular bindings for `@qredex/agent`.
 npm install @qredex/angular
 ```
 
+## Attribution Flow
+
+```text
+User lands with ?qdx_intent=...
+  -> Qredex captures IIT automatically
+  -> your cart UI reports itemCount changes
+  -> first lockable non-empty cart report locks IIT -> PIT
+  -> checkout sends PIT to your backend
+  -> clearCart() empties the cart and clears attribution state
+```
+
 ## Recommended Integration
 
 Register `provideQredexAgent()` once, then call `injectQredexAgent()` inside the existing cart surface you already control.
@@ -46,18 +57,18 @@ bootstrapApplication(AppComponent, {
   selector: 'qredex-cart-bridge',
   standalone: true,
   template: `
-    <span>Qredex status: {{ status }}</span>
+    <span>Qredex status: {{ agent.hasPurchaseIntentToken() ? 'locked' : 'waiting' }}</span>
+    <button (click)="clearCart()">Clear cart</button>
+    <button [disabled]="!agent.hasPurchaseIntentToken()" (click)="submitOrder()">
+      Send PIT to backend
+    </button>
   `,
 })
 export class QredexCartBridgeComponent implements OnChanges {
   @Input() itemCount = 0;
 
   private previousCount = 0;
-  private readonly agent = injectQredexAgent();
-
-  get status(): string {
-    return this.agent.hasPurchaseIntentToken() ? 'locked' : 'waiting';
-  }
+  readonly agent = injectQredexAgent();
 
   ngOnChanges(): void {
     this.agent.handleCartChange({
@@ -66,6 +77,31 @@ export class QredexCartBridgeComponent implements OnChanges {
     });
 
     this.previousCount = this.itemCount;
+  }
+
+  async clearCart(): Promise<void> {
+    await fetch('/api/cart/clear', {
+      method: 'POST',
+    });
+
+    this.agent.handleCartEmpty();
+  }
+
+  async submitOrder(): Promise<void> {
+    const pit = this.agent.getPurchaseIntentToken();
+
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId: 'order-123',
+        qredex_pit: pit,
+      }),
+    });
+
+    await this.clearCart();
   }
 }
 ```
@@ -76,10 +112,10 @@ export class QredexCartBridgeComponent implements OnChanges {
 |---|---|---|
 | App bootstrap | `provideQredexAgent()` | Makes the agent available to Angular surfaces |
 | Cart becomes non-empty | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart stays non-empty and changes again | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
-| Cart becomes empty | `agent.handleCartChange({ itemCount: 0, previousCount })` | Clears IIT/PIT from the live session |
-| Checkout succeeds | `agent.handlePaymentSuccess({ orderId, amount, currency })` | Clears attribution state after a completed purchase |
+| Cart changes while still non-empty | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Clear cart action | `clearCart() -> agent.handleCartEmpty()` | Clears IIT/PIT from the live session |
 | Need PIT for order submission | `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
+| Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()` | Optional explicit cleanup path |
 
 ## API Surface
 
@@ -92,15 +128,3 @@ export class QredexCartBridgeComponent implements OnChanges {
 | `initQredex()` | Explicit browser init when needed |
 | `QREDEX_AGENT` | Angular injection token |
 | `QredexAgent` | Re-export of the core agent |
-
-## Attribution Flow
-
-```text
-User lands with ?qdx_intent=...
-  -> Qredex captures IIT
-  -> Angular cart surface reports itemCount changes
-  -> handleCartChange() sees non-empty cart + IIT
-  -> Qredex locks IIT -> PIT
-  -> checkout uses PIT from getPurchaseIntentToken()
-  -> handlePaymentSuccess() clears attribution state
-```

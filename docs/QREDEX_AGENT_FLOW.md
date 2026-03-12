@@ -207,15 +207,11 @@ if (result.success) {
 ### After Checkout
 
 ```typescript
-// After successful payment/order
-QredexAgent.handlePaymentSuccess({
-  orderId: 'order-123',
-  amount: 99.99,
-  currency: 'USD',
-});
+// Most platforms will clear the cart after checkout
+QredexAgent.handleCartEmpty();
 
-// Or manually clear tokens
-QredexAgent.clearIntent();
+// Optional explicit cleanup if checkout completes without a cart-empty step
+QredexAgent.handlePaymentSuccess();
 ```
 
 ---

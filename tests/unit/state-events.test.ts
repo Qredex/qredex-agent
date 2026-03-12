@@ -19,7 +19,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import QredexAgent from '../../src/index.js';
-import { resetConfig } from '../../src/bootstrap/config.js';
+import { getConfig, resetConfig } from '../../src/bootstrap/config.js';
 
 describe('State change events', () => {
   beforeEach(() => {
@@ -46,6 +46,26 @@ describe('State change events', () => {
       hasIIT: false,
       hasPIT: false,
       locked: false,
+    });
+  });
+
+  it('clears attribution state when payment success is reported without payload', () => {
+    QredexAgent.init();
+
+    const config = getConfig();
+    const cleared = vi.fn();
+
+    sessionStorage.setItem(config.influenceIntentToken, 'iit_12345678');
+    sessionStorage.setItem(config.purchaseIntentToken, 'pit_12345678');
+
+    QredexAgent.onCleared(cleared);
+    QredexAgent.handlePaymentSuccess();
+
+    expect(QredexAgent.getInfluenceIntentToken()).toBeNull();
+    expect(QredexAgent.getPurchaseIntentToken()).toBeNull();
+    expect(cleared).toHaveBeenCalledTimes(1);
+    expect(cleared.mock.calls[0][0]).toMatchObject({
+      timestamp: expect.any(Number),
     });
   });
 });
