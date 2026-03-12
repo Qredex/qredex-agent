@@ -38,6 +38,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       QREDEX_CDN_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
+      QREDEX_AGENT_LOCK_ENDPOINT: ${{ vars.QREDEX_AGENT_LOCK_ENDPOINT }}
 
     steps:
       - name: Checkout

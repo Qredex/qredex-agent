@@ -34,17 +34,13 @@ function init(config?: AgentConfig): void
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
-| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING/TEST ONLY** - Controlled override ignored in production |
 | `debug` | `boolean` | `false` | ❌ Forced Off | Enable debug logging outside production only |
-| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens (no network calls) |
-| `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
-| `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
-| `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEVELOPMENT ONLY** for merchant usage - Generate fake PIT tokens (no network calls) |
 
 **⚠️ Production Safety:**
-- `useMockEndpoint: true` is for development/test only - ignored elsewhere
-- `lockEndpoint` override ignored in production (always uses Qredex AGENT endpoint)
+- `useMockEndpoint: true` is for local development only - ignored in staging and production
 - `debug: true` is ignored in production and agent `debug`/`info`/`warn` console output is suppressed
+- endpoint selection and storage keys are internal; production always uses the canonical Qredex lock endpoint and stable storage keys
 
 **Example:**
 ```javascript
@@ -52,12 +48,6 @@ function init(config?: AgentConfig): void
 QredexAgentConfig = {
   debug: true,
   useMockEndpoint: true,  // Mock PIT, no network calls
-};
-
-// Staging (test against your backend)
-QredexAgentConfig = {
-  debug: true,
-  lockEndpoint: 'https://staging-api.your-backend.com/api/v1/agent/intents/lock',
 };
 
 // Production - use defaults (no config needed)
@@ -560,51 +550,28 @@ if (QredexAgent.isInitialized()) {
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
-| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING/TEST ONLY** - Controlled override ignored in production |
 | `debug` | `boolean` | `false` | ❌ Forced Off | Enable debug logging outside production only |
-| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens (no network calls) |
-| `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
-| `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
-| `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEVELOPMENT ONLY** for merchant usage - Generate fake PIT tokens (no network calls) |
 
 **Type Definition:**
 ```typescript
 interface AgentConfig {
-  /**
-   * API endpoint for lock requests
-   * ⚠️ DEV/STAGING/TEST ONLY - Ignored in production builds
-   */
-  lockEndpoint?: string;
-
   /** Enable verbose agent diagnostics in non-production builds. */
   debug?: boolean;
 
   /**
    * Use mock endpoint for local development (generates fake PIT tokens)
-   * ⚠️ DEVELOPMENT/TEST ONLY - Ignored elsewhere
+   * ⚠️ DEVELOPMENT ONLY for merchant usage - Ignored in staging and production
    */
   useMockEndpoint?: boolean;
-
-  /** sessionStorage/cookie key for IIT */
-  influenceIntentToken?: string;
-
-  /** sessionStorage/cookie key for PIT */
-  purchaseIntentToken?: string;
-
-  /** Cookie expiration in days */
-  cookieExpireDays?: number;
 }
 ```
 
 **Defaults:**
 ```typescript
 {
-  lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
   debug: false,
-  useMockEndpoint: false,  // ⚠️ DEV/TEST ONLY - Ignored elsewhere
-  influenceIntentToken: '__qdx_iit',
-  purchaseIntentToken: '__qdx_pit',
-  cookieExpireDays: 30,
+  useMockEndpoint: false,
 }
 ```
 
@@ -612,9 +579,6 @@ interface AgentConfig {
 ```typescript
 // Development (mock PIT, no network calls)
 { debug: true, useMockEndpoint: true }
-
-// Staging (test against your backend)
-{ debug: true, lockEndpoint: 'https://staging.your-backend.com/...' }
 
 // Production (use defaults - no config needed)
 {}  // Omit entirely in production

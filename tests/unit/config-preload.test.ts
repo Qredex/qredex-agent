@@ -62,14 +62,13 @@ describe('Config Pre-load', () => {
     // Set pre-load config
     (window as Record<string, unknown>).QredexAgentConfig = {
       debug: true,
-      lockEndpoint: 'https://custom.api.com/lock',
     };
 
     // Access config (should auto-initialize from pre-load)
     const config = getConfig();
 
     expect(config.debug).toBe(true);
-    expect(config.lockEndpoint).toBe('https://custom.api.com/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
   });
 
   it('should merge pre-load config with programmatic config', () => {
@@ -80,7 +79,7 @@ describe('Config Pre-load', () => {
 
     // Initialize with additional config
     initConfig({
-      lockEndpoint: 'https://programmatic.api.com/lock',
+      useMockEndpoint: true,
     });
 
     const config = getConfig();
@@ -88,21 +87,18 @@ describe('Config Pre-load', () => {
     // Pre-load takes precedence for debug
     expect(config.debug).toBe(true);
     // Programmatic config is applied
-    expect(config.lockEndpoint).toBe('https://programmatic.api.com/lock');
+    expect(config.useMockEndpoint).toBe(true);
   });
 
-  it('should validate pre-load config values', () => {
-    // Set invalid pre-load config
+  it('should ignore unsupported pre-load config values', () => {
     (window as Record<string, unknown>).QredexAgentConfig = {
-      lockEndpoint: 'not-a-valid-url',
+      lockEndpoint: 'https://custom.api.com/lock',
       debug: true,
-    };
+    } as Record<string, unknown>;
 
     const config = getConfig();
 
-    // Invalid URL should fall back to default
     expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
-    // Valid values should be applied
     expect(config.debug).toBe(true);
   });
 

@@ -35,15 +35,13 @@ describe('Public init', () => {
   it('should apply programmatic config via init()', () => {
     QredexAgent.init({
       debug: true,
-      influenceIntentToken: '__qdx_custom_iit',
-      purchaseIntentToken: '__qdx_custom_pit',
     });
 
     const config = getConfig();
 
     expect(config.debug).toBe(true);
-    expect(config.influenceIntentToken).toBe('__qdx_custom_iit');
-    expect(config.purchaseIntentToken).toBe('__qdx_custom_pit');
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
+    expect(config.purchaseIntentToken).toBe('__qdx_pit');
     expect(QredexAgent.isInitialized()).toBe(true);
   });
 });

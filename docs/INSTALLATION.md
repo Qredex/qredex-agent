@@ -82,11 +82,6 @@ The agent uses semantic versioning for CDN delivery.
 <script src="https://cdn.qredex.com/agent/v1.0.0/qredex-agent.iife.min.js"></script>
 ```
 
-**Development (always latest):**
-```html
-<script src="https://cdn.qredex.com/agent/latest/qredex-agent.iife.min.js"></script>
-```
-
 ### Caching Headers
 
 **Pinned versions:**
@@ -108,15 +103,7 @@ Set `window.QredexAgentConfig` **before** the script loads:
 ```html
 <script>
   window.QredexAgentConfig = {
-    // Debug logging (non-production only)
     debug: false,
-
-    // Storage keys (usually not needed)
-    influenceIntentToken: '__qdx_iit',
-    purchaseIntentToken: '__qdx_pit',
-
-    // Cookie expiration in days
-    cookieExpireDays: 30,
   };
 </script>
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
@@ -126,12 +113,10 @@ Set `window.QredexAgentConfig` **before** the script loads:
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
-| `lockEndpoint` | `string` | Production URL | ❌ Ignored | ⚠️ **DEV/STAGING/TEST ONLY** - Controlled override ignored in production |
 | `debug` | `boolean` | `false` | ❌ Forced Off | Non-production logging only |
-| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens (no network calls) |
-| `influenceIntentToken` | `string` | `'__qdx_iit'` | ✅ Default | Storage key for IIT |
-| `purchaseIntentToken` | `string` | `'__qdx_pit'` | ✅ Default | Storage key for PIT |
-| `cookieExpireDays` | `number` | `30` | ✅ Default | Cookie expiration in days |
+| `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEVELOPMENT ONLY** for merchant usage - Generate fake PIT tokens (no network calls) |
+
+Runtime configuration does not support `lockEndpoint`, storage-key overrides, or cookie-expiry overrides. Those are internal agent settings. Production always uses the built-in Qredex lock endpoint and stable storage keys.
 
 ---
 
@@ -147,7 +132,7 @@ npm run dev
 ### Staging
 
 ```bash
-npm run build:stage
+QREDEX_AGENT_LOCK_ENDPOINT=https://staging-api.example.com/api/v1/agent/intents/lock npm run build:stage
 # Deploy /dist/qredex-agent.iife.stage.min.js to your staging site
 ```
 
@@ -155,7 +140,6 @@ npm run build:stage
 <script>
   window.QredexAgentConfig = {
     debug: true,
-    lockEndpoint: 'https://staging-api.your-backend.com/api/v1/agent/intents/lock',
   };
 </script>
 <script src="/assets/qredex-agent.iife.stage.min.js"></script>
@@ -168,7 +152,7 @@ npm run build:stage
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-> **Note:** In production builds, `lockEndpoint` overrides are **ignored**. The agent always uses the default Qredex AGENT endpoint (`https://api.qredex.com/api/v1/agent/intents/lock`). This ensures consistent runtime behavior and prevents accidental misconfiguration.
+> **Note:** In production builds, the lock endpoint is fixed inside the bundle. Runtime overrides are not supported.
 
 ---
 
@@ -289,7 +273,7 @@ useEffect(() => {
 
 ### Lock Not Working
 
-1. Check `lockEndpoint` is correct for your environment
+1. Check you are using the correct bundle for the environment
 2. Verify IIT exists: `QredexAgent.hasInfluenceIntentToken()`
 3. Check network tab for API errors
 

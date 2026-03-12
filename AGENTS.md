@@ -508,13 +508,16 @@ The library produces two bundles:
 ### Environment Configuration
 
 Required configuration:
-- `lockEndpoint` = Qredex lock API URL
 - `debug` = Enable debug logging (default: false)
-- `influenceIntentToken` = IIT storage key (default: `__qdx_iit`)
-- `purchaseIntentToken` = PIT storage key (default: `__qdx_pit`)
-- `cookieExpireDays` = Cookie expiration (default: 30)
+- `useMockEndpoint` = Generate mock PIT tokens for development/test only (default: false)
 
-**Note:** Auto-detection is not implemented. Merchants must explicitly call `handleCartChange()` or `handleCartAdd()` when cart state changes.
+Internal runtime defaults:
+- `DEFAULT_LOCK_ENDPOINT` = Built-in Qredex lock API URL (build-time selected outside production)
+- `DEFAULT_INFLUENCE_INTENT_TOKEN_KEY` = IIT storage key (default: `__qdx_iit`)
+- `DEFAULT_PURCHASE_INTENT_TOKEN_KEY` = PIT storage key (default: `__qdx_pit`)
+- `DEFAULT_COOKIE_EXPIRE_DAYS` = Cookie expiration (default: 30)
+
+**Note:** Auto-detection is not implemented. Merchants must explicitly call `handleCartChange()` when cart state changes.
 
 ### Monitoring
 
@@ -743,7 +746,7 @@ Remember: When in doubt, ask. Never guess or assume.
 
 ## ⚠️ CRITICAL: Copyright Notice
 
-**ALL created files MUST include the official Qredex copyright header:**
+**ALL created files MUST include the official Qredex MIT header used in this repository:**
 
 ```typescript
 /**
@@ -759,8 +762,8 @@ Remember: When in doubt, ask. Never guess or assume.
  *
  *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *  This is proprietary and confidential. Unauthorized copying, redistributing
- *  and/or modification of this file via any medium is inexorably prohibited.
+ *  Licensed under the MIT License. See LICENSE for the full license text.
+ *  Redistribution and use are permitted under that license.
  *
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */

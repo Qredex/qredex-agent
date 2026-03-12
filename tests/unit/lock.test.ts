@@ -26,30 +26,25 @@ import { lockIntent } from '../../src/api/lock.js';
 import { storeInfluenceIntentToken, storePurchaseToken, clearAllTokens } from '../../src/storage/tokens.js';
 import { initConfig, resetConfig } from '../../src/bootstrap/config.js';
 import { resetState } from '../../src/core/state.js';
+import {
+  DEFAULT_COOKIE_EXPIRE_DAYS,
+  DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+} from '../../src/utils/constants.js';
 
 describe('Lock API', () => {
-  const testConfig = {
-    lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
-    debug: false,
-    influenceIntentToken: 'test_intent',
-    purchaseIntentToken: 'test_pit',
-    influenceIntentToken: 'test_intent_key',
-    purchaseIntentToken: 'test_pit_key',
-    cookieExpireDays: 30,
+  const storageConfig = {
+    influenceIntentToken: DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+    purchaseIntentToken: DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+    cookieExpireDays: DEFAULT_COOKIE_EXPIRE_DAYS,
   };
 
   beforeEach(() => {
     // Clear storage
-    clearAllTokens({
-      influenceIntentToken: testConfig.influenceIntentToken,
-      purchaseIntentToken: testConfig.purchaseIntentToken,
-      influenceIntentToken: testConfig.influenceIntentToken,
-      purchaseIntentToken: testConfig.purchaseIntentToken,
-      cookieExpireDays: testConfig.cookieExpireDays,
-    });
+    clearAllTokens(storageConfig);
 
     // Initialize config
-    initConfig(testConfig);
+    initConfig();
 
     // Reset state
     resetState();
@@ -66,13 +61,7 @@ describe('Lock API', () => {
   describe('Idempotency', () => {
     it('should return cached PIT if already exists locally', async () => {
       // Store a PIT first
-      storePurchaseToken('existing_pit_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storePurchaseToken('existing_pit_12345', storageConfig);
 
       const result = await lockIntent();
 
@@ -83,13 +72,7 @@ describe('Lock API', () => {
 
     it('should return same promise for concurrent calls', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       // Mock fetch to simulate slow response
       const mockResponse = {
@@ -119,11 +102,7 @@ describe('Lock API', () => {
 
     it('should handle successful lock response', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       // Mock fetch to return successful response
       const mockResponse = {
@@ -156,13 +135,7 @@ describe('Lock API', () => {
 
     it('should successfully lock intent', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       // Mock successful fetch response
       const mockResponse = {
@@ -188,13 +161,7 @@ describe('Lock API', () => {
 
     it('should handle HTTP errors', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       // Mock HTTP error
       global.fetch = vi.fn().mockResolvedValue({
@@ -213,13 +180,7 @@ describe('Lock API', () => {
 
     it('should handle network errors', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       // Mock network error
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
@@ -234,11 +195,7 @@ describe('Lock API', () => {
 
     it('should handle invalid response without token', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       // Mock response without token (invalid)
       const mockResponse = {
@@ -260,13 +217,7 @@ describe('Lock API', () => {
 
     it('should include metadata in request', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       const mockResponse = {
         success: true,
@@ -296,13 +247,7 @@ describe('Lock API', () => {
   describe('State Management', () => {
     it('should reset in-flight state after completion', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       const mockResponse = {
         success: true,
@@ -326,13 +271,7 @@ describe('Lock API', () => {
 
     it('should allow new lock after state reset', async () => {
       // Store IIT
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       const mockResponse1 = {
         success: true,
@@ -348,22 +287,10 @@ describe('Lock API', () => {
       expect(result1.success).toBe(true);
 
       // Clear PIT to simulate fresh state (but keep IIT)
-      clearAllTokens({
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      clearAllTokens(storageConfig);
 
       // Re-store IIT since clearAllTokens clears both
-      storeInfluenceIntentToken('test_intent_12345', {
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        influenceIntentToken: testConfig.influenceIntentToken,
-        purchaseIntentToken: testConfig.purchaseIntentToken,
-        cookieExpireDays: testConfig.cookieExpireDays,
-      });
+      storeInfluenceIntentToken('test_intent_12345', storageConfig);
 
       resetState();
 

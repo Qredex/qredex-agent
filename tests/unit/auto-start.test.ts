@@ -25,23 +25,28 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { captureIntentToken } from '../../src/bootstrap/auto-start.js';
 import { initConfig, resetConfig } from '../../src/bootstrap/config.js';
 import {
+  DEFAULT_COOKIE_EXPIRE_DAYS,
+  DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+} from '../../src/utils/constants.js';
+import {
   clearAllTokens,
   getInfluenceIntentToken,
   getPurchaseToken,
   storePurchaseToken,
 } from '../../src/storage/tokens.js';
 
-const testConfig = {
-  influenceIntentToken: '__qdx_test_iit',
-  purchaseIntentToken: '__qdx_test_pit',
-  cookieExpireDays: 30,
+const storageConfig = {
+  influenceIntentToken: DEFAULT_INFLUENCE_INTENT_TOKEN_KEY,
+  purchaseIntentToken: DEFAULT_PURCHASE_INTENT_TOKEN_KEY,
+  cookieExpireDays: DEFAULT_COOKIE_EXPIRE_DAYS,
 };
 
 describe('Auto-start bootstrap', () => {
   beforeEach(() => {
     resetConfig();
-    initConfig(testConfig);
-    clearAllTokens(testConfig);
+    initConfig();
+    clearAllTokens(storageConfig);
     window.location.href = 'http://localhost:5173/examples/index.html';
   });
 
@@ -52,20 +57,20 @@ describe('Auto-start bootstrap', () => {
     const captured = captureIntentToken();
 
     expect(captured).toBe(true);
-    expect(getInfluenceIntentToken(testConfig)).toBe('iit_12345678');
+    expect(getInfluenceIntentToken(storageConfig)).toBe('iit_12345678');
     expect(replaceStateSpy).toHaveBeenCalledWith({}, '', '/examples/index.html');
   });
 
   it('should clean qdx_intent from the URL when PIT already exists', () => {
     const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
-    storePurchaseToken('pit_12345678', testConfig);
+    storePurchaseToken('pit_12345678', storageConfig);
     window.location.href = 'http://localhost:5173/examples/index.html?qdx_intent=iit_12345678';
 
     const captured = captureIntentToken();
 
     expect(captured).toBe(false);
-    expect(getPurchaseToken(testConfig)).toBe('pit_12345678');
-    expect(getInfluenceIntentToken(testConfig)).toBe(null);
+    expect(getPurchaseToken(storageConfig)).toBe('pit_12345678');
+    expect(getInfluenceIntentToken(storageConfig)).toBe(null);
     expect(replaceStateSpy).toHaveBeenCalledWith({}, '', '/examples/index.html');
   });
 });

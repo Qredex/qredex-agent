@@ -24,6 +24,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getConfigPolicy } from '../../src/bootstrap/config-policy.js';
 import {
+  type AgentConfig,
   getConfig,
   getConfigValue,
   initConfig,
@@ -53,18 +54,16 @@ describe('Configuration', () => {
   it('should merge user config with defaults in test mode', () => {
     const config = initConfig({
       debug: true,
-      lockEndpoint: 'https://custom.endpoint.com/lock',
     });
 
     expect(config.debug).toBe(true);
-    expect(config.lockEndpoint).toBe('https://custom.endpoint.com/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.influenceIntentToken).toBe('__qdx_iit');
   });
 
   it('should respect pre-load global config', () => {
     window.QredexAgentConfig = {
       debug: true,
-      influenceIntentToken: 'custom_intent',
     };
 
     const config = initConfig({
@@ -72,47 +71,49 @@ describe('Configuration', () => {
     });
 
     expect(config.debug).toBe(true);
-    expect(config.influenceIntentToken).toBe('custom_intent');
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
   });
 
-  it('should allow relative lockEndpoint overrides in non-production runtimes', () => {
-    const config = resolveConfig(
-      {
-        lockEndpoint: '/api/v1/agent/intents/lock',
-      },
-      getConfigPolicy('staging')
-    );
+  it('should ignore unsupported runtime config fields', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const config = resolveConfig({
+      debug: true,
+      lockEndpoint: 'https://custom.endpoint.com/lock',
+      influenceIntentToken: '__qdx_custom_iit',
+      purchaseIntentToken: '__qdx_custom_pit',
+      cookieExpireDays: 7,
+    } as AgentConfig & Record<string, unknown>);
 
-    expect(config.lockEndpoint).toBe('/api/v1/agent/intents/lock');
+    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
+    expect(config.influenceIntentToken).toBe('__qdx_iit');
+    expect(config.purchaseIntentToken).toBe('__qdx_pit');
+    expect(config.cookieExpireDays).toBe(30);
+    expect(warnSpy).toHaveBeenCalled();
   });
 
-  it('should ignore lockEndpoint and debug overrides in production', () => {
+  it('should ignore debug in production', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const config = resolveConfig(
       {
-        lockEndpoint: 'https://custom.endpoint.com/lock',
         debug: true,
       },
       getConfigPolicy('production')
     );
 
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(false);
     expect(warnSpy).toHaveBeenCalled();
   });
 
-  it('should allow lockEndpoint and debug in staging but reject mock endpoint', () => {
+  it('should allow debug in staging but reject mock endpoint', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const config = resolveConfig(
       {
-        lockEndpoint: 'https://staging.example.com/api/v1/agent/intents/lock',
         debug: true,
         useMockEndpoint: true,
       },
       getConfigPolicy('staging')
     );
 
-    expect(config.lockEndpoint).toBe('https://staging.example.com/api/v1/agent/intents/lock');
     expect(config.debug).toBe(true);
     expect(config.useMockEndpoint).toBe(false);
     expect(warnSpy).toHaveBeenCalled();
@@ -127,26 +128,6 @@ describe('Configuration', () => {
     );
 
     expect(config.useMockEndpoint).toBe(true);
-  });
-
-  it('should fall back to default for invalid lockEndpoint', () => {
-    const config = initConfig({
-      lockEndpoint: 'not-a-valid-url',
-    });
-
-    expect(config.lockEndpoint).toBe('https://api.qredex.com/api/v1/agent/intents/lock');
-  });
-
-  it('should revert duplicate storage key overrides to defaults', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const config = resolveConfig({
-      influenceIntentToken: '__qdx_shared',
-      purchaseIntentToken: '__qdx_shared',
-    });
-
-    expect(config.influenceIntentToken).toBe('__qdx_iit');
-    expect(config.purchaseIntentToken).toBe('__qdx_pit');
-    expect(warnSpy).toHaveBeenCalled();
   });
 
   it('should provide getConfigValue for individual values', () => {

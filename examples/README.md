@@ -63,7 +63,7 @@ This builds the development IIFE bundle, serves the repo root, opens the example
 npm run build:stage
 
 # 2. Deliver /dist with your staging site
-#    Use lockEndpoint to point at the staging Qredex backend
+#    Build the staging bundle with QREDEX_AGENT_LOCK_ENDPOINT if it should hit a real staging backend
 ```
 
 ---
@@ -170,13 +170,13 @@ QredexAgent.onCleared(() => {
 In production, load from CDN instead of local dist:
 
 ```html
-<script src="https://cdn.qredex.com/agent/v1/@qredex/agent.iife.min.js"></script>
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
 Or use a specific version:
 
 ```html
-<script src="https://cdn.qredex.com/agent/v1.0.0/@qredex/agent.iife.min.js"></script>
+<script src="https://cdn.qredex.com/agent/v1.0.0/qredex-agent.iife.min.js"></script>
 ```
 
 ---
@@ -188,9 +188,8 @@ For local bundle validation, configure before the script loads:
 ```html
 <script>
   window.QredexAgentConfig = {
-    debug: true,              // Non-production only
-    lockEndpoint: '/api/v1/agent/intents/lock', // Same-origin non-production override
-    cookieExpireDays: 30,     // Cookie expiration
+    debug: true,
+    useMockEndpoint: true,
   };
 </script>
 <script src="../../dist/qredex-agent.iife.dev.min.js"></script>

@@ -145,6 +145,12 @@ That prepares and uploads the staging bundle to:
 Staging uses the staging build policy and is intentionally isolated from the
 production versioned CDN paths.
 
+If staging should hit a real non-production lock API, set the `staging`
+environment variable `QREDEX_AGENT_LOCK_ENDPOINT` in GitHub Actions before
+running the staging workflow. The staging build bakes that endpoint into the
+bundle at build time. Production ignores this override and always uses the
+canonical Qredex production lock endpoint.
+
 Caching policy:
 
 - pinned version path: `Cache-Control: public, max-age=31536000, immutable`

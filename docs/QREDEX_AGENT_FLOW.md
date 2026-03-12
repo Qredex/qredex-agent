@@ -88,41 +88,7 @@ The agent maintains a simple cart state machine:
 
 ## Canonical Runtime Sequence
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant FE as Storefront + Qredex Agent
-    participant Q as Qredex API
-    participant C as Cart / Checkout
-    participant O as Order Ingestion
-
-    U->>FE: Visit landing page with ?qdx_intent=IIT
-    FE->>FE: Read qdx_intent from URL
-    FE->>FE: Store IIT in sessionStorage
-    FE->>FE: Store IIT in cookie fallback
-    FE->>FE: Remove qdx_intent from URL
-    FE->>FE: Cart state: empty
-
-    U->>FE: Add item to cart
-    FE->>FE: Merchant calls handleCartChange()
-    FE->>FE: Merchant-reported cart is non-empty
-    FE->>FE: Check IIT exists
-    FE->>FE: Check PIT not already stored
-    FE->>FE: Check no lock already in flight
-
-    FE->>Q: POST /api/v1/agent/intents/lock
-    Q->>Q: Validate IIT
-    Q-->>FE: Return PIT
-
-    FE->>FE: Store PIT in sessionStorage
-    FE->>FE: Store PIT in cookie fallback
-    FE->>FE: Clear IIT (PIT now authoritative)
-    FE->>C: Attach PIT to cart/session/order handoff
-
-    U->>C: Complete checkout
-    C->>O: Submit order with PIT
-    O->>Q: Resolve attribution from PIT
-```
+![Qredex attribution sequence](./diagrams/agent-attribution-sequence.svg)
 
 ---
 

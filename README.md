@@ -40,32 +40,7 @@
 
 ### 2. Attribution Sequence
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Storefront as Merchant Storefront
-    participant Agent as QredexAgent
-
-    User->>Storefront: Land on storefront with ?qdx_intent=iit_xxx
-    Note right of Agent: Capture IIT<br/>Store (session + cookie)<br/>Clean URL
-
-    User->>Storefront: Add item to cart
-    Storefront->>Storefront: Update cart state
-    Storefront->>Agent: handleCartChange({ itemCount, previousCount })
-    Note right of Agent: Locks IIT to PIT internally when lockable
-
-    User->>Storefront: Checkout
-    Storefront->>Agent: getPurchaseIntentToken()
-    Note right of Storefront: Send PIT with the order to your backend
-
-    User->>Storefront: Cart becomes empty
-    Storefront->>Agent: handleCartEmpty()
-    Note right of Agent: Clear PIT
-    
-    opt No cart-empty step after checkout
-        Storefront->>Agent: handlePaymentSuccess()
-    end
-```
+![Qredex attribution sequence](https://raw.githubusercontent.com/Qredex/qredex-agent/main/docs/diagrams/agent-attribution-sequence.svg)
 
 The agent never adds to cart, removes items, or clears the merchant cart. The storefront owns cart state and checkout; the agent only captures intent and reacts to merchant-reported cart events.
 
@@ -300,7 +275,7 @@ Pass `meta` only if you intentionally want to attach extra merchant context to t
 // CDN/IIFE auto-starts on script load; ESM/framework usage should call init() in the browser.
 QredexAgent.init({
   debug: true,
-  lockEndpoint: 'https://staging.your-backend.com/api/v1/agent/intents/lock',
+  useMockEndpoint: true,
 });
 
 // Check if initialized
@@ -375,15 +350,11 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 ```html
 <script>
   window.QredexAgentConfig = {
-    debug: true,                     // Non-production only
-    lockEndpoint: '/api/v1/agent/intents/lock', // Same-origin staging/dev only
-    useMockEndpoint: true,           // ⚠️ DEV/TEST ONLY: mock PIT tokens
-    influenceIntentToken: '__qdx_iit',  // IIT storage key
-    purchaseIntentToken: '__qdx_pit',   // PIT storage key
-    cookieExpireDays: 30,            // Cookie expiration in days
+    debug: true,
+    useMockEndpoint: true,
   };
 </script>
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script src="http://localhost:3000/dist/qredex-agent.iife.dev.min.js"></script>
 ```
 
 ### Configuration Options
@@ -391,13 +362,13 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `debug` | boolean | `false` | Non-production logging. Forced to `false` in production |
-| `lockEndpoint` | string | `'https://api.qredex.com/api/v1/agent/intents/lock'` | Controlled non-production override. Ignored in production |
-| `useMockEndpoint` | boolean | `false` | ⚠️ **DEV/TEST ONLY** - Generate fake PIT tokens locally |
-| `influenceIntentToken` | string | `'__qdx_iit'` | Stable IIT storage key. Override only for advanced integrations |
-| `purchaseIntentToken` | string | `'__qdx_pit'` | Stable PIT storage key. Override only for advanced integrations |
-| `cookieExpireDays` | number | `30` | Cookie expiration in days |
+| `useMockEndpoint` | boolean | `false` | ⚠️ **DEVELOPMENT ONLY** for merchant usage. Generates fake PIT tokens locally |
 
-### ⚠️ Mock Endpoint Warning
+Production does not support runtime endpoint overrides, storage-key overrides, or mock mode. The production bundle always uses the built-in Qredex production lock endpoint and stable storage keys.
+
+For real non-production network testing, build the bundle with `QREDEX_AGENT_LOCK_ENDPOINT` so the endpoint is baked into the staging/dev artifact instead of passed at runtime.
+
+### ⚠️ Development-Only Mock Mode
 
 ```javascript
 useMockEndpoint: true  // ⚠️ DEVELOPMENT ONLY
@@ -405,8 +376,8 @@ useMockEndpoint: true  // ⚠️ DEVELOPMENT ONLY
 
 - Generates fake PIT tokens locally (no network calls)
 - Only use for local development/testing
-- Ignored outside development/test builds
-- **Never rely on `useMockEndpoint` in staging or production**
+- Ignored in staging and production
+- **Never rely on `useMockEndpoint` outside local development**
 
 ---
 
