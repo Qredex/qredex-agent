@@ -589,15 +589,15 @@ Open DevTools → Application → Storage:
 |---------|-------------|-------------|
 | [examples/index.html](examples/index.html) | Example hub for CDN and wrapper pages | `npm run example` |
 | [examples/cdn/index.html](examples/cdn/index.html) | Canonical script-tag customer path | Open from the hub |
-| [examples/wrappers/react/index.html](examples/wrappers/react/index.html) | React bridge code + shared live harness | Open from the hub |
-| [examples/wrappers/vue/index.html](examples/wrappers/vue/index.html) | Vue bridge code + shared live harness | Open from the hub |
-| [examples/wrappers/svelte/index.html](examples/wrappers/svelte/index.html) | Svelte bridge code + shared live harness | Open from the hub |
-| [examples/wrappers/angular/index.html](examples/wrappers/angular/index.html) | Angular bridge code + shared live harness | Open from the hub |
+| [examples/wrappers/react/index.html](examples/wrappers/react/index.html) | Real React app using `@qredex/react` | Open from the hub |
+| [examples/wrappers/vue/index.html](examples/wrappers/vue/index.html) | Real Vue app using `@qredex/vue` | Open from the hub |
+| [examples/wrappers/svelte/index.html](examples/wrappers/svelte/index.html) | Real Svelte app using `@qredex/svelte` | Open from the hub |
+| [examples/wrappers/angular/index.html](examples/wrappers/angular/index.html) | Real Angular app using `@qredex/angular` | Open from the hub |
 
 Each example includes:
 - A focused integration path
-- The same cart harness for IIT/PIT behavior checks
-- The wrapper bridge code when a framework adapter is involved
+- The same IIT/PIT cart scenario for behavior checks
+- Real framework apps for React, Vue, Svelte, and Angular
 - Debugging guide
 
 **See:** [examples/README.md](examples/README.md) for detailed example and testing instructions.

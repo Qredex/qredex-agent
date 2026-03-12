@@ -40,7 +40,7 @@ If your browser does not open automatically, use:
 open http://localhost:3000/examples/index.html
 ```
 
-The hub opens first. Start with the featured CDN card, then open the wrapper pages as needed.
+The hub opens first. Start with the featured CDN card, then open the framework-specific example apps as needed.
 
 ### Browser smoke test
 
@@ -72,10 +72,10 @@ npm run build:stage
 
 - `examples/index.html` = example hub
 - `examples/cdn/index.html` = canonical CDN/script-tag path
-- `examples/wrappers/react/index.html` = React bridge code + shared live harness
-- `examples/wrappers/vue/index.html` = Vue bridge code + shared live harness
-- `examples/wrappers/svelte/index.html` = Svelte bridge code + shared live harness
-- `examples/wrappers/angular/index.html` = Angular bridge code + shared live harness
+- `examples/wrappers/react/index.html` = real React app using `@qredex/react`
+- `examples/wrappers/vue/index.html` = real Vue app using `@qredex/vue`
+- `examples/wrappers/svelte/index.html` = real Svelte app using `@qredex/svelte`
+- `examples/wrappers/angular/index.html` = real Angular app using `@qredex/angular`
 
 ## What These Examples Do
 
@@ -85,13 +85,14 @@ The examples demonstrate the complete Qredex Agent flow:
 2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
 3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
 
-**Note:** The live harness uses `useMockEndpoint: true` through `dist/qredex-agent.iife.dev.min.js`, so it generates fake PIT tokens locally without network calls.
+**Note:** The CDN page uses `dist/qredex-agent.iife.dev.min.js` with `useMockEndpoint: true`. The wrapper pages use their wrapper packages directly with the same mock setting, so they generate fake PIT tokens locally without network calls.
 
 Wrapper pages stay honest:
-- the code panel shows the exact wrapper bridge you would place in React, Vue, Svelte, or Angular
-- the live cart harness below it still exercises the same shared core agent flow
+- each page is a real mounted framework app
+- the code panel shows the exact wrapper bridge used by that page
+- the cart scenario stays aligned across frameworks so IIT capture, PIT lock, and clear behavior are easy to compare
 
-Once loaded, the agent is available globally via `window.QredexAgent`:
+On the CDN page, the agent is available globally via `window.QredexAgent`:
 
 ```javascript
 // Check tokens
