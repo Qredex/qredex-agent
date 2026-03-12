@@ -28,10 +28,18 @@ import { getConfigValue } from './config.js';
 
 const INFLUENCE_INTENT_TOKEN_PARAM = 'qdx_intent';
 
+function canUseWindow(): boolean {
+  return typeof window !== 'undefined';
+}
+
 /**
  * Extract the qdx_intent token from the current URL.
  */
 const extractIntentFromUrl = (): string | null => {
+  if (!canUseWindow()) {
+    return null;
+  }
+
   try {
     const params = new URLSearchParams(window.location.search);
     const token = params.get(INFLUENCE_INTENT_TOKEN_PARAM);
@@ -55,6 +63,10 @@ export default extractIntentFromUrl;
  * Uses history.replaceState to maintain the current page state.
  */
 export const cleanUrl = (): void => {
+  if (!canUseWindow()) {
+    return;
+  }
+
   try {
     const params = new URLSearchParams(window.location.search);
 

@@ -64,7 +64,7 @@ QredexAgentConfig = {
 // QredexAgentConfig omitted entirely
 ```
 
-**Note:** Usually not needed - agent auto-starts on script load with default configuration.
+**Note:** Usually not needed for the CDN/IIFE bundle, which auto-starts on script load. ESM and framework consumers should call `init()` in the browser.
 
 ---
 

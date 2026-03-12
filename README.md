@@ -285,7 +285,8 @@ QredexAgent.clearIntent();
 ### Lifecycle Methods
 
 ```javascript
-// Initialize with custom config (usually not needed - auto-starts)
+// Initialize with custom config
+// CDN/IIFE auto-starts on script load; ESM/framework usage should call init() in the browser.
 QredexAgent.init({
   debug: true,
   lockEndpoint: 'https://staging.your-backend.com/api/v1/agent/intents/lock',
@@ -337,6 +338,8 @@ import {
 
 // Or default import
 import QredexAgent from '@qredex/agent';
+
+QredexAgent.init();
 ```
 
 ---

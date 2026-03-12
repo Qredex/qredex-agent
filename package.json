@@ -20,9 +20,9 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node scripts/copy-iife-min.js production",
-    "build:dev": "tsc && vite build --mode development && node scripts/copy-iife-min.js development",
-    "build:stage": "tsc && vite build --mode staging && node scripts/copy-iife-min.js staging",
+    "build": "tsc && vite build && vite build --config vite.iife.config.ts && node scripts/copy-iife-min.js production",
+    "build:dev": "tsc && vite build --mode development && vite build --config vite.iife.config.ts --mode development && node scripts/copy-iife-min.js development",
+    "build:stage": "tsc && vite build --mode staging && vite build --config vite.iife.config.ts --mode staging && node scripts/copy-iife-min.js staging",
     "example": "node scripts/run-example.mjs",
     "example:serve": "npm run build:dev && node scripts/static-server.mjs",
     "preview": "vite preview",

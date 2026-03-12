@@ -18,7 +18,6 @@
  */
 
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
 function resolveRuntimeEnvironment(mode: string): 'development' | 'staging' | 'production' | 'test' {
@@ -34,37 +33,30 @@ function resolveRuntimeEnvironment(mode: string): 'development' | 'staging' | 'p
   return 'production';
 }
 
-export default defineConfig(({ mode }) => {
-  return {
-    plugins: [
-      dts({
-        rollupTypes: true,
-        entryRoot: 'src',
-      }),
-    ],
-    build: {
-      lib: {
-        entry: resolve(__dirname, 'src/index.ts'),
-        fileName: () => 'qredex-agent.es.js',
-        formats: ['es'],
+export default defineConfig(({ mode }) => ({
+  build: {
+    lib: {
+      entry: resolve(__dirname, 'src/iife.ts'),
+      name: 'QredexAgent',
+      fileName: () => 'qredex-agent.iife.js',
+      formats: ['iife'],
+    },
+    minify: 'terser',
+    sourcemap: true,
+    outDir: 'dist',
+    emptyOutDir: false,
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        drop_debugger: mode === 'production',
       },
-      minify: 'terser',
-      sourcemap: true,
-      outDir: 'dist',
-      emptyOutDir: true,
-      terserOptions: {
-        compress: {
-          drop_console: false,
-          drop_debugger: mode === 'production',
-        },
-        format: {
-          comments: false,
-        },
+      format: {
+        comments: false,
       },
     },
-    define: {
-      __QDX_ENV__: JSON.stringify(resolveRuntimeEnvironment(mode)),
-      __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
-    },
-  };
-});
+  },
+  define: {
+    __QDX_ENV__: JSON.stringify(resolveRuntimeEnvironment(mode)),
+    __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
+  },
+}));

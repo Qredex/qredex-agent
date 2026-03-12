@@ -17,33 +17,22 @@
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
-/**
- * Unit tests for public lifecycle methods.
- */
+/* @vitest-environment node */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import { getConfig, resetConfig } from '../../src/bootstrap/config.js';
-import QredexAgent from '../../src/index.js';
+import { describe, expect, it } from 'vitest';
 
-describe('Public init', () => {
-  beforeEach(() => {
-    resetConfig();
-    delete window.QredexAgentConfig;
-    QredexAgent.destroy();
-  });
+describe('Node-safe import', () => {
+  it('imports and initializes without browser globals', async () => {
+    const module = await import('../../src/index.js');
 
-  it('should apply programmatic config via init()', () => {
-    QredexAgent.init({
-      debug: true,
-      influenceIntentToken: '__qdx_custom_iit',
-      purchaseIntentToken: '__qdx_custom_pit',
-    });
+    expect(module.default).toBe(module.QredexAgent);
+    expect(module.isInitialized()).toBe(false);
 
-    const config = getConfig();
+    module.init({ debug: true });
 
-    expect(config.debug).toBe(true);
-    expect(config.influenceIntentToken).toBe('__qdx_custom_iit');
-    expect(config.purchaseIntentToken).toBe('__qdx_custom_pit');
-    expect(QredexAgent.isInitialized()).toBe(true);
+    expect(module.isInitialized()).toBe(true);
+
+    module.destroy();
+    expect(module.isInitialized()).toBe(false);
   });
 });

@@ -18,32 +18,15 @@
  */
 
 /**
- * Unit tests for public lifecycle methods.
+ * Browser-only bootstrap entry for the CDN/IIFE bundle.
+ * Attaches the global API and auto-starts immediately on load.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import { getConfig, resetConfig } from '../../src/bootstrap/config.js';
-import QredexAgent from '../../src/index.js';
+import QredexAgent from './index.js';
 
-describe('Public init', () => {
-  beforeEach(() => {
-    resetConfig();
-    delete window.QredexAgentConfig;
-    QredexAgent.destroy();
-  });
+if (typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).QredexAgent = QredexAgent;
+  QredexAgent.init();
+}
 
-  it('should apply programmatic config via init()', () => {
-    QredexAgent.init({
-      debug: true,
-      influenceIntentToken: '__qdx_custom_iit',
-      purchaseIntentToken: '__qdx_custom_pit',
-    });
-
-    const config = getConfig();
-
-    expect(config.debug).toBe(true);
-    expect(config.influenceIntentToken).toBe('__qdx_custom_iit');
-    expect(config.purchaseIntentToken).toBe('__qdx_custom_pit');
-    expect(QredexAgent.isInitialized()).toBe(true);
-  });
-});
+export default QredexAgent;

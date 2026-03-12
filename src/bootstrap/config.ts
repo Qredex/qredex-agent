@@ -108,6 +108,14 @@ const DEFAULT_CONFIG: Required<AgentConfig> = {
 let currentConfig: Required<AgentConfig> = { ...DEFAULT_CONFIG };
 let isInitialized = false;
 
+function getPreloadConfig(): AgentConfig | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  return window.QredexAgentConfig;
+}
+
 function isValidLockEndpoint(value: string): boolean {
   const isRelativePath = value.startsWith('/');
   const isAbsoluteHttpUrl = /^https?:\/\//.test(value);
@@ -198,7 +206,7 @@ function ensureConfigInitialized(): void {
     return;
   }
 
-  const preloadConfig = window.QredexAgentConfig;
+  const preloadConfig = getPreloadConfig();
   if (preloadConfig) {
     currentConfig = resolveConfig(preloadConfig);
     isInitialized = true;
@@ -211,7 +219,7 @@ function ensureConfigInitialized(): void {
  * Pre-load config takes precedence over programmatic config.
  */
 export function initConfig(userConfig?: AgentConfig): Required<AgentConfig> {
-  const preloadConfig = window.QredexAgentConfig;
+  const preloadConfig = getPreloadConfig();
   const merged = resolveConfig(userConfig);
   const finalConfig = preloadConfig ? resolveConfig({ ...merged, ...preloadConfig }) : merged;
 

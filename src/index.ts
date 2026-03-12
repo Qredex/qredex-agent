@@ -27,7 +27,7 @@
  * - Manages attribution state
  */
 
-import { setDebugMode, debug } from './utils/log.js';
+import { setDebugMode, debug, error as logError } from './utils/log.js';
 import { getConfig, initConfig } from './bootstrap/config.js';
 import { autoStart } from './bootstrap/auto-start.js';
 import {
@@ -76,7 +76,7 @@ type IntentCapturedHandler = (event: {
 }) => void;
 
 // ============================================
-// EVENT HANDLER ARRAYS (must be declared before auto-start)
+// EVENT HANDLER ARRAYS
 // ============================================
 
 const lockedHandlers: LockedHandler[] = [];
@@ -85,26 +85,44 @@ const errorHandlers: ErrorHandler[] = [];
 const stateChangeHandlers: StateChangeHandler[] = [];
 const intentCapturedHandlers: IntentCapturedHandler[] = [];
 
-const startupConfig = getConfig();
-setDebugMode(startupConfig.debug);
+let initialized = false;
+let browserBootstrapCompleted = false;
 
-// Auto-start: capture intent token from URL immediately
-const intentCapturedOnStart = autoStart();
-if (intentCapturedOnStart) {
-  // Emit intent captured event
+function canUseBrowserRuntime(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
+function reportInternalError(context: string, err: unknown): void {
+  logError(`${context}:`, err);
+}
+
+function emitIntentCaptured(): void {
   const intentCapturedEvent = {
     hasIIT: true as const,
     timestamp: Date.now(),
   };
+
   for (const handler of intentCapturedHandlers) {
     try {
       handler(intentCapturedEvent);
     } catch (err) {
-      console.error('[QredexAgent] onIntentCaptured handler error:', err);
+      reportInternalError('onIntentCaptured handler error', err);
     }
   }
-  // Emit state changed event
+
   emitStateChanged();
+}
+
+function bootstrapBrowserRuntime(): void {
+  if (browserBootstrapCompleted || !canUseBrowserRuntime()) {
+    return;
+  }
+
+  browserBootstrapCompleted = true;
+
+  if (autoStart()) {
+    emitIntentCaptured();
+  }
 }
 
 // ============================================
@@ -295,7 +313,20 @@ function emitStateChanged(): void {
     try {
       handler(event);
     } catch (err) {
-      console.error('[QredexAgent] onStateChanged handler error:', err);
+      reportInternalError('onStateChanged handler error', err);
+    }
+  }
+}
+
+function emitErrorEvent(event: {
+  error: string;
+  context?: string;
+}): void {
+  for (const handler of errorHandlers) {
+    try {
+      handler(event);
+    } catch (err) {
+      reportInternalError('onError handler error', err);
     }
   }
 }
@@ -442,34 +473,18 @@ export function handleCartChange(event: {
 
   // Validate inputs
   if (typeof itemCount !== 'number' || typeof previousCount !== 'number') {
-    const errorEvent = {
+    emitErrorEvent({
       error: 'itemCount and previousCount must be numbers',
       context: 'handleCartChange',
-    };
-
-    for (const handler of errorHandlers) {
-      try {
-        handler(errorEvent);
-      } catch (err) {
-        console.error('[QredexAgent] onError handler error:', err);
-      }
-    }
+    });
     return;
   }
 
   if (itemCount < 0 || previousCount < 0) {
-    const errorEvent = {
+    emitErrorEvent({
       error: 'itemCount and previousCount must be non-negative',
       context: 'handleCartChange',
-    };
-
-    for (const handler of errorHandlers) {
-      try {
-        handler(errorEvent);
-      } catch (err) {
-        console.error('[QredexAgent] onError handler error:', err);
-      }
-    }
+    });
     return;
   }
 
@@ -498,7 +513,7 @@ export function handleCartChange(event: {
             try {
               handler(lockedEvent);
             } catch (err) {
-              console.error('[QredexAgent] onLocked handler error:', err);
+              reportInternalError('onLocked handler error', err);
             }
           }
 
@@ -506,36 +521,19 @@ export function handleCartChange(event: {
           emitStateChanged();
         } else {
           // Emit error event
-          const errorEvent = {
+          emitErrorEvent({
             error: result.error ?? 'Lock failed',
             context: 'handleCartChange',
-          };
-
-          for (const handler of errorHandlers) {
-            try {
-              handler(errorEvent);
-            } catch (err) {
-              console.error('[QredexAgent] onError handler error:', err);
-            }
-          }
+          });
         }
       })
       .catch((err) => {
-        console.error('[QredexAgent] handleCartChange lock failed:', err);
+        reportInternalError('handleCartChange lock failed', err);
 
-        // Emit error event
-        const errorEvent = {
+        emitErrorEvent({
           error: err instanceof Error ? err.message : 'Unknown error',
           context: 'handleCartChange',
-        };
-
-        for (const handler of errorHandlers) {
-          try {
-            handler(errorEvent);
-          } catch (handlerErr) {
-            console.error('[QredexAgent] onError handler error:', handlerErr);
-          }
-        }
+        });
       });
   }
 
@@ -555,7 +553,7 @@ export function handleCartChange(event: {
       try {
         handler(clearedEvent);
       } catch (err) {
-        console.error('[QredexAgent] onCleared handler error:', err);
+        reportInternalError('onCleared handler error', err);
       }
     }
 
@@ -595,18 +593,10 @@ export function handleCartAdd(
   }
 ): void {
   if (typeof itemCount !== 'number' || itemCount < 0) {
-    const errorEvent = {
+    emitErrorEvent({
       error: 'itemCount must be a non-negative number',
       context: 'handleCartAdd',
-    };
-
-    for (const handler of errorHandlers) {
-      try {
-        handler(errorEvent);
-      } catch (err) {
-        console.error('[QredexAgent] onError handler error:', err);
-      }
-    }
+    });
     return;
   }
 
@@ -706,7 +696,7 @@ export function handlePaymentSuccess(event: {
     try {
       handler(clearedEvent);
     } catch (err) {
-      console.error('[QredexAgent] onCleared handler error:', err);
+      reportInternalError('onCleared handler error', err);
     }
   }
 
@@ -957,8 +947,8 @@ export function offIntentCaptured(handler: IntentCapturedHandler): void {
 /**
  * Initialize the Qredex Agent with optional configuration.
  *
- * Usually not needed - the agent auto-starts on script load with default configuration.
- * Use this if you need to customize configuration or re-initialize.
+ * Usually not needed for the CDN/IIFE bundle, which auto-starts on script load.
+ * ESM and framework consumers should call this in the browser before using the agent.
  *
  *
  * @example
@@ -977,7 +967,16 @@ export function offIntentCaptured(handler: IntentCapturedHandler): void {
 export function init(_config?: AgentConfig): void {
   const cfg = initConfig(_config);
   setDebugMode(cfg.debug);
+  initialized = true;
+  bootstrapBrowserRuntime();
   debug('Agent initialized');
+}
+
+/**
+ * Check whether the agent lifecycle has been initialized.
+ */
+export function isInitialized(): boolean {
+  return initialized;
 }
 
 /**
@@ -1008,6 +1007,11 @@ export function destroy(): void {
   lockedHandlers.length = 0;
   clearedHandlers.length = 0;
   errorHandlers.length = 0;
+  stateChangeHandlers.length = 0;
+  intentCapturedHandlers.length = 0;
+  initialized = false;
+  browserBootstrapCompleted = false;
+  setCartState('unknown');
   debug('Agent destroyed');
 }
 
@@ -1032,64 +1036,10 @@ export function stop(): void {
 export type { AgentConfig } from './bootstrap/config.js';
 export type { LockResult, LockMeta } from './api/types.js';
 
-// ============================================
-// WINDOW GLOBAL (IIFE usage)
-// ============================================
-
-if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).QredexAgent = {
-    // Read/State
-    getInfluenceIntentToken,
-    getPurchaseIntentToken,
-    hasInfluenceIntentToken,
-    hasPurchaseIntentToken,
-    getState,
-
-    // Commands
-    lockIntent,
-    clearIntent,
-
-    // Event Handlers (Merchant → Agent)
-    handleCartChange,
-    handleCartAdd,
-    handleCartEmpty,
-    handlePaymentSuccess,
-
-    // Event Listeners (Agent → Merchant)
-    onLocked,
-    onCleared,
-    onError,
-    offLocked,
-    offCleared,
-    offError,
-    onStateChanged,
-    offStateChanged,
-    onIntentCaptured,
-    offIntentCaptured,
-
-    // Lifecycle
-    init,
-    destroy,
-    stop,
-  };
-}
-
-// ============================================
-// DEFAULT EXPORT (ESM alias)
-// ============================================
-
 /**
- * Default export for ESM imports.
- *
- * @example
- * ```typescript
- * import QredexAgent from 'qredex-agent';
- *
- * QredexAgent.getInfluenceIntentToken();
- * QredexAgent.handleCartChange({ itemCount: 1, previousCount: 0 });
- * ```
+ * Named API surface for ESM consumers and wrapper packages.
  */
-const QredexAgent = {
+export const QredexAgent = {
   // Read/State
   getInfluenceIntentToken,
   getPurchaseIntentToken,
@@ -1121,6 +1071,7 @@ const QredexAgent = {
 
   // Lifecycle
   init,
+  isInitialized,
   destroy,
   stop,
 };
