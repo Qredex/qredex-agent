@@ -93,7 +93,7 @@ QredexAgent.onCleared(() => {
 
 1. **Add intent to URL**: `?qdx_intent=test123`
 2. **Observe**: IIT appears in status panel
-3. **Click "Add to Cart"**: Cart goes from 0 → 1
+3. **Click "Add to Cart"**: Empty cart becomes non-empty
 4. **Observe**: 
    - IIT disappears (exchanged)
    - PIT appears (locked)
@@ -102,22 +102,22 @@ QredexAgent.onCleared(() => {
 ### Scenario 2: Clear on Empty
 
 1. **Ensure PIT exists** (from Scenario 1)
-2. **Click "Clear Cart"**: Cart goes from 1 → 0
+2. **Click "Clear Cart"**: Non-empty cart becomes empty
 3. **Observe**:
    - PIT disappears
    - Console shows: `🗑️ Cleared`
 
 ### Scenario 3: Multiple Adds (No Re-lock)
 
-1. **Add to cart** (0 → 1): Locks IIT → PIT
-2. **Add again** (1 → 2): No action (already locked)
-3. **Add again** (2 → 3): No action
+1. **Add to cart**: Empty cart becomes non-empty and locks IIT → PIT
+2. **Add again**: Cart stays non-empty, so there is no second lock once PIT exists
+3. **Add again**: Cart stays non-empty, still no second lock
 4. **Observe**: Once PIT exists, later add-to-cart events do not re-lock
 
 ### Scenario 4: Partial Remove (No Clear)
 
-1. **Add 3 items** (0 → 3): Locks
-2. **Clear cart** (3 → 0): Clears tokens
+1. **Add 3 items**: Empty cart becomes non-empty and locks
+2. **Clear cart**: Non-empty cart becomes empty and clears tokens
 3. **Observe**: Only full empty triggers clear
 
 ---
@@ -126,13 +126,12 @@ QredexAgent.onCleared(() => {
 
 | Transition | Action | Description |
 |------------|--------|-------------|
-| `0 → 1` | 🔒 Lock | First item added |
-| `0 → 3` | 🔒 Lock | Multiple items added at once |
-| `1 → 3` | — | Adding more (already locked) |
-| `3 → 2` | — | Removing item (cart not empty) |
-| `1 → 0` | 🗑️ Clear | Last item removed |
-| `3 → 0` | 🗑️ Clear | Cart emptied |
-| `0 → 0` | — | No change |
+| Empty cart becomes non-empty | 🔒 Lock | Agent can lock when IIT exists and PIT does not |
+| Empty cart becomes non-empty with multiple items | 🔒 Lock | Multiple items at once still produce one lock attempt |
+| Non-empty cart stays non-empty | — | Adding more does not re-lock once PIT exists |
+| Non-empty cart stays non-empty with fewer items | — | Partial remove does not clear attribution |
+| Non-empty cart becomes empty | 🗑️ Clear | Agent clears IIT and PIT |
+| Empty cart stays empty | — | No change |
 
 ---
 

@@ -422,7 +422,7 @@ function clearIntent(): void {
  *
  * @example
  * ```TypeScript
- * // Add to cart (0 → 1 item) - locks IIT → PIT
+ * // Merchant reports that an empty cart now has one item
  * QredexAgent.handleCartChange({
  *   itemCount: 1,
  *   previousCount: 0,
@@ -434,7 +434,7 @@ function clearIntent(): void {
  *   previousCount: 1,
  * });
  *
- * // Empty cart (3 → 0) - clears tokens
+ * // Merchant reports that a non-empty cart became empty
  * QredexAgent.handleCartChange({
  *   itemCount: 0,
  *   previousCount: 3,
@@ -539,7 +539,7 @@ export function handleCartChange(event: {
       });
   }
 
-  // Clear when cart goes from >0 → 0 (emptied) and PIT exists
+  // Clear when the merchant reports that a non-empty cart became empty and PIT exists
   if (itemCount === 0 && previousCount > 0 && hasPurchaseIntentToken()) {
     debug('Cart emptied, clearing tokens');
 

@@ -486,7 +486,7 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
    → handleCartChange() locks IIT → PIT via API
    → PIT stored, IIT cleared
 
-3. User continues shopping (itemCount: 1 → 2 → 3...)
+3. User continues shopping and the cart stays non-empty
    → Lock can retry on later non-empty cart reports if previous lock failed
    → PIT persists once locked
 

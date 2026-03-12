@@ -309,7 +309,7 @@ function clearCart() {
 
 ### `handleCartChange(event)`
 
-Tell the agent that the cart state changed. The agent does not infer merchant attribution policy; it reacts to the cart state you report. It attempts IIT → PIT lock when the reported cart is non-empty, IIT exists, and PIT is absent, and clears tokens when cart goes >0→0.
+Tell the agent that the cart state changed. The agent does not infer merchant attribution policy; it reacts to the cart state you report. It attempts IIT → PIT lock when the reported cart is non-empty, IIT exists, and PIT is absent, and clears tokens when the reported cart becomes empty.
 
 **Signature:**
 ```typescript
