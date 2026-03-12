@@ -72,7 +72,7 @@ async function waitForServer(targetUrl) {
     await delay(250);
   }
 
-  throw new Error(`Static server did not become ready at ${targetUrl}`);
+  throw new Error(`Examples server did not become ready at ${targetUrl}`);
 }
 
 async function isServerReady(targetUrl) {
@@ -106,7 +106,7 @@ async function main() {
     return;
   }
 
-  const server = spawn(process.execPath, ['scripts/static-server.mjs'], {
+  const server = spawn(getNpmCommand(), ['run', 'example:serve'], {
     cwd: repoRoot,
     stdio: 'inherit',
   });
@@ -132,7 +132,7 @@ async function main() {
         return;
       }
 
-      rejectPromise(new Error(`Static server exited unexpectedly (${signal ?? code ?? 'unknown'})`));
+      rejectPromise(new Error(`Examples server exited unexpectedly (${signal ?? code ?? 'unknown'})`));
     });
   });
 }

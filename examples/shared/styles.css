@@ -130,9 +130,9 @@ code {
 }
 
 .hero h1 {
-  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-size: clamp(2.1rem, 3.3vw, 3.4rem);
   line-height: 0.95;
-  max-width: 10ch;
+  max-width: 12ch;
 }
 
 .hero-copy {
@@ -261,6 +261,36 @@ code {
 .state-box {
   padding: 14px 16px;
   margin-top: 12px;
+}
+
+.runtime-details {
+  margin-top: 12px;
+}
+
+.runtime-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(31, 30, 27, 0.04);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+.runtime-summary::-webkit-details-marker {
+  display: none;
+}
+
+.runtime-summary span:last-child {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .state-title {

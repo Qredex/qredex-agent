@@ -56,7 +56,7 @@ export function getQredexAgent(): typeof CoreQredexAgent {
 }
 
 export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
-  if (canUseBrowser()) {
+  if (canUseBrowser() && (config !== undefined || !CoreQredexAgent.isInitialized())) {
     CoreQredexAgent.init(config);
   }
 

@@ -17,7 +17,7 @@
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import CoreQredexAgent, { type AgentConfig } from '@qredex/agent';
 
 export type QredexState = ReturnType<typeof CoreQredexAgent.getState>;
@@ -40,32 +40,12 @@ function canUseBrowser(): boolean {
   return typeof window !== 'undefined';
 }
 
-function subscribe(onStoreChange: () => void): () => void {
-  const handler = () => {
-    onStoreChange();
-  };
-
-  CoreQredexAgent.onStateChanged(handler);
-
-  return () => {
-    CoreQredexAgent.offStateChanged(handler);
-  };
-}
-
-function getSnapshot(): QredexState {
-  return CoreQredexAgent.getState();
-}
-
-function getServerSnapshot(): QredexState {
-  return SERVER_STATE;
-}
-
 export function getQredexAgent(): typeof CoreQredexAgent {
   return CoreQredexAgent;
 }
 
 export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
-  if (canUseBrowser()) {
+  if (canUseBrowser() && (config !== undefined || !CoreQredexAgent.isInitialized())) {
     CoreQredexAgent.init(config);
   }
 
@@ -73,11 +53,34 @@ export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
 }
 
 export function useQredexState(config?: AgentConfig): QredexState {
+  const [state, setState] = useState<QredexState>(() => {
+    if (!canUseBrowser()) {
+      return SERVER_STATE;
+    }
+
+    return CoreQredexAgent.getState();
+  });
+
   useEffect(() => {
+    if (!canUseBrowser()) {
+      return;
+    }
+
     initQredex(config);
+    setState(CoreQredexAgent.getState());
+
+    const handler = () => {
+      setState(CoreQredexAgent.getState());
+    };
+
+    CoreQredexAgent.onStateChanged(handler);
+
+    return () => {
+      CoreQredexAgent.offStateChanged(handler);
+    };
   }, []);
 
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return state;
 }
 
 export function useQredexAgent(config?: AgentConfig): QredexComposable {

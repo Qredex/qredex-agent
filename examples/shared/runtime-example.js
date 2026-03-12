@@ -418,6 +418,16 @@ function renderShell(config, activeKind) {
           <section class="panel">
             <div class="panel-header">
               <div>
+                <p class="panel-label">Product Shelf</p>
+                <h2>Add test products</h2>
+              </div>
+            </div>
+            <div class="catalog" id="catalog"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
                 <p class="panel-label">Agent Runtime</p>
                 <h2>Current session</h2>
               </div>
@@ -443,25 +453,21 @@ function renderShell(config, activeKind) {
               </article>
             </div>
 
-            <div class="state-box">
-              <p class="state-title">Visible URL</p>
-              <code id="current-url"></code>
-            </div>
-
-            <div class="state-box">
-              <p class="state-title">Live harness note</p>
-              <p id="persistence-note">${escapeHtml(config.runtimeNote)}</p>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <p class="panel-label">Product Shelf</p>
-                <h2>Add test products</h2>
+            <details class="runtime-details">
+              <summary class="runtime-summary">
+                <span>Session details</span>
+                <span>URL + harness note</span>
+              </summary>
+              <div class="state-box">
+                <p class="state-title">Visible URL</p>
+                <code id="current-url"></code>
               </div>
-            </div>
-            <div class="catalog" id="catalog"></div>
+
+              <div class="state-box">
+                <p class="state-title">Live harness note</p>
+                <p id="persistence-note">${escapeHtml(config.runtimeNote)}</p>
+              </div>
+            </details>
           </section>
 
           <section class="panel">

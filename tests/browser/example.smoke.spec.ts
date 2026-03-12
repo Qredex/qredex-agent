@@ -41,3 +41,33 @@ test('bundle-first example exercises the shipped customer path', async ({ page }
   const hasGlobal = await page.evaluate(() => Boolean(window.QredexAgent));
   expect(hasGlobal).toBe(true);
 });
+
+const wrapperExamples = [
+  { label: 'React', path: '/examples/wrappers/react/' },
+  { label: 'Vue', path: '/examples/wrappers/vue/' },
+  { label: 'Svelte', path: '/examples/wrappers/svelte/' },
+  { label: 'Angular', path: '/examples/wrappers/angular/' },
+] as const;
+
+for (const example of wrapperExamples) {
+  test(`${example.label} wrapper example drives the live cart flow`, async ({ page }) => {
+    test.setTimeout(20_000);
+
+    await page.goto(`${example.path}?qdx_intent=iit_12345678`);
+
+    await expect(page.locator('h1')).toContainText(example.label, { timeout: 15_000 });
+    await expect(page.locator('#status-iit')).not.toHaveText('Not present', { timeout: 15_000 });
+    await expect(page).toHaveURL(new RegExp(`${example.path.replace(/\//g, '\\/')}$`), {
+      timeout: 15_000,
+    });
+    await expect(page.locator('[data-add-product="crewneck"]')).toBeVisible();
+
+    await page.click('[data-add-product="crewneck"]');
+    await expect(page.locator('#summary-units')).toHaveText('1');
+    await expect(page.locator('#status-pit')).not.toHaveText('Not present');
+
+    await page.click('#empty-cart-button');
+    await expect(page.locator('#summary-units')).toHaveText('0');
+    await expect(page.locator('#status-pit')).toHaveText('Not present');
+  });
+}
