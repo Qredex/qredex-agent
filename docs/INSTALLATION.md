@@ -148,7 +148,7 @@ npm run dev
 
 ```bash
 npm run build:stage
-# Deploy /dist/qredex-agent.iife.min.js to your staging site
+# Deploy /dist/qredex-agent.iife.stage.min.js to your staging site
 ```
 
 ```html
@@ -158,7 +158,7 @@ npm run build:stage
     lockEndpoint: 'https://staging-api.your-backend.com/api/v1/agent/intents/lock',
   };
 </script>
-<script src="/assets/qredex-agent.iife.min.js"></script>
+<script src="/assets/qredex-agent.iife.stage.min.js"></script>
 ```
 
 ### Production

@@ -1,6 +1,6 @@
 # Qredex Agent - Examples
 
-**Quick testing for Qredex Agent using the generated IIFE bundle.**
+**Quick testing for Qredex Agent using the generated development IIFE bundle.**
 
 > ⚠️ **IMPORTANT:** Build the bundle first, then serve the repo over HTTP. Opening the file directly (`file://`) will not work.
 
@@ -8,16 +8,16 @@
 
 ## Quick Start
 
-### Option 1: Build the development IIFE bundle (Recommended)
+### Option 1: Start the local example (Recommended)
 
 ```bash
-# 1. Build the generated development bundle
-npm run build:dev
+# Build the generated development bundle, start the local server, and open the page
+npm run example
+```
 
-# 2. Serve the repo root
-npx serve .
+If your browser does not open automatically, use:
 
-# 3. Open in browser
+```bash
 open http://localhost:3000/examples/index.html
 ```
 
@@ -55,7 +55,7 @@ The test page demonstrates the complete Qredex Agent flow:
 2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
 3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
 
-**Note:** Uses `useMockEndpoint: true` through the generated development bundle - generates fake PIT tokens locally (no network calls).
+**Note:** Uses `useMockEndpoint: true` through `dist/qredex-agent.iife.dev.min.js` - generates fake PIT tokens locally (no network calls).
 
 Once loaded, the agent is available globally via `window.QredexAgent`:
 
@@ -154,7 +154,7 @@ Or use a specific version:
 
 ## Configuration (Optional)
 
-For production or staging delivery, configure before the script loads:
+For local bundle validation, configure before the script loads:
 
 ```html
 <script>
@@ -164,7 +164,7 @@ For production or staging delivery, configure before the script loads:
     cookieExpireDays: 30,     // Cookie expiration
   };
 </script>
-<script src="../../dist/qredex-agent.iife.min.js"></script>
+<script src="../../dist/qredex-agent.iife.dev.min.js"></script>
 ```
 
 ---
@@ -225,7 +225,7 @@ QredexAgent.clearIntent();           // Clear all tokens
 |------|-------------|
 | `index.html` | Self-contained test page |
 | `styles.css` | Page styles |
-| `../../dist/qredex-agent.iife.min.js` | Minified IIFE bundle |
+| `../../dist/qredex-agent.iife.dev.min.js` | Development minified IIFE bundle |
 
 ---
 

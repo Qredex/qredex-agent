@@ -66,7 +66,7 @@
             <p class="state-title">Example persistence</p>
             <p id="persistence-note">
               Cart line items are kept in <code>localStorage</code>. This page loads the generated
-              <code>dist/qredex-agent.iife.min.js</code> bundle with pre-load config, just like a merchant script tag setup.
+              <code>dist/qredex-agent.iife.dev.min.js</code> bundle with pre-load config, just like a merchant script tag setup.
             </p>
           </div>
         </section>
@@ -127,7 +127,7 @@
       useMockEndpoint: true,
     };
   </script>
-  <script src="../dist/qredex-agent.iife.min.js"></script>
+  <script src="../dist/qredex-agent.iife.dev.min.js"></script>
   <script type="module">
     const CART_STORAGE_KEY = 'qredex-example-cart-v1';
     const PRODUCTS = [
@@ -467,12 +467,12 @@
         document.body.innerHTML = `
           <div style="padding: 40px; font-family: monospace;">
             <h1>Example failed to load</h1>
-            <p><strong>Problem:</strong> This page expects the generated IIFE bundle.</p>
+            <p><strong>Problem:</strong> This page expects the generated development IIFE bundle.</p>
             <ol>
-              <li><code>npm run build:dev</code></li>
-              <li><code>npx serve .</code></li>
-              <li>Open <code>http://localhost:3000/examples/index.html</code></li>
+              <li><code>npm run example</code></li>
+              <li>If the browser does not open, visit <code>http://localhost:3000/examples/index.html</code></li>
             </ol>
+            <p><strong>Note:</strong> <code>npm run build</code> produces the production bundle, not the dev bundle used by this example.</p>
             <p><strong>Error:</strong> <code>${String(error)}</code></p>
           </div>
         `;

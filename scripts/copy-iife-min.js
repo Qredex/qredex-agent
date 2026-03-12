@@ -29,13 +29,30 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(__dirname, '..', 'dist');
+const target = process.argv[2] || 'production';
+
+const targetFiles = {
+  development: 'qredex-agent.iife.dev.min.js',
+  dev: 'qredex-agent.iife.dev.min.js',
+  staging: 'qredex-agent.iife.stage.min.js',
+  stage: 'qredex-agent.iife.stage.min.js',
+  production: 'qredex-agent.iife.min.js',
+  prod: 'qredex-agent.iife.min.js',
+};
+
+const outputFile = targetFiles[target];
+
+if (!outputFile) {
+  console.error(`Unknown bundle target "${target}"`);
+  process.exit(1);
+}
 
 try {
   copyFileSync(
     resolve(distDir, 'qredex-agent.iife.js'),
-    resolve(distDir, 'qredex-agent.iife.min.js')
+    resolve(distDir, outputFile)
   );
-  console.log('✓ Copied qredex-agent.iife.js to qredex-agent.iife.min.js');
+  console.log(`✓ Copied qredex-agent.iife.js to ${outputFile}`);
 } catch (err) {
   console.error('Failed to copy IIFE bundle:', err);
   process.exit(1);
