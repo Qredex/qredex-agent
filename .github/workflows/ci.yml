@@ -1,0 +1,61 @@
+#    ▄▄▄▄
+#  ▄█▀▀███▄▄              █▄
+#  ██    ██ ▄             ██
+#  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+#  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+#   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+#        ▀█
+#
+#  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+#
+#  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+#  Licensed under the MIT License. See LICENSE for the full license text.
+#  Redistribution and use are permitted under that license.
+#
+#  If you need additional information or have any questions, please email: copyright@qredex.com
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke test
+        run: npm run test:browser
+
+      - name: Release checks
+        run: npm run release:check
