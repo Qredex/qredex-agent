@@ -68,7 +68,7 @@ The agent maintains a simple cart state machine:
 │    empty    │◄────────────────┐
 └──────┬──────┘                 │
        │                        │
-       │ 0 → >0 (first item)    │ >0 → 0 (cart emptied)
+       │ empty cart becomes non-empty │ non-empty cart becomes empty
        ▼                        │
 ┌─────────────┐                 │
 │  non-empty  │─────────────────┘
@@ -80,7 +80,7 @@ The agent maintains a simple cart state machine:
 | Transition | Condition | Action |
 |------------|-----------|--------|
 | `unknown` → `empty` | Initial load | None |
-| `empty` → `non-empty` | First item added | **Lock IIT → PIT** (if IIT exists, PIT doesn't) |
+| `empty` → `non-empty` | Merchant reports a non-empty cart | **Lock IIT → PIT** (if IIT exists, PIT doesn't) |
 | `non-empty` → `non-empty` | Merchant reports a live non-empty cart again | **Attempt or retry lock** if IIT exists and PIT doesn't |
 | `non-empty` → `empty` | Cart emptied | **Clear IIT + PIT** |
 

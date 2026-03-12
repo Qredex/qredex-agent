@@ -112,7 +112,7 @@ QredexAgent.onCleared(() => {
 1. **Add to cart** (0 → 1): Locks IIT → PIT
 2. **Add again** (1 → 2): No action (already locked)
 3. **Add again** (2 → 3): No action
-4. **Observe**: Only first add triggers lock
+4. **Observe**: Once PIT exists, later add-to-cart events do not re-lock
 
 ### Scenario 4: Partial Remove (No Clear)
 

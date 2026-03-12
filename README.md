@@ -84,7 +84,7 @@ The agent automatically:
 - ✅ Captures `qdx_intent` from URL
 - ✅ Stores IIT in browser storage (sessionStorage + cookie fallback)
 - ✅ Locks IIT → PIT when the merchant reports a non-empty cart and the state is lockable
-- ✅ Clears PIT when cart goes from >0 → 0 items or checkout
+- ✅ Clears PIT when the merchant reports that the cart became empty or checkout succeeds
 - ✅ Exposes PIT for checkout
 
 ---
@@ -207,10 +207,10 @@ QredexAgent.handlePaymentSuccess({
 
 | Event | Example | Agent behavior |
 |-------|---------|----------------|
-| First add | `0 -> 1` | Attempts IIT -> PIT lock |
-| Non-empty cart report | `1 -> 2` | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
-| Partial remove | `2 -> 1` | No clear; attribution stays attached to the live cart |
-| Full clear | `1 -> 0` | Clears IIT and PIT |
+| Empty cart becomes non-empty | empty cart -> 1 item | Attempts IIT -> PIT lock |
+| Merchant reports a live non-empty cart again | 1 item -> 2 items | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
+| Partial remove | 2 items -> 1 item | No clear; attribution stays attached to the live cart |
+| Full clear | non-empty cart -> empty cart | Clears IIT and PIT |
 | Checkout success | payment completed | Clears IIT and PIT |
 
 ### Event Listeners (Agent → Merchant)
@@ -490,7 +490,7 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
    → Lock can retry on later non-empty cart reports if previous lock failed
    → PIT persists once locked
 
-4. User empties cart (itemCount: >0 → 0) OR completes checkout
+4. User empties cart (cart goes from non-empty to empty) OR completes checkout
    → handleCartChange() or handlePaymentSuccess() clears PIT
 
 5. Next purchase requires new Qredex link (new IIT)
