@@ -2,9 +2,9 @@
 
 **Lightweight browser agent for Qredex intent capture and locking.**
 
-[![npm version](https://img.shields.io/npm/v/qredex-agent.svg)](https://npmjs.com/package/qredex-agent)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/qredex-agent)](https://bundlephobia.com/package/qredex-agent)
-[![license](https://img.shields.io/npm/l/qredex-agent)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/%40qredex%2Fagent.svg)](https://www.npmjs.com/package/@qredex/agent)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/%40qredex%2Fagent)](https://bundlephobia.com/package/@qredex/agent)
+[![license](https://img.shields.io/npm/l/%40qredex%2Fagent)](LICENSE)
 
 ---
 
@@ -20,14 +20,15 @@
 ### 2. Handle Cart Events
 
 ```javascript
-// When cart state changes
+const agent = window.QredexAgent;
+
 async function addToCart(product) {
+  const previousCount = cart.itemCount;
   await api.post('/cart', product);
 
-  // Tell agent (auto-locks IIT → PIT on first item)
-  QredexAgent.handleCartChange({
+  agent.handleCartChange({
     itemCount: cart.itemCount,
-    previousCount: cart.previousCount,
+    previousCount,
     meta: {
       productId: product.id,
       quantity: product.quantity,
@@ -36,28 +37,40 @@ async function addToCart(product) {
   });
 }
 
-// When cart is emptied
-function clearCart() {
-  cart.clear();
+async function removeFromCart(line) {
+  const previousCount = cart.itemCount;
+  await api.delete(`/cart/${line.id}`);
 
-  // Tell agent (auto-clears PIT when itemCount = 0)
-  QredexAgent.handleCartChange({
-    itemCount: 0,
-    previousCount: cart.previousCount,
+  agent.handleCartChange({
+    itemCount: cart.itemCount,
+    previousCount,
+    meta: {
+      productId: line.productId,
+      quantity: -1,
+      price: line.price,
+    },
   });
 }
 
-// When payment succeeds
+async function clearCart() {
+  const previousCount = cart.itemCount;
+  await api.post('/cart/clear');
+
+  agent.handleCartChange({
+    itemCount: 0,
+    previousCount,
+  });
+}
+
 async function checkout(order) {
-  const pit = QredexAgent.getPurchaseIntentToken();
+  const pit = agent.getPurchaseIntentToken();
 
   await api.post('/orders', {
     ...order,
-    qredex_pit: pit,  // Send PIT to backend
+    qredex_pit: pit,
   });
 
-  // Tell agent (auto-clears PIT)
-  QredexAgent.handlePaymentSuccess({
+  agent.handlePaymentSuccess({
     orderId: order.id,
     amount: order.total,
     currency: 'USD',
@@ -135,31 +148,54 @@ const state = QredexAgent.getState();
 Tell the agent when events happen:
 
 ```javascript
-// Single method for all cart state changes
+// Canonical path: report every cart count transition
 QredexAgent.handleCartChange({
-  itemCount: 1,              // Required: current cart item count
-  previousCount: 0,          // Required: previous cart item count
-  meta: {                    // Optional: sent to lock API
+  itemCount: 1,
+  previousCount: 0,
+  meta: {
     productId: 'widget-001',
-    quantity: 2,
+    quantity: 1,
     price: 99.99,
   },
 });
 
-// Convenience wrapper for adding items
-QredexAgent.handleCartAdd(
-  itemCount,                 // Current item count after adding
-  {                          // Optional metadata
+// Add one more item later
+QredexAgent.handleCartChange({
+  itemCount: 2,
+  previousCount: 1,
+  meta: {
     productId: 'widget-001',
     quantity: 1,
     price: 99.99,
-  }
-);
+  },
+});
 
-// Convenience wrapper for emptying cart
+// Remove one item but keep cart non-empty
+QredexAgent.handleCartChange({
+  itemCount: 1,
+  previousCount: 2,
+  meta: {
+    productId: 'widget-001',
+    quantity: -1,
+    price: 99.99,
+  },
+});
+
+// Clear cart completely
+QredexAgent.handleCartChange({
+  itemCount: 0,
+  previousCount: 1,
+});
+
+// Optional convenience wrappers
+QredexAgent.handleCartAdd(1, {
+  productId: 'widget-001',
+  quantity: 1,
+  price: 99.99,
+});
+
 QredexAgent.handleCartEmpty();
 
-// Payment success (auto-clears tokens)
 QredexAgent.handlePaymentSuccess({
   orderId: 'order-123',
   amount: 99.99,
@@ -169,12 +205,13 @@ QredexAgent.handlePaymentSuccess({
 
 **Behavior:**
 
-| Method | When `itemCount > 0` and `previousCount === 0` | When `itemCount === 0` and `previousCount > 0` |
-|--------|------------------------------------------------|------------------------------------------------|
-| `handleCartChange()` | 🔒 Locks IIT → PIT | 🗑️ Clears tokens |
-| `handleCartAdd()` | 🔒 Locks IIT → PIT | — |
-| `handleCartEmpty()` | — | 🗑️ Clears tokens |
-| `handlePaymentSuccess()` | — | 🗑️ Clears tokens |
+| Event | Example | Agent behavior |
+|-------|---------|----------------|
+| First add | `0 -> 1` | Attempts IIT -> PIT lock |
+| Additional add | `1 -> 2` | Keeps PIT, retries lock only if IIT exists and PIT is still absent |
+| Partial remove | `2 -> 1` | No clear; attribution stays attached to the live cart |
+| Full clear | `1 -> 0` | Clears IIT and PIT |
+| Checkout success | payment completed | Clears IIT and PIT |
 
 ### Event Listeners (Agent → Merchant)
 
@@ -377,26 +414,64 @@ open http://localhost:3000/examples/index.html
 ### Vanilla JS
 
 ```javascript
-// Add to cart button
-document.querySelector('.add-to-cart').addEventListener('click', async (e) => {
+const agent = window.QredexAgent;
+
+async function reportCart(previousCount, itemCount, meta) {
+  agent.handleCartChange({
+    previousCount,
+    itemCount,
+    meta,
+  });
+}
+
+document.querySelector('.add-to-cart').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
   const product = {
-    id: e.target.dataset.productId,
-    price: parseFloat(e.target.dataset.price),
+    id: button.dataset.productId,
+    price: parseFloat(button.dataset.price),
   };
+  const previousCount = cart.itemCount;
 
   await fetch('/api/cart', {
     method: 'POST',
     body: JSON.stringify(product),
   });
 
-  QredexAgent.handleCartChange({
-    itemCount: cart.itemCount,
-    previousCount: cart.previousCount,
-    meta: {
-      productId: product.id,
-      price: product.price,
-    },
+  reportCart(previousCount, cart.itemCount, {
+    productId: product.id,
+    quantity: 1,
+    price: product.price,
   });
+});
+
+document.querySelector('.remove-from-cart').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  const line = {
+    id: button.dataset.lineId,
+    productId: button.dataset.productId,
+    price: parseFloat(button.dataset.price),
+  };
+  const previousCount = cart.itemCount;
+
+  await fetch(`/api/cart/${line.id}`, {
+    method: 'DELETE',
+  });
+
+  reportCart(previousCount, cart.itemCount, {
+    productId: line.productId,
+    quantity: -1,
+    price: line.price,
+  });
+});
+
+document.querySelector('.clear-cart').addEventListener('click', async () => {
+  const previousCount = cart.itemCount;
+
+  await fetch('/api/cart/clear', {
+    method: 'POST',
+  });
+
+  reportCart(previousCount, 0);
 });
 ```
 
