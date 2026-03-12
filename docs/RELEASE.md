@@ -67,14 +67,18 @@ The release workflow:
 
 ### Required GitHub Configuration
 
-Repository secrets:
+Production environment secrets:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN`
 
-Repository variables:
+Production environment variables:
 
 - `CLOUDFLARE_R2_BUCKET`
+
+The release workflow runs in the `production` GitHub Actions environment.
+If you also create a `staging` environment, keep it for a separate staging
+workflow or manual non-production release path.
 
 NPM trusted publishing must be configured for:
 
@@ -83,6 +87,9 @@ NPM trusted publishing must be configured for:
 - `@qredex/vue`
 - `@qredex/svelte`
 - `@qredex/angular`
+
+Use the same `production` environment in npm trusted publishing so the GitHub
+job, environment protection rules, and npm publisher trust all align.
 
 ## CDN
 
