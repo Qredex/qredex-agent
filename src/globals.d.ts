@@ -18,3 +18,4 @@
  */
 
 declare const __QDX_ENV__: 'development' | 'staging' | 'production' | 'test';
+declare const __QDX_LOCK_ENDPOINT__: string;

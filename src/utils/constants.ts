@@ -21,7 +21,11 @@
  * Canonical runtime defaults shared across configuration and storage helpers.
  */
 
-export const DEFAULT_LOCK_ENDPOINT = 'https://api.qredex.com/api/v1/agent/intents/lock';
+export const PRODUCTION_LOCK_ENDPOINT = 'https://api.qredex.com/api/v1/agent/intents/lock';
+export const DEFAULT_LOCK_ENDPOINT =
+  __QDX_ENV__ !== 'production' && __QDX_LOCK_ENDPOINT__.trim().length > 0
+    ? __QDX_LOCK_ENDPOINT__
+    : PRODUCTION_LOCK_ENDPOINT;
 export const DEFAULT_INFLUENCE_INTENT_TOKEN_KEY = '__qdx_iit';
 export const DEFAULT_PURCHASE_INTENT_TOKEN_KEY = '__qdx_pit';
 export const DEFAULT_COOKIE_EXPIRE_DAYS = 30;

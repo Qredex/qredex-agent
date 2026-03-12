@@ -1,0 +1,54 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  Licensed under the MIT License. See LICENSE for the full license text.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="360" viewBox="0 0 1180 360" role="img" aria-labelledby="title desc">
+  <title id="title">Angular attribution flow</title>
+  <desc id="desc">Bootstrap provides the Qredex agent once, then the cart component injects it and reports cart state changes.</desc>
+  <rect width="1180" height="360" fill="#f6f1e8"/>
+  <rect x="40" y="40" width="250" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <rect x="330" y="40" width="260" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <rect x="630" y="40" width="240" height="70" rx="18" fill="#1f1b18"/>
+  <rect x="910" y="40" width="220" height="70" rx="18" fill="#d55b17"/>
+  <text x="165" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">App bootstrap</text>
+  <text x="165" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">provideQredexAgent()</text>
+  <text x="460" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Cart component</text>
+  <text x="460" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">injectQredexAgent()</text>
+  <text x="750" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
+  <text x="1020" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#fff">QredexAgent</text>
+  <text x="1020" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#fff">Core runtime</text>
+
+  <path d="M165 130 L165 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M460 130 L460 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M750 130 L750 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1020 130 L1020 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+
+  <path d="M180 160 H445" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="445,160 430,152 430,168" fill="#1f1b18"/>
+  <text x="312" y="148" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">Provide agent once at bootstrap</text>
+
+  <path d="M765 205 H1005" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1005,205 990,197 990,213" fill="#1f1b18"/>
+  <text x="885" y="193" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">injectQredexAgent()</text>
+
+  <path d="M475 255 H1005" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1005,255 990,247 990,263" fill="#1f1b18"/>
+  <text x="740" y="243" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.handleCartChange() and agent.getPurchaseIntentToken()</text>
+
+  <rect x="860" y="275" width="320" height="46" rx="14" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
+  <text x="1020" y="304" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Angular stays headless; the core agent still owns attribution state</text>
+</svg>

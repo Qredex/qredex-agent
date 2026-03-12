@@ -1,0 +1,54 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  Licensed under the MIT License. See LICENSE for the full license text.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="360" viewBox="0 0 1180 360" role="img" aria-labelledby="title desc">
+  <title id="title">Qredex attribution sequence</title>
+  <desc id="desc">Merchant storefront reports cart state to QredexAgent, which captures IIT, locks to PIT, and exposes PIT for checkout.</desc>
+  <rect width="1180" height="360" fill="#f6f1e8"/>
+  <rect x="40" y="40" width="220" height="70" rx="18" fill="#1f1b18"/>
+  <rect x="320" y="40" width="280" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <rect x="660" y="40" width="220" height="70" rx="18" fill="#d55b17"/>
+  <rect x="940" y="40" width="200" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <text x="150" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
+  <text x="460" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#1f1b18">Merchant Storefront</text>
+  <text x="460" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Owns cart and checkout</text>
+  <text x="770" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#fff">QredexAgent</text>
+  <text x="770" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#fff">Captures IIT, locks to PIT</text>
+  <text x="1040" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#1f1b18">Merchant Backend</text>
+  <text x="1040" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Receives PIT on order</text>
+
+  <path d="M150 130 L150 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M460 130 L460 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M770 130 L770 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1040 130 L1040 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+
+  <path d="M165 160 H445" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="445,160 430,152 430,168" fill="#1f1b18"/>
+  <text x="305" y="148" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">Land with ?qdx_intent=iit_xxx</text>
+
+  <path d="M475 205 H755" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="755,205 740,197 740,213" fill="#1f1b18"/>
+  <text x="615" y="193" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">handleCartChange({ itemCount, previousCount })</text>
+
+  <rect x="620" y="218" width="300" height="52" rx="14" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
+  <text x="770" y="250" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Agent stores IIT, locks when cart is lockable, then keeps PIT ready</text>
+
+  <path d="M785 290 H1025" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1025,290 1010,282 1010,298" fill="#1f1b18"/>
+  <text x="905" y="278" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">Send PIT with the order payload</text>
+</svg>

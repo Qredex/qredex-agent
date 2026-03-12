@@ -24,14 +24,12 @@
 export type AgentRuntimeEnvironment = 'development' | 'staging' | 'production' | 'test';
 
 export interface AgentConfigPolicy {
-  allowLockEndpointOverride: boolean;
   allowDebug: boolean;
   allowMockEndpoint: boolean;
 }
 
 export function getConfigPolicy(environment: AgentRuntimeEnvironment): AgentConfigPolicy {
   return {
-    allowLockEndpointOverride: environment !== 'production',
     allowDebug: environment !== 'production',
     allowMockEndpoint: environment === 'development' || environment === 'test',
   };

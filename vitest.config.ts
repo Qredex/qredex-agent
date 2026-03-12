@@ -38,5 +38,6 @@ export default defineConfig({
   },
   define: {
     __QDX_ENV__: JSON.stringify('test'),
+    __QDX_LOCK_ENDPOINT__: JSON.stringify(''),
   },
 });

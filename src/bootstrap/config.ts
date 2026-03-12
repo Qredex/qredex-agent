@@ -23,7 +23,7 @@
  */
 
 import { debug, warn } from '../utils/log.js';
-import { isObject, isNonEmptyString } from '../utils/guards.js';
+import { isObject } from '../utils/guards.js';
 import { getCurrentConfigPolicy, type AgentConfigPolicy } from './config-policy.js';
 import {
   DEFAULT_COOKIE_EXPIRE_DAYS,
@@ -37,21 +37,6 @@ import {
  */
 export interface AgentConfig {
   /**
-   * The lock endpoint URL.
-   *
-   * ⚠️ **Development/Staging/Test Only** - Override is ignored in production.
-   *
-   * In production builds, the default Qredex AGENT endpoint is always used
-   * regardless of this setting. This keeps the browser agent aligned to the
-   * canonical Qredex lock flow instead of becoming a generic transport client.
-   *
-   * Root-relative paths are allowed for same-origin non-production testing.
-   *
-   * @default 'https://api.qredex.com/api/v1/agent/intents/lock'
-   */
-  lockEndpoint?: string;
-
-  /**
    * Enable debug logging in non-production runtimes.
    * Production always forces this to false.
    * @default false
@@ -62,29 +47,18 @@ export interface AgentConfig {
    * Use mock endpoint for local development/test (no network calls).
    * When true, generates fake PIT tokens locally for testing.
    *
-   * ⚠️ **DEVELOPMENT/TEST ONLY** - Ignored elsewhere.
+   * ⚠️ **DEVELOPMENT ONLY** for merchant usage - ignored outside development/test.
    *
    * @default false
    */
   useMockEndpoint?: boolean;
+}
 
-  /**
-   * Key name for influence intent token (used for both cookie and sessionStorage).
-   * @default '__qdx_iit'
-   */
-  influenceIntentToken?: string;
-
-  /**
-   * Key name for purchase intent token (used for both cookie and sessionStorage).
-   * @default '__qdx_pit'
-   */
-  purchaseIntentToken?: string;
-
-  /**
-   * Cookie expiration in days.
-   * @default 30
-   */
-  cookieExpireDays?: number;
+interface InternalAgentConfig extends Required<AgentConfig> {
+  lockEndpoint: string;
+  influenceIntentToken: string;
+  purchaseIntentToken: string;
+  cookieExpireDays: number;
 }
 
 /**
@@ -96,7 +70,7 @@ declare global {
   }
 }
 
-const DEFAULT_CONFIG: Required<AgentConfig> = {
+const DEFAULT_CONFIG: InternalAgentConfig = {
   lockEndpoint: DEFAULT_LOCK_ENDPOINT,
   debug: false,
   useMockEndpoint: false,
@@ -105,7 +79,7 @@ const DEFAULT_CONFIG: Required<AgentConfig> = {
   cookieExpireDays: DEFAULT_COOKIE_EXPIRE_DAYS,
 };
 
-let currentConfig: Required<AgentConfig> = { ...DEFAULT_CONFIG };
+let currentConfig: InternalAgentConfig = { ...DEFAULT_CONFIG };
 let isInitialized = false;
 
 function getPreloadConfig(): AgentConfig | undefined {
@@ -116,49 +90,31 @@ function getPreloadConfig(): AgentConfig | undefined {
   return window.QredexAgentConfig;
 }
 
-function isValidLockEndpoint(value: string): boolean {
-  const isRelativePath = value.startsWith('/');
-  const isAbsoluteHttpUrl = /^https?:\/\//.test(value);
-
-  if (!isRelativePath && !isAbsoluteHttpUrl) {
-    return false;
+function warnUnsupportedRuntimeConfig(userConfig: Record<string, unknown>): void {
+  if ('lockEndpoint' in userConfig) {
+    warn('lockEndpoint is a build-time setting and is ignored at runtime');
   }
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://qredex.invalid';
+  if ('influenceIntentToken' in userConfig || 'purchaseIntentToken' in userConfig) {
+    warn('Storage key overrides are not supported in the public runtime config');
+  }
 
-  try {
-    const url = new URL(value, baseUrl);
-    if (isRelativePath) {
-      return url.pathname.length > 0;
-    }
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
+  if ('cookieExpireDays' in userConfig) {
+    warn('cookieExpireDays is fixed by the agent and is ignored at runtime');
   }
 }
 
 export function resolveConfig(
   userConfig: AgentConfig = {},
   policy: AgentConfigPolicy = getCurrentConfigPolicy()
-): Required<AgentConfig> {
-  const config: Required<AgentConfig> = { ...DEFAULT_CONFIG };
+): InternalAgentConfig {
+  const config: InternalAgentConfig = { ...DEFAULT_CONFIG };
 
   if (!isObject(userConfig)) {
     return config;
   }
 
-  if (userConfig.lockEndpoint !== undefined && isNonEmptyString(userConfig.lockEndpoint)) {
-    if (policy.allowLockEndpointOverride) {
-      if (isValidLockEndpoint(userConfig.lockEndpoint)) {
-        config.lockEndpoint = userConfig.lockEndpoint;
-        debug('lockEndpoint overridden for non-production runtime');
-      } else {
-        warn('Invalid lockEndpoint URL, using default');
-      }
-    } else {
-      warn('lockEndpoint override ignored in production');
-    }
-  }
+  warnUnsupportedRuntimeConfig(userConfig as Record<string, unknown>);
 
   if (typeof userConfig.debug === 'boolean') {
     if (policy.allowDebug) {
@@ -174,24 +130,6 @@ export function resolveConfig(
     } else if (userConfig.useMockEndpoint) {
       warn('useMockEndpoint ignored outside development/test');
     }
-  }
-
-  if (isNonEmptyString(userConfig.influenceIntentToken)) {
-    config.influenceIntentToken = userConfig.influenceIntentToken;
-  }
-
-  if (isNonEmptyString(userConfig.purchaseIntentToken)) {
-    config.purchaseIntentToken = userConfig.purchaseIntentToken;
-  }
-
-  if (typeof userConfig.cookieExpireDays === 'number' && userConfig.cookieExpireDays > 0) {
-    config.cookieExpireDays = userConfig.cookieExpireDays;
-  }
-
-  if (config.influenceIntentToken === config.purchaseIntentToken) {
-    warn('Storage key overrides must use distinct IIT and PIT keys, reverting to defaults');
-    config.influenceIntentToken = DEFAULT_INFLUENCE_INTENT_TOKEN_KEY;
-    config.purchaseIntentToken = DEFAULT_PURCHASE_INTENT_TOKEN_KEY;
   }
 
   return config;
@@ -218,10 +156,10 @@ function ensureConfigInitialized(): void {
  * Initialize configuration from user config and/or pre-load global config.
  * Pre-load config takes precedence over programmatic config.
  */
-export function initConfig(userConfig?: AgentConfig): Required<AgentConfig> {
+export function initConfig(userConfig?: AgentConfig): InternalAgentConfig {
   const preloadConfig = getPreloadConfig();
-  const merged = resolveConfig(userConfig);
-  const finalConfig = preloadConfig ? resolveConfig({ ...merged, ...preloadConfig }) : merged;
+  const finalInput = preloadConfig ? { ...(userConfig ?? {}), ...preloadConfig } : userConfig;
+  const finalConfig = resolveConfig(finalInput);
 
   currentConfig = finalConfig;
   isInitialized = true;
@@ -234,7 +172,7 @@ export function initConfig(userConfig?: AgentConfig): Required<AgentConfig> {
 /**
  * Get the current configuration.
  */
-export function getConfig(): Required<AgentConfig> {
+export function getConfig(): InternalAgentConfig {
   ensureConfigInitialized();
   return { ...currentConfig };
 }
@@ -242,9 +180,9 @@ export function getConfig(): Required<AgentConfig> {
 /**
  * Get a specific config value.
  */
-export function getConfigValue<K extends keyof Required<AgentConfig>>(
+export function getConfigValue<K extends keyof InternalAgentConfig>(
   key: K
-): Required<AgentConfig>[K] {
+): InternalAgentConfig[K] {
   ensureConfigInitialized();
   return currentConfig[key] ?? DEFAULT_CONFIG[key];
 }

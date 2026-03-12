@@ -964,9 +964,8 @@ export function offIntentCaptured(handler: IntentCapturedHandler): void {
  * @example
  * ```TypeScript
  * QredexAgent.init({
- *   debug: true,  // Enable debug logging
- *   lockEndpoint: 'https://api.qredex.com/api/v1/agent/intents/lock',
- *   cookieExpireDays: 30,
+ *   debug: true,
+ *   useMockEndpoint: true,
  * });
  * ```
  *

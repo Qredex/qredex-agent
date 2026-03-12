@@ -34,6 +34,14 @@ function resolveRuntimeEnvironment(mode: string): 'development' | 'staging' | 'p
   return 'production';
 }
 
+function resolveBuildTimeLockEndpoint(mode: string): string {
+  if (resolveRuntimeEnvironment(mode) === 'production') {
+    return '';
+  }
+
+  return process.env.QREDEX_AGENT_LOCK_ENDPOINT || '';
+}
+
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
@@ -63,6 +71,7 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       __QDX_ENV__: JSON.stringify(resolveRuntimeEnvironment(mode)),
+      __QDX_LOCK_ENDPOINT__: JSON.stringify(resolveBuildTimeLockEndpoint(mode)),
       __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
     },
   };
