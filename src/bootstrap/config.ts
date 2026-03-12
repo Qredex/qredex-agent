@@ -11,8 +11,8 @@
  *
  *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *  This is proprietary and confidential. Unauthorized copying, redistributing
- *  and/or modification of this file via any medium is inexorably prohibited.
+ *  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+ *  Redistribution and use are permitted under that license.
  *
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */

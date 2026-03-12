@@ -7,19 +7,24 @@
     "packages/*"
   ],
   "type": "module",
-  "main": "./dist/qredex-agent.iife.js",
+  "main": "./dist/qredex-agent.es.js",
   "module": "./dist/qredex-agent.es.js",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/qredex-agent.iife.min.js",
+  "jsdelivr": "./dist/qredex-agent.iife.min.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/qredex-agent.es.js",
-      "require": "./dist/qredex-agent.iife.js"
-    }
+      "default": "./dist/qredex-agent.es.js"
+    },
+    "./qredex-agent.iife.js": "./dist/qredex-agent.iife.js",
+    "./qredex-agent.iife.min.js": "./dist/qredex-agent.iife.min.js"
   },
   "files": [
     "dist",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "dev": "vite",
@@ -34,6 +39,10 @@
     "lint": "eslint src packages",
     "format": "prettier --write \"src/**/*.ts\" \"examples/**/*.html\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"examples/**/*.html\"",
+    "release:check": "npm run test && npm run build && node scripts/verify-release.mjs",
+    "release:cdn": "npm run build && node scripts/prepare-cdn-release.mjs",
+    "publish:npm:dry-run": "npm run release:check && node scripts/publish-packages.mjs --dry-run",
+    "publish:npm": "npm run release:check && node scripts/publish-packages.mjs",
     "test": "vitest run",
     "test:browser": "npm run build:dev && playwright test",
     "test:watch": "vitest",
@@ -50,6 +59,17 @@
   ],
   "author": "Qredex",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Qredex/qredex-agent.git"
+  },
+  "homepage": "https://github.com/Qredex/qredex-agent#readme",
+  "bugs": {
+    "url": "https://github.com/Qredex/qredex-agent/issues"
+  },
   "devDependencies": {
     "@angular/core": "^20.3.2",
     "@playwright/test": "^1.58.2",

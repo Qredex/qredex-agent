@@ -11,19 +11,19 @@
  *
  *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *  This is proprietary and confidential. Unauthorized copying, redistributing
- *  and/or modification of this file via any medium is inexorably prohibited.
+ *  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+ *  Redistribution and use are permitted under that license.
  *
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
 /**
- * Post-build script: Copy IIFE bundle to .min.js variant.
- * The IIFE build is already minified by terser, so this is just
- * to provide the expected .min.js filename for CDN versioning.
+ * Post-build script: Copy IIFE bundle and sourcemap to .min.js variants.
+ * The IIFE build is already minified by terser, so this is just to provide
+ * the expected filenames for CDN versioning.
  */
 
-import { copyFileSync } from 'fs';
+import { copyFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -48,10 +48,17 @@ if (!outputFile) {
 }
 
 try {
-  copyFileSync(
-    resolve(distDir, 'qredex-agent.iife.js'),
-    resolve(distDir, outputFile)
-  );
+  const sourceFile = resolve(distDir, 'qredex-agent.iife.js');
+  const sourceMapFile = resolve(distDir, 'qredex-agent.iife.js.map');
+  const outputPath = resolve(distDir, outputFile);
+  const outputMapPath = resolve(distDir, `${outputFile}.map`);
+
+  copyFileSync(sourceFile, outputPath);
+
+  if (existsSync(sourceMapFile)) {
+    copyFileSync(sourceMapFile, outputMapPath);
+  }
+
   console.log(`✓ Copied qredex-agent.iife.js to ${outputFile}`);
 } catch (err) {
   console.error('Failed to copy IIFE bundle:', err);

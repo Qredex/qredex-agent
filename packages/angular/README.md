@@ -11,8 +11,8 @@
 
   DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
-  This is proprietary and confidential. Unauthorized copying, redistributing
-  and/or modification of this file via any medium is inexorably prohibited.
+  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+  Redistribution and use are permitted under that license.
 
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
@@ -27,15 +27,80 @@ Thin Angular bindings for `@qredex/agent`.
 npm install @qredex/angular
 ```
 
-## Usage
+## Recommended Integration
+
+Register `provideQredexAgent()` once, then call `injectQredexAgent()` inside the existing cart surface you already control.
 
 ```ts
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideQredexAgent } from '@qredex/angular';
+import { Component, Input, OnChanges } from '@angular/core';
+import { injectQredexAgent, provideQredexAgent } from '@qredex/angular';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideQredexAgent(),
   ],
 });
+
+@Component({
+  selector: 'qredex-cart-bridge',
+  standalone: true,
+  template: `
+    <span>Qredex status: {{ status }}</span>
+  `,
+})
+export class QredexCartBridgeComponent implements OnChanges {
+  @Input() itemCount = 0;
+
+  private previousCount = 0;
+  private readonly agent = injectQredexAgent();
+
+  get status(): string {
+    return this.agent.hasPurchaseIntentToken() ? 'locked' : 'waiting';
+  }
+
+  ngOnChanges(): void {
+    this.agent.handleCartChange({
+      itemCount: this.itemCount,
+      previousCount: this.previousCount,
+    });
+
+    this.previousCount = this.itemCount;
+  }
+}
+```
+
+## What To Call When
+
+| Merchant event | Call | Why |
+|---|---|---|
+| App bootstrap | `provideQredexAgent()` | Makes the agent available to Angular surfaces |
+| Cart becomes non-empty | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
+| Cart stays non-empty and changes again | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Cart becomes empty | `agent.handleCartChange({ itemCount: 0, previousCount })` | Clears IIT/PIT from the live session |
+| Checkout succeeds | `agent.handlePaymentSuccess({ orderId, amount, currency })` | Clears attribution state after a completed purchase |
+| Need PIT for order submission | `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
+
+## API Surface
+
+| Export | Use |
+|---|---|
+| `provideQredexAgent()` | Primary Angular bootstrap helper |
+| `provideQredex()` | Deprecated alias for `provideQredexAgent()` |
+| `injectQredexAgent()` | Primary Angular injection helper |
+| `getQredexAgent()` | Direct access to the singleton runtime |
+| `initQredex()` | Explicit browser init when needed |
+| `QREDEX_AGENT` | Angular injection token |
+| `QredexAgent` | Re-export of the core agent |
+
+## Attribution Flow
+
+```text
+User lands with ?qdx_intent=...
+  -> Qredex captures IIT
+  -> Angular cart surface reports itemCount changes
+  -> handleCartChange() sees non-empty cart + IIT
+  -> Qredex locks IIT -> PIT
+  -> checkout uses PIT from getPurchaseIntentToken()
+  -> handlePaymentSuccess() clears attribution state
 ```

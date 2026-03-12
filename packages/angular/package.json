@@ -15,7 +15,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json"
@@ -29,5 +30,17 @@
   "peerDependencies": {
     "@angular/core": ">=17.0.0 <21.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Qredex/qredex-agent.git",
+    "directory": "packages/angular"
+  },
+  "homepage": "https://github.com/Qredex/qredex-agent/tree/main/packages/angular#readme",
+  "bugs": {
+    "url": "https://github.com/Qredex/qredex-agent/issues"
+  }
 }

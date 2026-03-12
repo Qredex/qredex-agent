@@ -1,3 +1,22 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+
 # Qredex Agent
 
 **Lightweight browser agent for Qredex intent capture and locking.**
@@ -86,6 +105,28 @@ The agent automatically:
 - ✅ Locks IIT → PIT when the merchant reports a non-empty cart and the state is lockable
 - ✅ Clears PIT when the merchant reports that the cart became empty or checkout succeeds
 - ✅ Exposes PIT for checkout
+
+### What Merchants Actually Call
+
+| Merchant event | Call | Why |
+|---|---|---|
+| User lands from Qredex link | No manual call required | The agent captures `qdx_intent` automatically |
+| Cart becomes non-empty | `handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
+| Cart changes while still non-empty | `handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Cart becomes empty | `handleCartChange({ itemCount: 0, previousCount })` | Clears IIT/PIT from the live session |
+| Need PIT for order submission | `getPurchaseIntentToken()` | Attach PIT to the order or checkout payload |
+| Checkout succeeds | `handlePaymentSuccess({ orderId, amount, currency })` | Clears attribution state after a completed purchase |
+
+### Attribution Sequence
+
+```text
+Landing URL with qdx_intent
+  -> agent captures IIT
+  -> merchant reports cart changes
+  -> first lockable non-empty cart report calls IIT -> PIT lock
+  -> PIT is used at checkout
+  -> payment success or cart empty clears attribution state
+```
 
 ---
 
