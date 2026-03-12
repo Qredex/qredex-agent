@@ -65,19 +65,23 @@ function runCommand(command, args, label) {
 
 async function waitForServer(targetUrl) {
   for (let attempt = 0; attempt < 40; attempt += 1) {
-    try {
-      const response = await fetch(targetUrl, { method: 'GET' });
-      if (response.ok) {
-        return;
-      }
-    } catch {
-      // Server not ready yet.
+    if (await isServerReady(targetUrl)) {
+      return;
     }
 
     await delay(250);
   }
 
   throw new Error(`Static server did not become ready at ${targetUrl}`);
+}
+
+async function isServerReady(targetUrl) {
+  try {
+    const response = await fetch(targetUrl, { method: 'GET' });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function openBrowser(targetUrl) {
@@ -96,6 +100,12 @@ async function openBrowser(targetUrl) {
 async function main() {
   await runCommand(getNpmCommand(), ['run', 'build:dev'], 'Development build');
 
+  if (await isServerReady(url)) {
+    await openBrowser(url);
+    process.stdout.write(`Example ready at ${url}\n`);
+    return;
+  }
+
   const server = spawn(process.execPath, ['scripts/static-server.mjs'], {
     cwd: repoRoot,
     stdio: 'inherit',
@@ -110,10 +120,6 @@ async function main() {
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
   process.on('exit', shutdown);
-
-  server.once('error', (error) => {
-    throw error;
-  });
 
   await waitForServer(url);
   await openBrowser(url);

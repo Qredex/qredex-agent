@@ -76,6 +76,6 @@ const server = createServer(async (request, response) => {
   }
 });
 
-server.listen(port, '127.0.0.1', () => {
-  process.stdout.write(`Static server listening on http://127.0.0.1:${port}\n`);
+server.listen(port, () => {
+  process.stdout.write(`Static server listening on http://localhost:${port}\n`);
 });
