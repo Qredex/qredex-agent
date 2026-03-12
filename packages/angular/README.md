@@ -29,14 +29,35 @@ npm install @qredex/angular
 
 ## Attribution Flow
 
-```text
-User lands with ?qdx_intent=...
-  -> Qredex captures IIT automatically
-  -> your cart UI reports itemCount changes
-  -> first lockable non-empty cart report locks IIT -> PIT
-  -> checkout sends PIT to your backend
-  -> clearCart() empties the cart and clears attribution state
+```mermaid
+sequenceDiagram
+    participant User
+    participant Bootstrap as App bootstrap
+    participant Component as Cart component
+    participant Agent as QredexAgent
+
+    Bootstrap->>Agent: provideQredexAgent()
+    User->>Component: Land with ?qdx_intent=iit_xxx
+    Component->>Agent: injectQredexAgent()
+    Note right of Agent: Captures IIT automatically<br/>No function call needed
+
+    User->>Component: Cart item count changes
+    Component->>Agent: agent.handleCartChange({ itemCount, previousCount })
+    Note right of Agent: Locks IIT to PIT internally when lockable
+
+    User->>Component: Checkout
+    Component->>Agent: agent.getPurchaseIntentToken()
+    Note right of Component: Send PIT with the order to your backend
+
+    User->>Component: Cart is cleared
+    Component->>Agent: agent.handleCartEmpty()
+
+    opt No cart-empty step after checkout
+        Component->>Agent: agent.handlePaymentSuccess()
+    end
 ```
+
+Call `provideQredexAgent()` once at bootstrap, get the runtime with `injectQredexAgent()`, then forward merchant cart state with `agent.handleCartChange(...)`, read the PIT with `agent.getPurchaseIntentToken()`, and clear attribution with `agent.handleCartEmpty()`. Only call `agent.handlePaymentSuccess()` if your platform has no cart-empty step after checkout.
 
 ## Recommended Integration
 

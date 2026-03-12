@@ -1,0 +1,42 @@
+sequenceDiagram
+  %%
+  %%    ▄▄▄▄
+  %%  ▄█▀▀███▄▄              █▄
+  %%  ██    ██ ▄             ██
+  %%  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  %%  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+  %%   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+  %%        ▀█
+  %%
+  %%  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+  %%
+  %%  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  %%
+  %%  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+  %%  Redistribution and use are permitted under that license.
+  %%
+  %%  If you need additional information or have any questions, please email: copyright@qredex.com
+  %%
+  participant User
+  participant Storefront as Your cart UI
+  participant Wrapper as useQredexAgent()
+  participant Agent as QredexAgent
+
+  User->>Storefront: Land with ?qdx_intent=iit_xxx
+  Storefront->>Wrapper: useQredexAgent()
+  Note right of Agent: Captures IIT automatically<br/>No function call needed
+
+  User->>Storefront: Cart item count changes
+  Storefront->>Agent: agent.handleCartChange({ itemCount, previousCount })
+  Note right of Agent: Locks IIT to PIT internally when lockable
+
+  User->>Storefront: Checkout
+  Storefront->>Agent: agent.getPurchaseIntentToken()
+  Note right of Storefront: Send PIT with the order to your backend
+
+  User->>Storefront: Cart is cleared
+  Storefront->>Agent: agent.handleCartEmpty()
+
+  opt No cart-empty step after checkout
+    Storefront->>Agent: agent.handlePaymentSuccess()
+  end

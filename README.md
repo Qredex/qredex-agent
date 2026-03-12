@@ -38,34 +38,34 @@
 
 ### 2. Attribution Sequence
 
+```mermaid
+sequenceDiagram
+    participant User
+    participant Storefront as Merchant Storefront
+    participant Agent as QredexAgent
+
+    User->>Storefront: Land on storefront with ?qdx_intent=iit_xxx
+    Note right of Agent: Capture IIT<br/>Store (session + cookie)<br/>Clean URL
+
+    User->>Storefront: Add item to cart
+    Storefront->>Storefront: Update cart state
+    Storefront->>Agent: handleCartChange({ itemCount, previousCount })
+    Note right of Agent: Locks IIT to PIT internally when lockable
+
+    User->>Storefront: Checkout
+    Storefront->>Agent: getPurchaseIntentToken()
+    Note right of Storefront: Send PIT with the order to your backend
+
+    User->>Storefront: Cart becomes empty
+    Storefront->>Agent: handleCartEmpty()
+    Note right of Agent: Clear PIT
+    
+    opt No cart-empty step after checkout
+        Storefront->>Agent: handlePaymentSuccess()
+    end
 ```
-User     →  Agent        →  Merchant        →  Backend
- │           │               │                   │
- │  ?qdx_intent=iit_xxx      │                   │
- │──────────>│               │                   │
- │           │ [capture IIT] │                   │
- │           │ [store]       │                   │
- │           │ [clean URL]   │                   │
- │           │               │                   │
- │  add to cart              │                   │
- │──────────>│               │                   │
- │           │  → handleCartChange()             │
- │           │               │  → lock(IIT→PIT)  │
- │           │               │──────────────────>│
- │           │               │  ← PIT            │
- │           │               │                   │
- │           │  [PIT stored] │                   │
- │           │               │                   │
- │  checkout →               │                   │
- │           │  ← getPurchaseIntentToken()       │
- │           │               │  → POST /orders   │
- │           │               │──────────────────>│
- │           │               │                   │
- │  cart empty →             │                   │
- │           │  → handleCartEmpty()              │
- │           │  [clear PIT]  │                   │
- │           │               │                   │
-```
+
+The agent never adds to cart, removes items, or clears the merchant cart. The storefront owns cart state and checkout; the agent only captures intent and reacts to merchant-reported cart events.
 
 ### 3. Connect Cart And Checkout
 

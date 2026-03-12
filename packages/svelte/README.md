@@ -29,14 +29,34 @@ npm install @qredex/svelte
 
 ## Attribution Flow
 
-```text
-User lands with ?qdx_intent=...
-  -> Qredex captures IIT automatically
-  -> your cart UI reports itemCount changes
-  -> first lockable non-empty cart report locks IIT -> PIT
-  -> checkout sends PIT to your backend
-  -> clearCart() empties the cart and clears attribution state
+```mermaid
+sequenceDiagram
+    participant User
+    participant Storefront as Your cart UI
+    participant Wrapper as useQredexAgent()
+    participant Agent as QredexAgent
+
+    User->>Storefront: Land with ?qdx_intent=iit_xxx
+    Storefront->>Wrapper: useQredexAgent()
+    Note right of Agent: Captures IIT automatically<br/>No function call needed
+
+    User->>Storefront: Cart item count changes
+    Storefront->>Agent: agent.handleCartChange({ itemCount, previousCount })
+    Note right of Agent: Locks IIT to PIT internally when lockable
+
+    User->>Storefront: Checkout
+    Storefront->>Agent: agent.getPurchaseIntentToken()
+    Note right of Storefront: Send PIT with the order to your backend
+
+    User->>Storefront: Cart is cleared
+    Storefront->>Agent: agent.handleCartEmpty()
+
+    opt No cart-empty step after checkout
+        Storefront->>Agent: agent.handlePaymentSuccess()
+    end
 ```
+
+Call `useQredexAgent()`, then forward merchant cart state with `agent.handleCartChange(...)`, read the PIT with `agent.getPurchaseIntentToken()`, and clear attribution with `agent.handleCartEmpty()`. Only call `agent.handlePaymentSuccess()` if your platform has no cart-empty step after checkout.
 
 ## Recommended Integration
 
