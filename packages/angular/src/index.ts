@@ -46,7 +46,7 @@ export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
   return CoreQredexAgent;
 }
 
-export function provideQredex(config?: AgentConfig): EnvironmentProviders {
+export function provideQredexAgent(config?: AgentConfig): EnvironmentProviders {
   return makeEnvironmentProviders([
     {
       provide: QREDEX_AGENT,
@@ -60,6 +60,13 @@ export function provideQredex(config?: AgentConfig): EnvironmentProviders {
       },
     },
   ]);
+}
+
+/**
+ * @deprecated Use provideQredexAgent() instead.
+ */
+export function provideQredex(config?: AgentConfig): EnvironmentProviders {
+  return provideQredexAgent(config);
 }
 
 export function injectQredexAgent(): typeof CoreQredexAgent {

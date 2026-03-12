@@ -24,7 +24,7 @@ Thin Vue bindings for `@qredex/agent`.
 ## Install
 
 ```bash
-npm install @qredex/vue @qredex/agent vue
+npm install @qredex/vue
 ```
 
 ## Usage

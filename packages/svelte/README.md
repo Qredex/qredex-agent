@@ -24,16 +24,17 @@ Thin Svelte bindings for `@qredex/agent`.
 ## Install
 
 ```bash
-npm install @qredex/svelte @qredex/agent svelte
+npm install @qredex/svelte
 ```
 
 ## Usage
 
 ```ts
-import { createQredexStateStore, useQredex } from '@qredex/svelte';
+import { useQredex } from '@qredex/svelte';
 
-const agent = useQredex();
-const qredexState = createQredexStateStore();
+const { agent, state } = useQredex();
 
 agent.handleCartChange({ itemCount: 1, previousCount: 0 });
+
+$state.locked;
 ```

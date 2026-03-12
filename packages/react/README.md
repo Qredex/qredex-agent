@@ -24,7 +24,7 @@ Thin React bindings for `@qredex/agent`.
 ## Install
 
 ```bash
-npm install @qredex/react @qredex/agent react
+npm install @qredex/react
 ```
 
 ## Usage

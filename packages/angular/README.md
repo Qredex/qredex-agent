@@ -24,18 +24,18 @@ Thin Angular bindings for `@qredex/agent`.
 ## Install
 
 ```bash
-npm install @qredex/angular @qredex/agent @angular/core
+npm install @qredex/angular
 ```
 
 ## Usage
 
 ```ts
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideQredex } from '@qredex/angular';
+import { provideQredexAgent } from '@qredex/angular';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideQredex(),
+    provideQredexAgent(),
   ],
 });
 ```

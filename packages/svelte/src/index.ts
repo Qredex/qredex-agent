@@ -22,6 +22,10 @@ import { readable, type Readable } from 'svelte/store';
 import CoreQredexAgent, { type AgentConfig } from '@qredex/agent';
 
 export type QredexState = ReturnType<typeof CoreQredexAgent.getState>;
+export interface QredexComposable {
+  agent: typeof CoreQredexAgent;
+  state: Readable<QredexState>;
+}
 
 const SERVER_STATE: QredexState = {
   hasIIT: false,
@@ -49,7 +53,7 @@ export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
   return CoreQredexAgent;
 }
 
-export function useQredex(config?: AgentConfig): typeof CoreQredexAgent {
+export function useQredexAgent(config?: AgentConfig): typeof CoreQredexAgent {
   onMount(() => {
     initQredex(config);
   });
@@ -76,6 +80,13 @@ export function createQredexStateStore(config?: AgentConfig): Readable<QredexSta
       CoreQredexAgent.offStateChanged(handler);
     };
   });
+}
+
+export function useQredex(config?: AgentConfig): QredexComposable {
+  return {
+    agent: useQredexAgent(config),
+    state: createQredexStateStore(config),
+  };
 }
 
 export { CoreQredexAgent as QredexAgent };

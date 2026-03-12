@@ -20,11 +20,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
+  "dependencies": {
+    "@qredex/agent": "^1.0.0"
+  },
   "devDependencies": {
     "@qredex/agent": "file:../.."
   },
   "peerDependencies": {
-    "@qredex/agent": "^1.0.0",
     "@angular/core": ">=17.0.0 <21.0.0"
   },
   "license": "MIT"

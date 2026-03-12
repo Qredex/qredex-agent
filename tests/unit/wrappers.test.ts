@@ -34,12 +34,15 @@ import {
   createQredexStateStore,
   getQredexAgent as getSvelteAgent,
   initQredex as initSvelteQredex,
+  useQredex,
+  useQredexAgent,
 } from '../../packages/svelte/src/index.ts';
 import {
   QREDEX_AGENT,
   getQredexAgent as getAngularAgent,
   initQredex as initAngularQredex,
   provideQredex,
+  provideQredexAgent,
 } from '../../packages/angular/src/index.ts';
 
 describe('Framework wrappers', () => {
@@ -88,9 +91,17 @@ describe('Framework wrappers', () => {
     unsubscribe();
   });
 
+  it('svelte wrapper exposes a convenience useQredex composable', () => {
+    const qredex = useQredex({ debug: true });
+
+    expect(qredex.agent.handleCartChange).toBe(useQredexAgent({ debug: true }).handleCartChange);
+    expect(qredex.state.subscribe).toEqual(expect.any(Function));
+  });
+
   it('angular wrapper exposes provider helpers around the core agent', () => {
     expect(initAngularQredex({ debug: true }).isInitialized()).toBe(true);
     expect(getAngularAgent().handleCartChange).toBe(initAngularQredex().handleCartChange);
+    expect(provideQredexAgent()).toBeDefined();
     expect(provideQredex()).toBeDefined();
     expect(QREDEX_AGENT).toBeDefined();
   });
