@@ -38,13 +38,33 @@
 
 ### 2. Attribution Sequence
 
-```text
-Landing URL with qdx_intent
-  -> agent captures IIT automatically
-  -> merchant reports cart changes
-  -> first lockable non-empty cart report locks IIT -> PIT
-  -> checkout sends PIT to backend
-  -> clearCart() empties the cart and clears attribution state
+```
+User     →  Agent        →  Merchant        →  Backend
+ │           │               │                   │
+ │  ?qdx_intent=iit_xxx      │                   │
+ │──────────>│               │                   │
+ │           │ [capture IIT] │                   │
+ │           │ [store]       │                   │
+ │           │ [clean URL]   │                   │
+ │           │               │                   │
+ │  add to cart              │                   │
+ │──────────>│               │                   │
+ │           │  → handleCartChange()             │
+ │           │               │  → lock(IIT→PIT)  │
+ │           │               │──────────────────>│
+ │           │               │  ← PIT            │
+ │           │               │                   │
+ │           │  [PIT stored] │                   │
+ │           │               │                   │
+ │  checkout →               │                   │
+ │           │  ← getPurchaseIntentToken()       │
+ │           │               │  → POST /orders   │
+ │           │               │──────────────────>│
+ │           │               │                   │
+ │  cart empty →             │                   │
+ │           │  → handleCartEmpty()              │
+ │           │  [clear PIT]  │                   │
+ │           │               │                   │
 ```
 
 ### 3. Connect Cart And Checkout
@@ -443,9 +463,10 @@ open http://localhost:3000/examples/index.html
 ```
 
 Then:
-- Simulate intent URL by adding `?qdx_intent=test123` to the URL and pressing Enter
+- Start with the featured CDN card
+- Simulate intent URL by adding `?qdx_intent=test123` to the CDN page URL and pressing Enter
 - Add to cart and watch PIT get locked
-- Clear cart and watch PIT get cleared
+- Empty cart and watch PIT get cleared
 
 **See:** [examples/TESTING.md](examples/TESTING.md) for complete testing scenarios.
 
@@ -518,24 +539,26 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
 ## How It Works
 
 ```
-1. User lands with ?qdx_intent=xxx
-   → Agent inspects qdx_intent, removes it from the visible URL, and stores IIT in sessionStorage + cookie when no PIT already exists
-
-2. Merchant reports a non-empty cart state
-   → handleCartChange() locks IIT → PIT via API
-   → PIT stored, IIT cleared
-
-3. User continues shopping and the cart stays non-empty
-   → Lock can retry on later non-empty cart reports if previous lock failed
-   → PIT persists once locked
-
-4. User empties cart
-   → handleCartEmpty() clears PIT
-
-5. Optional explicit post-payment clear
-   → handlePaymentSuccess() clears PIT if checkout completes without a cart-empty step
-
-6. Next purchase requires new Qredex link (new IIT)
+User      →  Agent       →  Backend
+ │            │              │
+ │  ?qdx_intent              │
+ │───────────>│              │
+ │            │ [IIT stored] │
+ │            │              │
+ │  non-empty cart           │
+ │            │  → lock()    │
+ │            │─────────────>│
+ │            │  ← PIT       │
+ │            │              │
+ │  continue shopping        │
+ │            │ [PIT persists]│
+ │            │              │
+ │  empty cart │              │
+ │            │ [clear PIT]  │
+ │            │              │
+ │  (optional) handlePaymentSuccess()
+ │            │ [clear PIT]  │
+ │            │              │
 ```
 
 ### Key Behaviors
@@ -648,12 +671,17 @@ Open DevTools → Application → Storage:
 
 | Example | Description | Quick Start |
 |---------|-------------|-------------|
-| [examples/index.html](examples/index.html) | Quick testing page | `npm run example` |
+| [examples/index.html](examples/index.html) | Example hub for CDN and wrapper pages | `npm run example` |
+| [examples/cdn.html](examples/cdn.html) | Canonical script-tag customer path | Open from the hub |
+| [examples/react.html](examples/react.html) | React bridge code + shared live harness | Open from the hub |
+| [examples/vue.html](examples/vue.html) | Vue bridge code + shared live harness | Open from the hub |
+| [examples/svelte.html](examples/svelte.html) | Svelte bridge code + shared live harness | Open from the hub |
+| [examples/angular.html](examples/angular.html) | Angular bridge code + shared live harness | Open from the hub |
 
 Each example includes:
-- Complete working demo
-- Step-by-step testing scenarios
-- Console commands reference
+- A focused integration path
+- The same cart harness for IIT/PIT behavior checks
+- The wrapper bridge code when a framework adapter is involved
 - Debugging guide
 
 **See:** [examples/TESTING.md](examples/TESTING.md) for detailed testing instructions.

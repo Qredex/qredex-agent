@@ -1,3 +1,22 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+
 # Qredex Agent - Testing Guide
 
 Complete testing guide for Qredex Agent.
@@ -9,16 +28,11 @@ Complete testing guide for Qredex Agent.
 ### Step 1: Build & Open
 
 ```bash
-# 1. Build the project
-npm run build
-
-# 2. Open the test page
-open examples/cdn-test/index.html
-
-# Or serve locally
-npx serve examples
-# Navigate to: http://localhost:3000/cdn-test/
+# Build the development bundle, start the example server, and open the hub
+npm run example
 ```
+
+From the hub, open the featured CDN page for the canonical customer path.
 
 ### Step 2: Run Testing Scenarios
 
@@ -75,7 +89,7 @@ QredexAgent.hasPurchaseIntentToken()   // false
 
 **Alternative:** Manually navigate to:
 ```
-http://localhost:3000/basic/?qdx_intent=test_token_xyz789
+http://localhost:3000/examples/cdn.html?qdx_intent=test_token_xyz789
 ```
 
 ---

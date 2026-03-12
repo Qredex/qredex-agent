@@ -1,3 +1,22 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+
 # Qredex Agent - Examples
 
 **Quick testing for Qredex Agent using the generated development IIFE bundle.**
@@ -20,6 +39,8 @@ If your browser does not open automatically, use:
 ```bash
 open http://localhost:3000/examples/index.html
 ```
+
+The hub opens first. Start with the featured CDN card, then open the wrapper pages as needed.
 
 ### Browser smoke test
 
@@ -47,15 +68,28 @@ npm run build:stage
 
 ---
 
-## What This Example Does
+## Pages
 
-The test page demonstrates the complete Qredex Agent flow:
+- `examples/index.html` = example hub
+- `examples/cdn.html` = canonical CDN/script-tag path
+- `examples/react.html` = React bridge code + shared live harness
+- `examples/vue.html` = Vue bridge code + shared live harness
+- `examples/svelte.html` = Svelte bridge code + shared live harness
+- `examples/angular.html` = Angular bridge code + shared live harness
+
+## What These Examples Do
+
+The examples demonstrate the complete Qredex Agent flow:
 
 1. **IIT Capture** - Simulates landing with `?qdx_intent=xxx` URL parameter
 2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
 3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
 
-**Note:** Uses `useMockEndpoint: true` through `dist/qredex-agent.iife.dev.min.js` - generates fake PIT tokens locally (no network calls).
+**Note:** The live harness uses `useMockEndpoint: true` through `dist/qredex-agent.iife.dev.min.js`, so it generates fake PIT tokens locally without network calls.
+
+Wrapper pages stay honest:
+- the code panel shows the exact wrapper bridge you would place in React, Vue, Svelte, or Angular
+- the live cart harness below it still exercises the same shared core agent flow
 
 Once loaded, the agent is available globally via `window.QredexAgent`:
 
