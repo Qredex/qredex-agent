@@ -28,7 +28,42 @@ const version = packageJson.version;
 const majorVersion = version.split('.')[0];
 const distDir = resolve(rootDir, 'dist');
 const releaseRoot = resolve(rootDir, 'release', 'agent');
-const assets = ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'];
+const channel = process.argv[2] || 'production';
+
+const channelConfig = {
+  production: {
+    assetMap: {
+      'qredex-agent.iife.min.js': 'qredex-agent.iife.min.js',
+      'qredex-agent.iife.min.js.map': 'qredex-agent.iife.min.js.map',
+    },
+    targetDirs: [resolve(releaseRoot, `v${version}`), resolve(releaseRoot, `v${majorVersion}`)],
+    manifestPath: resolve(releaseRoot, 'manifest.json'),
+    manifest: {
+      channel: 'production',
+      version,
+      major: `v${majorVersion}`,
+      files: ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'],
+    },
+  },
+  staging: {
+    assetMap: {
+      'qredex-agent.iife.stage.min.js': 'qredex-agent.iife.min.js',
+      'qredex-agent.iife.stage.min.js.map': 'qredex-agent.iife.min.js.map',
+    },
+    targetDirs: [resolve(releaseRoot, 'staging')],
+    manifestPath: resolve(releaseRoot, 'staging', 'manifest.json'),
+    manifest: {
+      channel: 'staging',
+      version,
+      files: ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'],
+    },
+  },
+}[channel];
+
+if (!channelConfig) {
+  console.error(`Unknown CDN release channel "${channel}"`);
+  process.exit(1);
+}
 
 function ensureAsset(file) {
   const path = resolve(distDir, file);
@@ -43,29 +78,22 @@ function ensureAsset(file) {
 function copyAssets(targetDir) {
   mkdirSync(targetDir, { recursive: true });
 
-  for (const file of assets) {
-    copyFileSync(ensureAsset(file), resolve(targetDir, file));
+  for (const [sourceFile, outputFile] of Object.entries(channelConfig.assetMap)) {
+    copyFileSync(ensureAsset(sourceFile), resolve(targetDir, outputFile));
   }
 }
 
 try {
-  copyAssets(resolve(releaseRoot, `v${version}`));
-  copyAssets(resolve(releaseRoot, `v${majorVersion}`));
+  for (const targetDir of channelConfig.targetDirs) {
+    copyAssets(targetDir);
+  }
 
   writeFileSync(
-    resolve(releaseRoot, 'manifest.json'),
-    JSON.stringify(
-      {
-        version,
-        major: `v${majorVersion}`,
-        files: assets,
-      },
-      null,
-      2
-    )
+    channelConfig.manifestPath,
+    JSON.stringify(channelConfig.manifest, null, 2)
   );
 
-  console.log(`✓ Prepared CDN release assets for v${version}`);
+  console.log(`✓ Prepared ${channel} CDN release assets for v${version}`);
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

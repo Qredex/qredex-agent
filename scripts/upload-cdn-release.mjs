@@ -25,7 +25,11 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 const releaseRoot = resolve(rootDir, 'release', 'agent');
-const manifestPath = resolve(releaseRoot, 'manifest.json');
+const channel = process.argv[2] || 'production';
+const manifestPath =
+  channel === 'staging'
+    ? resolve(releaseRoot, 'staging', 'manifest.json')
+    : resolve(releaseRoot, 'manifest.json');
 const bucket = process.env.QREDEX_CDN_BUCKET;
 
 if (!bucket) {
@@ -34,14 +38,17 @@ if (!bucket) {
 }
 
 if (!existsSync(manifestPath)) {
-  console.error('Missing release/agent/manifest.json. Run npm run release:cdn first.');
+  console.error(`Missing ${manifestPath.replace(`${rootDir}/`, '')}. Run the matching CDN prepare command first.`);
   process.exit(1);
 }
 
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-const pinnedVersion = `v${manifest.version}`;
-const aliasVersion = manifest.major;
 const assetFiles = manifest.files;
+
+if (channel !== 'production' && channel !== 'staging') {
+  console.error(`Unknown CDN upload channel "${channel}"`);
+  process.exit(1);
+}
 
 function getContentType(filePath) {
   switch (extname(filePath)) {
@@ -56,7 +63,7 @@ function getContentType(filePath) {
 }
 
 function getCacheControl(key) {
-  if (key.startsWith(`agent/${pinnedVersion}/`)) {
+  if (channel === 'production' && key.startsWith(`agent/v${manifest.version}/`)) {
     return 'public, max-age=31536000, immutable';
   }
 
@@ -97,11 +104,16 @@ function uploadFile(localPath, key) {
 
 try {
   for (const file of assetFiles) {
-    uploadFile(resolve(releaseRoot, pinnedVersion, file), `agent/${pinnedVersion}/${file}`);
-    uploadFile(resolve(releaseRoot, aliasVersion, file), `agent/${aliasVersion}/${file}`);
+    if (channel === 'production') {
+      const pinnedVersion = `v${manifest.version}`;
+      uploadFile(resolve(releaseRoot, pinnedVersion, file), `agent/${pinnedVersion}/${file}`);
+      uploadFile(resolve(releaseRoot, manifest.major, file), `agent/${manifest.major}/${file}`);
+    } else {
+      uploadFile(resolve(releaseRoot, 'staging', file), `agent/staging/${file}`);
+    }
   }
 
-  uploadFile(manifestPath, 'agent/manifest.json');
+  uploadFile(manifestPath, channel === 'production' ? 'agent/manifest.json' : 'agent/staging/manifest.json');
   console.log(`✓ Uploaded CDN release assets to ${bucket}`);
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

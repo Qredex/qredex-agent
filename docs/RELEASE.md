@@ -91,6 +91,26 @@ NPM trusted publishing must be configured for:
 Use the same `production` environment in npm trusted publishing so the GitHub
 job, environment protection rules, and npm publisher trust all align.
 
+## First Publish
+
+Use this order for the first public npm release:
+
+1. Confirm the `@qredex` npm scope is owned by the Qredex org and your admin account has publish rights.
+2. Try to add a GitHub Actions trusted publisher for each package with:
+   - repository: `Qredex/qredex-agent`
+   - workflow: `release.yml`
+   - environment: `production`
+3. If npm does not let you configure trusted publishing before the package exists, do one bootstrap publish from an org owner account with 2FA:
+   - `npm run release:check`
+   - `node scripts/publish-packages.mjs`
+4. Immediately after the bootstrap publish, add trusted publishers for:
+   - `@qredex/agent`
+   - `@qredex/react`
+   - `@qredex/vue`
+   - `@qredex/svelte`
+   - `@qredex/angular`
+5. After trusted publishing is live, use the GitHub `release.yml` workflow for all subsequent releases.
+
 ## CDN
 
 ```bash
@@ -108,6 +128,22 @@ Current production CDN asset:
 
 - `qredex-agent.iife.min.js`
 - `qredex-agent.iife.min.js.map`
+
+## Staging CDN
+
+```bash
+npm run release:cdn:staging
+npm run release:cdn:staging:upload
+```
+
+That prepares and uploads the staging bundle to:
+
+- `agent/staging/qredex-agent.iife.min.js`
+- `agent/staging/qredex-agent.iife.min.js.map`
+- `agent/staging/manifest.json`
+
+Staging uses the staging build policy and is intentionally isolated from the
+production versioned CDN paths.
 
 Caching policy:
 
