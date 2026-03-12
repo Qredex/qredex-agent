@@ -10,7 +10,7 @@ The lock flow converts an **Influence Intent Token (IIT)** into a **Purchase Int
 
 **Key principles:**
 
--   **Merchant-driven**: Merchant calls `handleCartChange()` or `handleCartAdd()` when cart state changes
+-   **Merchant-driven**: Merchant calls `handleCartChange()` when cart state changes
 -   **State-based**: Lock triggers on cart transition (empty → non-empty), not just "add-to-cart" event
 -   **Idempotent**: Safe to retry; no duplicate locks
 -   **Fail-safe**: Lock failures preserve IIT for retry
@@ -41,7 +41,7 @@ The lock flow converts an **Influence Intent Token (IIT)** into a **Purchase Int
                               ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │ 4. Shopper adds first item to cart                              │
-│    → Merchant calls handleCartAdd() or handleCartChange()       │
+│    → Merchant calls handleCartChange()                          │
 │    → Cart state: empty → non-empty                              │
 │    → Validates: IIT exists, PIT doesn't, no lock in flight      │
 └──────────────────────────────────────────────────────────────────┘
@@ -294,10 +294,7 @@ if (!response.ok) {
 You can manually trigger lock (usually not needed):
 
 ```javascript
-const result = await QredexAgent.lockIntent({
-  productId: 'widget-001',
-  quantity: 2,
-});
+const result = await QredexAgent.lockIntent();
 
 if (result.success) {
   console.log('PIT:', result.purchaseToken);
@@ -329,12 +326,6 @@ QredexAgent.handleCartChange({
 ### Convenience Wrappers
 
 ```javascript
-// Add to cart
-QredexAgent.handleCartAdd(itemCount, {
-  productId: 'widget-001',
-  quantity: 1,
-});
-
 // Empty cart (clears tokens)
 QredexAgent.handleCartEmpty();
 ```

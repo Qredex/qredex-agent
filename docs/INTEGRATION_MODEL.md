@@ -59,7 +59,7 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ 2. USER ADDS FIRST ITEM TO CART                                        │
-│    → Merchant calls: handleCartAdd()                                   │
+│    → Merchant calls: handleCartChange()                                │
 │    → Agent locks IIT → PIT (Purchase Intent Token)                     │
 │    → Stores PIT in sessionStorage + cookie                             │
 │    → Clears IIT from storage (no longer needed)                        │
@@ -143,15 +143,16 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
 **2. Handle Cart Events (Merchant → Agent)**
 
 ```javascript
-// Merchant tells agent when cart add happens
-QredexAgent.handleCartAdd(cart.itemCount, {
-  productId: '123',
-  quantity: 1,
-  price: 99.99,
+// Merchant reports live cart state after cart changed
+QredexAgent.handleCartChange({
+  itemCount: cart.itemCount,
+  previousCount: cart.itemCount - 1,
+  meta: {
+    productId: '123',
+    quantity: 1,
+    price: 99.99,
+  },
 });
-// → Agent auto-locks IIT → PIT by calling POST /api/v1/agent/intents/lock
-// Request: { "token": "IIT" }
-// Response: { "token": "PIT", "expiresAt": "...", "lockedAt": "..." }
 
 // Merchant tells agent when cart is emptied
 QredexAgent.handleCartEmpty();
@@ -202,11 +203,15 @@ function useQredexAgent() {
   const addToCart = async (product) => {
     await api.post('/cart', { productId: product.id });
 
-    // Tell agent cart add happened (auto-locks)
-    QredexAgent.handleCartAdd(cart.itemCount, {
-      productId: product.id,
-      quantity: 1,
-      price: product.price,
+    // Tell agent the live cart state after the cart changed
+    QredexAgent.handleCartChange({
+      itemCount: cart.itemCount,
+      previousCount: cart.itemCount - 1,
+      meta: {
+        productId: product.id,
+        quantity: 1,
+        price: product.price,
+      },
     });
   };
 
@@ -310,7 +315,7 @@ hasPurchaseIntentToken(): boolean
 // Clear IIT/PIT tokens (after checkout or cart empty)
 clearIntent(): void
 
-// Manual lock (if not using handleCartAdd)
+// Manual lock (if not using handleCartChange)
 lockIntent(meta?: LockMeta): Promise<LockResult>
 ```
 
@@ -320,10 +325,7 @@ Use these if you prefer explicit control over auto-lock:
 
 ```typescript
 // Lock IIT → PIT manually
-const result = await QredexAgent.lockIntent({
-  productId: '123',
-  quantity: 1,
-});
+const result = await QredexAgent.lockIntent();
 
 // Clear IIT/PIT tokens manually
 QredexAgent.clearIntent();
@@ -337,7 +339,6 @@ const pit = QredexAgent.getPurchaseIntentToken();
 Merchant tells agent when events happen:
 
 ```typescript
-handleCartAdd(itemCount: number, meta?: CartAddMeta): void
 handleCartEmpty(): void
 handleCartChange(event: CartChangeEvent): void
 handlePaymentSuccess(event: PaymentSuccessEvent): void
@@ -424,7 +425,6 @@ type ErrorHandler = (event: ErrorEvent) => void;
 | `hasPurchaseIntentToken()` | Manual | Check PIT exists |
 | `lockIntent(meta?)` | Manual | Lock IIT → PIT |
 | `clearIntent()` | Manual | Clear local IIT/PIT state |
-| `handleCartAdd(itemCount, meta?)` | Event Input | Merchant tells agent cart got item(s) |
 | `handleCartEmpty()` | Event Input | Merchant tells agent cart is empty |
 | `handleCartChange(event)` | Event Input | Merchant sends cart state change |
 | `handlePaymentSuccess(event?)` | Event Input | Optional explicit post-payment clear |
@@ -436,7 +436,7 @@ type ErrorHandler = (event: ErrorEvent) => void;
 | `offError(handler)` | Hook | Unregister error listener |
 
 **Both approaches work!** Choose what fits your codebase:
-- **Event handlers** (`handleCartAdd`) for auto-lock convenience
+- **Event handlers** (`handleCartChange`) for merchant-driven cart state reporting
 - **Manual methods** (`lockIntent`) for explicit control
 
 ---
@@ -451,7 +451,6 @@ type ErrorHandler = (event: ErrorEvent) => void;
 - [x] Basic APIs: `getInfluenceIntentToken()`, `getPurchaseIntentToken()`, `lockIntent({ token })`, `clearIntent()`
 
 ### Phase 2: Event Handlers
-- [x] `handleCartAdd()` implementation + auto-lock
 - [x] `handleCartEmpty()` implementation + auto-clear
 - [x] `handleCartChange()` implementation (optional tracking)
 - [x] `handlePaymentSuccess()` implementation + auto-clear

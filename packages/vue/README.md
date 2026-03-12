@@ -119,52 +119,14 @@ async function submitOrder() {
 | Need PIT for order submission | `state.value.pit` or `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
 | Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()` | Optional explicit cleanup path |
 
-`clearCart() -> agent.handleCartEmpty()`
-
-Clears IIT/PIT from the live session
-
-Need PIT for order submission
-
-`state.value.pit` or `agent.getPurchaseIntentToken()`
-
-Attach PIT to the checkout payload
-
-Checkout completes without a cart-empty step
-
-`agent.handlePaymentSuccess()`
-
-Optional explicit cleanup path
-
 ## API Surface
 
-Export
-
-Use
-
-`createQredexPlugin()`
-
-Registers the core agent in the Vue app
-
-`useQredexAgent()`
-
-Primary Vue composable. Returns `{ agent, state }`
-
-`useQredex()`
-
-Deprecated alias for `useQredexAgent()`
-
-`useInjectedQredexAgent()`
-
-Direct access to the injected agent
-
-`getQredexAgent()`
-
-Direct access to the singleton runtime
-
-`initQredex()`
-
-Explicit browser init when needed
-
-`QredexAgent`
-
-Re-export of the core agent
+| Export | Use |
+|---|---|
+| `createQredexPlugin()` | Registers the core agent in the Vue app |
+| `useQredexAgent()` | Primary Vue composable. Returns `{ agent, state }` |
+| `useQredex()` | Deprecated alias for `useQredexAgent()` |
+| `useInjectedQredexAgent()` | Direct access to the injected agent |
+| `getQredexAgent()` | Direct access to the singleton runtime |
+| `initQredex()` | Explicit browser init when needed |
+| `QredexAgent` | Re-export of the core agent |

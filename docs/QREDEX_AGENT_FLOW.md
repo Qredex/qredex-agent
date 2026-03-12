@@ -39,7 +39,7 @@ Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` tok
 4.  Agent removes `qdx_intent` from the visible URL after inspection, even if PIT already exists and the IIT is ignored.
 5.  If no PIT exists, agent stores the IIT in browser session storage and cookie fallback.
 6.  Shopper browses the storefront.
-7.  Merchant calls `handleCartChange()` or `handleCartAdd()` when cart state changes.
+7.  Merchant calls `handleCartChange()` when cart state changes.
 8.  Agent checks whether:
     -   Reported cart is non-empty
     -   IIT exists
@@ -104,7 +104,7 @@ sequenceDiagram
     FE->>FE: Cart state: empty
 
     U->>FE: Add item to cart
-    FE->>FE: Merchant calls handleCartAdd() or handleCartChange()
+    FE->>FE: Merchant calls handleCartChange()
     FE->>FE: Merchant-reported cart is non-empty
     FE->>FE: Check IIT exists
     FE->>FE: Check PIT not already stored
@@ -178,12 +178,6 @@ QredexAgent.handleCartChange({
 ### Convenience Wrappers
 
 ```typescript
-// Add to cart (automatically tracks state)
-QredexAgent.handleCartAdd(itemCount, {
-  productId: 'widget-001',
-  quantity: 1,
-});
-
 // Empty cart (automatically clears tokens)
 QredexAgent.handleCartEmpty();
 ```
@@ -192,10 +186,7 @@ QredexAgent.handleCartEmpty();
 
 ```typescript
 // Usually not needed - handleCartChange() auto-locks
-const result = await QredexAgent.lockIntent({
-  productId: 'widget-001',
-  quantity: 2,
-});
+const result = await QredexAgent.lockIntent();
 
 if (result.success) {
   console.log('PIT:', result.purchaseToken);

@@ -169,17 +169,13 @@ function lockIntent(meta?: LockMeta): Promise<LockResult>
 ```
 
 **Parameters:**
-- `meta` (optional) - Metadata about the lock request
+- `meta` (optional) - Optional merchant-defined context to attach to the lock request
 
 **Returns:** Promise resolving to `LockResult`
 
 **Example:**
 ```javascript
-const result = await QredexAgent.lockIntent({
-  productId: 'widget-001',
-  quantity: 2,
-  price: 99.99,
-});
+const result = await QredexAgent.lockIntent();
 
 if (result.success) {
   console.log('PIT:', result.purchaseToken);
@@ -188,6 +184,8 @@ if (result.success) {
   console.error('Lock failed:', result.error);
 }
 ```
+
+Pass `meta` only if you intentionally want to send extra merchant context with the lock request.
 
 **Idempotency:**
 - Returns cached PIT if already locked

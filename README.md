@@ -236,15 +236,6 @@ QredexAgent.handleCartChange({
 // Clear cart completely
 QredexAgent.handleCartEmpty();
 
-// Optional convenience wrappers
-QredexAgent.handleCartAdd(1, {
-  productId: 'widget-001',
-  quantity: 1,
-  price: 99.99,
-});
-
-QredexAgent.handleCartEmpty();
-
 // Optional explicit cleanup if your platform does not emit a cart-empty step
 QredexAgent.handlePaymentSuccess();
 ```
@@ -313,12 +304,7 @@ QredexAgent.offIntentCaptured(handler);
 
 ```javascript
 // Manual lock (idempotent - safe to call multiple times)
-const result = await QredexAgent.lockIntent({
-  productId: 'widget-001',
-  quantity: 2,
-  price: 99.99,
-  // ... any other key-value pairs
-});
+const result = await QredexAgent.lockIntent();
 
 // Result type:
 // { success: true, purchaseToken: 'pit_xxx', alreadyLocked: false }
@@ -327,6 +313,8 @@ const result = await QredexAgent.lockIntent({
 // Clear intent state (after checkout or cart empty)
 QredexAgent.clearIntent();
 ```
+
+Pass `meta` only if you intentionally want to attach extra merchant context to the lock request.
 
 ### Lifecycle Methods
 
@@ -533,48 +521,6 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
   reportCart(previousCount, 0);
 });
 ```
-
----
-
-## How It Works
-
-```
-User      →  Agent       →  Backend
- │            │              │
- │  ?qdx_intent              │
- │───────────>│              │
- │            │ [IIT stored] │
- │            │              │
- │  non-empty cart           │
- │            │  → lock()    │
- │            │─────────────>│
- │            │  ← PIT       │
- │            │              │
- │  continue shopping        │
- │            │ [PIT persists]│
- │            │              │
- │  empty cart │              │
- │            │ [clear PIT]  │
- │            │              │
- │  (optional) handlePaymentSuccess()
- │            │ [clear PIT]  │
- │            │              │
-```
-
-### Key Behaviors
-
-| Behavior | Description |
-|----------|-------------|
-| **Retry on failure** | If lock fails, IIT stays in place and retry happens on the next merchant-reported non-empty cart event via `handleCartChange()` |
-| **Idempotent** | Safe to call `handleCartChange()` multiple times; no duplicate locks |
-| **Cart-driven** | Lock only happens when: cart has items AND IIT exists AND PIT doesn't exist |
-| **First-touch attribution** | Once PIT exists, new IIT captures are ignored until cart is emptied |
-
-There is no background timer or automatic scheduled retry loop. Retry is merchant-driven through the next non-empty cart report.
-
-**See:** [docs/INTEGRATION_MODEL.md](docs/INTEGRATION_MODEL.md) for complete flow diagram.
-
----
 
 ## Error Handling
 
