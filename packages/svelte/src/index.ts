@@ -53,12 +53,15 @@ export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
   return CoreQredexAgent;
 }
 
-export function useQredexAgent(config?: AgentConfig): typeof CoreQredexAgent {
+export function useQredexAgent(config?: AgentConfig): QredexComposable {
   onMount(() => {
     initQredex(config);
   });
 
-  return CoreQredexAgent;
+  return {
+    agent: CoreQredexAgent,
+    state: createQredexStateStore(config),
+  };
 }
 
 export function createQredexStateStore(config?: AgentConfig): Readable<QredexState> {
@@ -82,11 +85,11 @@ export function createQredexStateStore(config?: AgentConfig): Readable<QredexSta
   });
 }
 
+/**
+ * @deprecated Use useQredexAgent() instead.
+ */
 export function useQredex(config?: AgentConfig): QredexComposable {
-  return {
-    agent: useQredexAgent(config),
-    state: createQredexStateStore(config),
-  };
+  return useQredexAgent(config);
 }
 
 export { CoreQredexAgent as QredexAgent };

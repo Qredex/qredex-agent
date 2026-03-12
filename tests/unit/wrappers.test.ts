@@ -91,10 +91,10 @@ describe('Framework wrappers', () => {
     unsubscribe();
   });
 
-  it('svelte wrapper exposes a convenience useQredex composable', () => {
-    const qredex = useQredex({ debug: true });
+  it('svelte wrapper exposes useQredexAgent as the primary composable', () => {
+    const qredex = useQredexAgent({ debug: true });
 
-    expect(qredex.agent.handleCartChange).toBe(useQredexAgent({ debug: true }).handleCartChange);
+    expect(qredex.agent.handleCartChange).toBe(useQredex({ debug: true }).agent.handleCartChange);
     expect(qredex.state.subscribe).toEqual(expect.any(Function));
   });
 

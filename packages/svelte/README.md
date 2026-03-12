@@ -30,9 +30,9 @@ npm install @qredex/svelte
 ## Usage
 
 ```ts
-import { useQredex } from '@qredex/svelte';
+import { useQredexAgent } from '@qredex/svelte';
 
-const { agent, state } = useQredex();
+const { agent, state } = useQredexAgent();
 
 agent.handleCartChange({ itemCount: 1, previousCount: 0 });
 
