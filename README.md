@@ -21,6 +21,8 @@
 
 **Lightweight browser agent for Qredex intent capture and locking.**
 
+[![CI](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml)
+[![Release](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml/badge.svg)](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml)
 [![npm version](https://img.shields.io/npm/v/%40qredex%2Fagent.svg)](https://www.npmjs.com/package/@qredex/agent)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/%40qredex%2Fagent)](https://bundlephobia.com/package/@qredex/agent)
 [![license](https://img.shields.io/npm/l/%40qredex%2Fagent)](LICENSE)
@@ -79,11 +81,6 @@ async function addToCart(product) {
   agent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount,
-    meta: {
-      productId: product.id,
-      quantity: product.quantity,
-      price: product.price,
-    },
   });
 }
 
@@ -94,11 +91,6 @@ async function removeFromCart(line) {
   agent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount,
-    meta: {
-      productId: line.productId,
-      quantity: -1,
-      price: line.price,
-    },
   });
 }
 
@@ -204,33 +196,18 @@ Tell the agent when events happen:
 QredexAgent.handleCartChange({
   itemCount: 1,
   previousCount: 0,
-  meta: {
-    productId: 'widget-001',
-    quantity: 1,
-    price: 99.99,
-  },
 });
 
 // Add one more item later
 QredexAgent.handleCartChange({
   itemCount: 2,
   previousCount: 1,
-  meta: {
-    productId: 'widget-001',
-    quantity: 1,
-    price: 99.99,
-  },
 });
 
 // Remove one item but keep cart non-empty
 QredexAgent.handleCartChange({
   itemCount: 1,
   previousCount: 2,
-  meta: {
-    productId: 'widget-001',
-    quantity: -1,
-    price: 99.99,
-  },
 });
 
 // Clear cart completely
@@ -463,11 +440,10 @@ Then:
 ```javascript
 const agent = window.QredexAgent;
 
-async function reportCart(previousCount, itemCount, meta) {
+async function reportCart(previousCount, itemCount) {
   agent.handleCartChange({
     previousCount,
     itemCount,
-    meta,
   });
 }
 
@@ -484,11 +460,7 @@ document.querySelector('.add-to-cart').addEventListener('click', async (event) =
     body: JSON.stringify(product),
   });
 
-  reportCart(previousCount, cart.itemCount, {
-    productId: product.id,
-    quantity: 1,
-    price: product.price,
-  });
+  reportCart(previousCount, cart.itemCount);
 });
 
 document.querySelector('.remove-from-cart').addEventListener('click', async (event) => {
@@ -504,11 +476,7 @@ document.querySelector('.remove-from-cart').addEventListener('click', async (eve
     method: 'DELETE',
   });
 
-  reportCart(previousCount, cart.itemCount, {
-    productId: line.productId,
-    quantity: -1,
-    price: line.price,
-  });
+  reportCart(previousCount, cart.itemCount);
 });
 
 document.querySelector('.clear-cart').addEventListener('click', async () => {
@@ -620,11 +588,11 @@ Open DevTools → Application → Storage:
 | Example | Description | Quick Start |
 |---------|-------------|-------------|
 | [examples/index.html](examples/index.html) | Example hub for CDN and wrapper pages | `npm run example` |
-| [examples/cdn.html](examples/cdn.html) | Canonical script-tag customer path | Open from the hub |
-| [examples/react.html](examples/react.html) | React bridge code + shared live harness | Open from the hub |
-| [examples/vue.html](examples/vue.html) | Vue bridge code + shared live harness | Open from the hub |
-| [examples/svelte.html](examples/svelte.html) | Svelte bridge code + shared live harness | Open from the hub |
-| [examples/angular.html](examples/angular.html) | Angular bridge code + shared live harness | Open from the hub |
+| [examples/cdn/index.html](examples/cdn/index.html) | Canonical script-tag customer path | Open from the hub |
+| [examples/wrappers/react/index.html](examples/wrappers/react/index.html) | React bridge code + shared live harness | Open from the hub |
+| [examples/wrappers/vue/index.html](examples/wrappers/vue/index.html) | Vue bridge code + shared live harness | Open from the hub |
+| [examples/wrappers/svelte/index.html](examples/wrappers/svelte/index.html) | Svelte bridge code + shared live harness | Open from the hub |
+| [examples/wrappers/angular/index.html](examples/wrappers/angular/index.html) | Angular bridge code + shared live harness | Open from the hub |
 
 Each example includes:
 - A focused integration path

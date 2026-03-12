@@ -315,11 +315,6 @@ if (result.success) {
 QredexAgent.handleCartChange({
   itemCount: 1,        // Current cart item count
   previousCount: 0,    // Previous cart item count
-  meta: {              // Optional: sent to lock API
-    productId: 'widget-001',
-    quantity: 2,
-    price: 99.99,
-  },
 });
 ```
 

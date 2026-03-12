@@ -71,11 +71,11 @@ npm run build:stage
 ## Pages
 
 - `examples/index.html` = example hub
-- `examples/cdn.html` = canonical CDN/script-tag path
-- `examples/react.html` = React bridge code + shared live harness
-- `examples/vue.html` = Vue bridge code + shared live harness
-- `examples/svelte.html` = Svelte bridge code + shared live harness
-- `examples/angular.html` = Angular bridge code + shared live harness
+- `examples/cdn/index.html` = canonical CDN/script-tag path
+- `examples/wrappers/react/index.html` = React bridge code + shared live harness
+- `examples/wrappers/vue/index.html` = Vue bridge code + shared live harness
+- `examples/wrappers/svelte/index.html` = Svelte bridge code + shared live harness
+- `examples/wrappers/angular/index.html` = Angular bridge code + shared live harness
 
 ## What These Examples Do
 
@@ -102,11 +102,6 @@ QredexAgent.getPurchaseIntentToken()   // Get PIT
 QredexAgent.handleCartChange({
   itemCount: 1,
   previousCount: 0,
-  meta: {
-    productId: 'test-product',
-    quantity: 1,
-    price: 99.99,
-  },
 });
 
 // Listen for events
@@ -220,19 +215,10 @@ QredexAgent.hasPurchaseIntentToken()   // boolean
 QredexAgent.handleCartChange({
   itemCount: number,      // Required: current count
   previousCount: number,  // Required: previous count
-  meta?: {                // Optional: sent to lock API
-    productId?: string,
-    quantity?: number,
-    price?: number,
-  },
 });
 
 // Payment success
-QredexAgent.handlePaymentSuccess({
-  orderId: string,
-  amount: number,
-  currency: string,
-});
+QredexAgent.handlePaymentSuccess();
 ```
 
 ### Event Listeners (Agent → Merchant)
@@ -246,7 +232,7 @@ QredexAgent.onError(({ error, context }) => { ... });
 ### Manual Commands
 
 ```javascript
-await QredexAgent.lockIntent(meta);  // Manual lock
+await QredexAgent.lockIntent();      // Manual lock
 QredexAgent.clearIntent();           // Clear all tokens
 ```
 
@@ -256,9 +242,12 @@ QredexAgent.clearIntent();           // Clear all tokens
 
 | File | Description |
 |------|-------------|
-| `index.html` | Self-contained test page |
-| `styles.css` | Page styles |
-| `../../dist/qredex-agent.iife.dev.min.js` | Development minified IIFE bundle |
+| `index.html` | Example hub |
+| `shared/styles.css` | Shared page styles |
+| `shared/runtime-example.js` | Shared live cart harness |
+| `cdn/index.html` | Canonical CDN example |
+| `wrappers/*/index.html` | Framework bridge examples |
+| `../dist/qredex-agent.iife.dev.min.js` | Development minified IIFE bundle |
 
 ---
 

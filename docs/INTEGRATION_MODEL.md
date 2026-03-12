@@ -147,11 +147,6 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
 QredexAgent.handleCartChange({
   itemCount: cart.itemCount,
   previousCount: cart.itemCount - 1,
-  meta: {
-    productId: '123',
-    quantity: 1,
-    price: 99.99,
-  },
 });
 
 // Merchant tells agent when cart is emptied
@@ -207,11 +202,6 @@ function useQredexAgent() {
     QredexAgent.handleCartChange({
       itemCount: cart.itemCount,
       previousCount: cart.itemCount - 1,
-      meta: {
-        productId: product.id,
-        quantity: 1,
-        price: product.price,
-      },
     });
   };
 

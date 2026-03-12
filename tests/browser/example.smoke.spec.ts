@@ -20,9 +20,9 @@
 import { expect, test } from '@playwright/test';
 
 test('bundle-first example exercises the shipped customer path', async ({ page }) => {
-  await page.goto('/examples/cdn.html?qdx_intent=iit_12345678');
+  await page.goto('/examples/cdn/?qdx_intent=iit_12345678');
 
-  await expect(page).toHaveURL(/\/examples\/cdn\.html$/);
+  await expect(page).toHaveURL(/\/examples\/cdn\/$/);
   await expect(page.locator('#status-iit')).not.toHaveText('Not present');
 
   await page.click('[data-add-product="crewneck"]');

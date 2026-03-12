@@ -89,7 +89,7 @@ QredexAgent.hasPurchaseIntentToken()   // false
 
 **Alternative:** Manually navigate to:
 ```
-http://localhost:3000/examples/cdn.html?qdx_intent=test_token_xyz789
+http://localhost:3000/examples/cdn/?qdx_intent=test_token_xyz789
 ```
 
 ---
@@ -289,11 +289,7 @@ QredexAgent.offLocked(myHandler);
 3. Or call manually in console:
 
 ```javascript
-const result = await QredexAgent.lockIntent({
-  productId: 'manual-test',
-  quantity: 1,
-  price: 50.00
-});
+const result = await QredexAgent.lockIntent();
 console.log(result);
 ```
 
@@ -478,13 +474,13 @@ QredexAgent.hasInfluenceIntentToken()  // Check IIT exists
 QredexAgent.hasPurchaseIntentToken()   // Check PIT exists
 
 // Commands
-await QredexAgent.lockIntent(meta)        // Manual lock (idempotent)
+await QredexAgent.lockIntent()            // Manual lock (idempotent)
 QredexAgent.clearIntent()                 // Clear all tokens
 
 // Event handlers (Merchant → Agent)
-QredexAgent.handleCartAdd(itemCount, meta?)   // Cart add
+QredexAgent.handleCartAdd(itemCount)          // Cart add
 QredexAgent.handleCartEmpty()                 // Cart empty
-QredexAgent.handlePaymentSuccess(event)       // Payment success
+QredexAgent.handlePaymentSuccess()            // Payment success
 
 // Event listeners (Agent → Merchant)
 QredexAgent.onLocked(handler)             // Listen for lock

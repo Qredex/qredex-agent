@@ -265,11 +265,7 @@ function handleCartAdd(itemCount: number, meta?: {
 async function addToCart(product) {
   await api.post('/cart', product);
 
-  QredexAgent.handleCartAdd(cart.itemCount, {
-    productId: product.id,
-    quantity: 1,
-    price: product.price,
-  });
+  QredexAgent.handleCartAdd(cart.itemCount);
 }
 ```
 

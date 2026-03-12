@@ -21,6 +21,11 @@
 
 Thin Svelte bindings for `@qredex/agent`.
 
+[![CI](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml)
+[![Release](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml/badge.svg)](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/%40qredex%2Fsvelte.svg)](https://www.npmjs.com/package/@qredex/svelte)
+[![license](https://img.shields.io/npm/l/%40qredex%2Fsvelte)](LICENSE)
+
 ## Install
 
 ```bash

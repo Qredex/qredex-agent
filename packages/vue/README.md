@@ -1,6 +1,30 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+
 # @qredex/vue
 
 Thin Vue bindings for `@qredex/agent`.
+
+[![CI](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml)
+[![Release](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml/badge.svg)](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/%40qredex%2Fvue.svg)](https://www.npmjs.com/package/@qredex/vue)
+[![license](https://img.shields.io/npm/l/%40qredex%2Fvue)](LICENSE)
 
 ## Install
 

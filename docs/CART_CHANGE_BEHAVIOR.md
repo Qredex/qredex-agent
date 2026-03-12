@@ -100,7 +100,6 @@ export function handleCartChange(event: {
 QredexAgent.handleCartChange({
   itemCount: 1,
   previousCount: 0,
-  meta: { productId: 'widget-001', price: 99.99 },
 });
 
 // Result: IIT → PIT lock via API
@@ -117,7 +116,6 @@ QredexAgent.handleCartChange({
 QredexAgent.handleCartChange({
   itemCount: 3,
   previousCount: 0,
-  meta: { productId: 'bundle-pack', quantity: 3 },
 });
 
 // Result: IIT → PIT lock via API (same as 0 → 1)
@@ -275,11 +273,6 @@ async function addToCart(product, quantity = 1) {
   QredexAgent.handleCartChange({
     itemCount: cart.length,
     previousCount,
-    meta: {
-      productId: product.id,
-      quantity,
-      price: product.price,
-    },
   });
 }
 
@@ -327,7 +320,6 @@ function useCart() {
     QredexAgent.handleCartChange({
       itemCount: items.length + 1,
       previousCount,
-      meta: product,
     });
   };
 
@@ -362,7 +354,6 @@ const addToCart = async (product) => {
   QredexAgent.handleCartChange({
     itemCount: cart.value.length,
     previousCount,
-    meta: product,
   });
 };
 

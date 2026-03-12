@@ -19,6 +19,16 @@
 
 # Release
 
+## CI
+
+GitHub Actions runs `.github/workflows/ci.yml` on every pull request and on pushes to `main`.
+
+It verifies:
+
+- `npm run lint`
+- `npm run release:check`
+- `npm run test:browser`
+
 ## NPM
 
 ```bash
@@ -35,21 +45,67 @@ npm run publish:npm
 4. `@qredex/svelte`
 5. `@qredex/angular`
 
+The publish script is rerunnable. If a package version is already on npm, the script skips it and continues with the remaining packages.
+
+## GitHub Release Workflow
+
+GitHub Actions runs `.github/workflows/release.yml` on pushed version tags:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release workflow:
+
+1. verifies the tag matches `package.json`
+2. runs lint and browser smoke coverage
+3. runs the final production release checks (`test`, `build`, tarball verification, export verification)
+4. publishes npm packages with provenance
+5. prepares first-party CDN assets from the production build
+6. uploads versioned CDN assets to Cloudflare R2
+
+### Required GitHub Configuration
+
+Repository secrets:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN`
+
+Repository variables:
+
+- `CLOUDFLARE_R2_BUCKET`
+
+NPM trusted publishing must be configured for:
+
+- `@qredex/agent`
+- `@qredex/react`
+- `@qredex/vue`
+- `@qredex/svelte`
+- `@qredex/angular`
+
 ## CDN
 
 ```bash
 npm run release:cdn
+npm run release:cdn:upload
 ```
 
 That prepares first-party CDN assets under:
 
 - `release/agent/v<full-version>/`
 - `release/agent/v<major>/`
+- uploads them to `agent/v<full-version>/` and `agent/v<major>/` in the configured R2 bucket
 
 Current production CDN asset:
 
 - `qredex-agent.iife.min.js`
 - `qredex-agent.iife.min.js.map`
+
+Caching policy:
+
+- pinned version path: `Cache-Control: public, max-age=31536000, immutable`
+- moving major alias and manifest: `Cache-Control: public, max-age=300, must-revalidate`
 
 ## Checks
 

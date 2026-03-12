@@ -18,12 +18,14 @@
  */
 
 import { spawnSync } from 'child_process';
+import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 const dryRun = process.argv.includes('--dry-run');
+const useProvenance = process.env.QREDEX_NPM_PROVENANCE === 'true';
 
 const publishTargets = [
   rootDir,
@@ -33,17 +35,57 @@ const publishTargets = [
   resolve(rootDir, 'packages/angular'),
 ];
 
+function run(command, args, cwd, encoding = 'utf8') {
+  return spawnSync(command, args, {
+    cwd,
+    encoding,
+    stdio: encoding ? ['ignore', 'pipe', 'pipe'] : 'inherit',
+  });
+}
+
+function getPackageMeta(cwd) {
+  const packageJson = JSON.parse(readFileSync(resolve(cwd, 'package.json'), 'utf8'));
+
+  return {
+    name: packageJson.name,
+    version: packageJson.version,
+  };
+}
+
+function isAlreadyPublished(name, version) {
+  const result = run('npm', ['view', `${name}@${version}`, 'version', '--json'], rootDir);
+  const combinedOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;
+
+  if (result.status === 0) {
+    return true;
+  }
+
+  if (combinedOutput.includes('E404') || combinedOutput.includes('404')) {
+    return false;
+  }
+
+  throw new Error(`Unable to check npm version for ${name}@${version}\n${combinedOutput}`);
+}
+
 for (const cwd of publishTargets) {
+  const { name, version } = getPackageMeta(cwd);
+
+  if (!dryRun && isAlreadyPublished(name, version)) {
+    console.log(`↷ Skipping ${name}@${version}; already published`);
+    continue;
+  }
+
   const args = ['publish', '--access', 'public'];
 
   if (dryRun) {
     args.push('--dry-run');
   }
 
-  const result = spawnSync('npm', args, {
-    cwd,
-    stdio: 'inherit',
-  });
+  if (useProvenance && !dryRun) {
+    args.push('--provenance');
+  }
+
+  const result = run('npm', args, cwd, null);
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
