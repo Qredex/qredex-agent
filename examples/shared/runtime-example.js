@@ -140,7 +140,18 @@ function renderBridgePanel(config) {
       <p class="bridge-copy">${escapeHtml(config.bridgeCopy)}</p>
       <div class="state-box bridge-meta">
         <p class="state-title">Install</p>
-        <code>${escapeHtml(config.installCommand)}</code>
+        <div class="install-command-row">
+          <code class="install-command">${escapeHtml(config.installCommand)}</code>
+          <button
+            aria-label="Copy install command"
+            class="copy-install-button"
+            data-copy-install
+            title="Copy install command"
+            type="button"
+          >
+            ⧉
+          </button>
+        </div>
       </div>
       <details class="bridge-details">
         <summary class="bridge-summary">
@@ -448,6 +459,29 @@ function generateRandomToken() {
   return token;
 }
 
+async function copyText(text) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    const copied = document.execCommand('copy');
+    textarea.remove();
+    return copied;
+  } catch {
+    return false;
+  }
+}
+
 function syncAgentCart(previousCount, itemCount) {
   if (!agent) {
     return;
@@ -554,6 +588,10 @@ function bindUi() {
 
   document.getElementById('empty-cart-button')?.addEventListener('click', () => {
     emptyCart();
+  });
+
+  document.querySelector('[data-copy-install]')?.addEventListener('click', () => {
+    void copyText(PAGE_CONFIG.cdn.installCommand);
   });
 
   document.body.addEventListener('click', (event) => {

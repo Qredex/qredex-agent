@@ -24,6 +24,7 @@ import {
   EXAMPLE_LINKS,
   PRODUCTS,
   WRAPPER_PAGE_CONFIG,
+  copyText,
   createEmptySnapshot,
   createExampleHarness,
   formatCurrency,
@@ -301,7 +302,20 @@ export function App() {
             <p className="bridge-copy">{config.bridgeCopy}</p>
             <div className="state-box bridge-meta">
               <p className="state-title">Install</p>
-              <code>{config.installCommand}</code>
+              <div className="install-command-row">
+                <code className="install-command">{config.installCommand}</code>
+                <button
+                  aria-label="Copy install command"
+                  className="copy-install-button"
+                  title="Copy install command"
+                  type="button"
+                  onClick={() => {
+                    void copyText(config.installCommand);
+                  }}
+                >
+                  ⧉
+                </button>
+              </div>
             </div>
             <details className="bridge-details">
               <summary className="bridge-summary">

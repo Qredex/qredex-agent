@@ -28,6 +28,7 @@ import {
   EXAMPLE_LINKS,
   PRODUCTS,
   WRAPPER_PAGE_CONFIG,
+  copyText,
   createEmptySnapshot,
   createExampleHarness,
   formatCurrency,
@@ -241,7 +242,18 @@ import {
             <p class="bridge-copy">{{ config.bridgeCopy }}</p>
             <div class="state-box bridge-meta">
               <p class="state-title">Install</p>
-              <code>{{ config.installCommand }}</code>
+              <div class="install-command-row">
+                <code class="install-command">{{ config.installCommand }}</code>
+                <button
+                  aria-label="Copy install command"
+                  class="copy-install-button"
+                  title="Copy install command"
+                  type="button"
+                  (click)="copyInstallCommand()"
+                >
+                  ⧉
+                </button>
+              </div>
             </div>
             <details class="bridge-details">
               <summary class="bridge-summary">
@@ -316,6 +328,10 @@ class AppComponent implements OnInit, OnDestroy {
 
   reloadPage(): void {
     this.harness?.reloadPage();
+  }
+
+  copyInstallCommand(): void {
+    void copyText(this.config.installCommand);
   }
 
   trackByKind(_: number, item: { kind: string }): string {
