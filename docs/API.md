@@ -309,7 +309,7 @@ function clearCart() {
 
 ### `handleCartChange(event)`
 
-Tell the agent that the cart state changed. Automatically locks IIT → PIT when cart goes 0→>0, clears tokens when cart goes >0→0.
+Tell the agent that the cart state changed. The agent does not infer merchant attribution policy; it reacts to the cart state you report. It attempts IIT → PIT lock when the reported cart is non-empty, IIT exists, and PIT is absent, and clears tokens when cart goes >0→0.
 
 **Signature:**
 ```typescript
@@ -332,7 +332,7 @@ QredexAgent.handleCartChange({
 ```
 
 **What happens:**
-- **Cart 0 → >0** (with IIT, without PIT): Locks IIT → PIT
+- **Cart >0** (with IIT, without PIT): Locks or retries IIT → PIT
 - **Cart >0 → 0** (with PIT): Clears IIT and PIT
 - **Other transitions**: No action
 

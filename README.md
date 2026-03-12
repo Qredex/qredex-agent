@@ -83,7 +83,7 @@ async function checkout(order) {
 The agent automatically:
 - ✅ Captures `qdx_intent` from URL
 - ✅ Stores IIT in browser storage (sessionStorage + cookie fallback)
-- ✅ Locks IIT → PIT when cart goes from 0 → 1 items
+- ✅ Locks IIT → PIT when the merchant reports a non-empty cart and the state is lockable
 - ✅ Clears PIT when cart goes from >0 → 0 items or checkout
 - ✅ Exposes PIT for checkout
 
@@ -95,7 +95,7 @@ Qredex Agent is a **lightweight browser runtime** (~5KB minified) that:
 
 1. **Captures** the `qdx_intent` token from URLs when users arrive via Qredex tracking links
 2. **Stores** the token securely in browser storage (sessionStorage + cookie fallback)
-3. **Locks** the token via Qredex API when the user adds their first item to cart
+3. **Locks** the token via Qredex API when the merchant reports a non-empty cart
 4. **Manages** attribution state throughout the shopping session
 5. **Exposes** the Purchase Intent Token (PIT) for checkout
 
@@ -208,7 +208,7 @@ QredexAgent.handlePaymentSuccess({
 | Event | Example | Agent behavior |
 |-------|---------|----------------|
 | First add | `0 -> 1` | Attempts IIT -> PIT lock |
-| Additional add | `1 -> 2` | Keeps PIT, retries lock only if IIT exists and PIT is still absent |
+| Non-empty cart report | `1 -> 2` | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
 | Partial remove | `2 -> 1` | No clear; attribution stays attached to the live cart |
 | Full clear | `1 -> 0` | Clears IIT and PIT |
 | Checkout success | payment completed | Clears IIT and PIT |
@@ -482,12 +482,12 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
 1. User lands with ?qdx_intent=xxx
    → Agent inspects qdx_intent, removes it from the visible URL, and stores IIT in sessionStorage + cookie when no PIT already exists
 
-2. User adds first item to cart (itemCount: 0 → 1)
+2. Merchant reports a non-empty cart state
    → handleCartChange() locks IIT → PIT via API
    → PIT stored, IIT cleared
 
 3. User continues shopping (itemCount: 1 → 2 → 3...)
-   → Lock retries on every add-to-cart if previous lock failed
+   → Lock can retry on later non-empty cart reports if previous lock failed
    → PIT persists once locked
 
 4. User empties cart (itemCount: >0 → 0) OR completes checkout

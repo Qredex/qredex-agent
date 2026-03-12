@@ -411,10 +411,12 @@ function clearIntent(): void {
  * Tell the agent that the cart state changed.
  *
  * This is the **single method** for all cart state changes:
- * - **Locks IIT → PIT** when `itemCount > 0` and `previousCount === 0`
+ * - **Locks IIT → PIT** when the merchant reports a non-empty cart, IIT exists, and PIT does not
  * - **Clears tokens** when `itemCount === 0` and PIT is present
  *
- * Only locks if IIT exists and PIT doesn't already exist.
+ * The agent does not infer merchant attribution policy. Merchants decide when to
+ * report cart state and whether to report persisted/restored carts. When a reported
+ * cart is non-empty and lockable, the agent attempts the canonical IIT → PIT lock.
  *
  * @param event - Cart change event data
  *
@@ -426,7 +428,7 @@ function clearIntent(): void {
  *   previousCount: 0,
  * });
  *
- * // Add more items (1 → 3) - no action
+ * // Report an already non-empty cart (for example, restored cart state)
  * QredexAgent.handleCartChange({
  *   itemCount: 3,
  *   previousCount: 1,
@@ -450,7 +452,7 @@ function clearIntent(): void {
  * });
  * ```
  *
- * @emits `onLocked` - When IIT is locked to PIT (itemCount > 0, previousCount === 0)
+ * @emits `onLocked` - When IIT is locked to PIT after a reported non-empty cart state
  * @emits `onCleared` - When tokens are cleared (itemCount === 0)
  * @emits `onError` - If lock fails
  *

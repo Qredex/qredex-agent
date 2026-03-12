@@ -41,7 +41,7 @@ Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` tok
 6.  Shopper browses the storefront.
 7.  Merchant calls `handleCartChange()` or `handleCartAdd()` when cart state changes.
 8.  Agent checks whether:
-    -   Cart transitioned from empty → non-empty
+    -   Reported cart is non-empty
     -   IIT exists
     -   PIT is not already present
     -   No lock request is already in flight
@@ -81,7 +81,7 @@ The agent maintains a simple cart state machine:
 |------------|-----------|--------|
 | `unknown` → `empty` | Initial load | None |
 | `empty` → `non-empty` | First item added | **Lock IIT → PIT** (if IIT exists, PIT doesn't) |
-| `non-empty` → `non-empty` | More items added | **Retry lock** if IIT exists and PIT doesn't (Rule 13) |
+| `non-empty` → `non-empty` | Merchant reports a live non-empty cart again | **Attempt or retry lock** if IIT exists and PIT doesn't |
 | `non-empty` → `empty` | Cart emptied | **Clear IIT + PIT** |
 
 ---
@@ -104,8 +104,8 @@ sequenceDiagram
     FE->>FE: Cart state: empty
 
     U->>FE: Add item to cart
-    FE->>FE: Merchant calls handleCartAdd()
-    FE->>FE: Cart state: empty → non-empty
+    FE->>FE: Merchant calls handleCartAdd() or handleCartChange()
+    FE->>FE: Merchant-reported cart is non-empty
     FE->>FE: Check IIT exists
     FE->>FE: Check PIT not already stored
     FE->>FE: Check no lock already in flight
@@ -171,7 +171,7 @@ QredexAgent.handleCartChange({
 | `previousCount` | `itemCount` | Action |
 |-----------------|-------------|--------|
 | 0 | >0 | **Lock IIT → PIT** (if IIT exists) |
-| >0 | >0 | **Retry lock** if IIT exists and PIT doesn't (Rule 13) |
+| >0 | >0 | **Attempt or retry lock** if IIT exists and PIT doesn't |
 | >0 | 0 | **Clear IIT + PIT** |
 | 0 | 0 | None (state unchanged) |
 
