@@ -1,10 +1,10 @@
 /**
  *    ▄▄▄▄
- *  ▄█▀▀███▄              █▄
+ *  ▄█▀▀███▄▄              █▄
  *  ██    ██ ▄             ██
  *  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
  *  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
- *   ▀█████▄▄█▀  ▄▀█▄▄▄█▀███▄▀█▄▄▄██ ██▄
+ *   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
  *        ▀█
  *
  *  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
@@ -16,9 +16,21 @@
  *
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
-
-/**
- * Global build-time constants injected by Vite.
- */
-declare const __QDX_ENV__: 'development' | 'staging' | 'production' | 'test';
-declare const __VERSION__: string;
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

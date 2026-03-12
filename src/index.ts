@@ -38,7 +38,11 @@ import {
   clearAllTokens,
 } from './storage/tokens.js';
 import { lockIntent as apiLockIntent } from './api/lock.js';
-import { setCartState, hasCartItems as checkHasCartItems } from './core/state.js';
+import {
+  getCartState,
+  setCartState,
+  hasCartItems as checkHasCartItems,
+} from './core/state.js';
 
 import type { AgentConfig } from './bootstrap/config.js';
 import type { LockResult, LockMeta } from './api/types.js';
@@ -493,7 +497,13 @@ export function handleCartChange(event: {
   debug('Cart change event received', event);
 
   // Update cart state for tracking
-  setCartState(itemCount > 0 ? 'non-empty' : 'empty');
+  const nextCartState = itemCount > 0 ? 'non-empty' : 'empty';
+  const previousCartState = getCartState();
+  setCartState(nextCartState);
+
+  if (previousCartState !== nextCartState) {
+    emitStateChanged();
+  }
 
   // Lock when cart has items, IIT exists, and PIT doesn't exist
   // This retries on every add-to-cart if lock previously failed (Rule 13)

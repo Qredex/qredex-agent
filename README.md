@@ -342,6 +342,19 @@ import QredexAgent from '@qredex/agent';
 QredexAgent.init();
 ```
 
+### Framework Wrappers
+
+Thin framework adapters are available as separate packages:
+
+```bash
+npm install @qredex/agent @qredex/react react
+npm install @qredex/agent @qredex/vue vue
+npm install @qredex/agent @qredex/svelte svelte
+npm install @qredex/agent @qredex/angular @angular/core
+```
+
+Each wrapper stays thin and delegates runtime behavior to `@qredex/agent`.
+
 ---
 
 ## Configuration

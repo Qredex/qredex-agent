@@ -26,7 +26,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'packages/**/*.ts'],
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
@@ -44,6 +44,15 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist', 'node_modules', 'coverage', '*.d.ts'],
+    ignores: [
+      'dist',
+      'packages/*/dist',
+      'node_modules',
+      'coverage',
+      '**/*.js',
+      '**/*.js.map',
+      '**/*.d.ts',
+      '**/*.d.ts.map',
+    ],
   }
 );

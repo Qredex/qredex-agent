@@ -16,27 +16,11 @@
  *
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
-
-import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
-
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@qredex/agent': resolve(__dirname, 'src/index.ts'),
-    },
+{
+  "extends": "../../tsconfig.wrapper.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-    include: ['tests/unit/**/*.test.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
-    },
-  },
-  define: {
-    __QDX_ENV__: JSON.stringify('test'),
-  },
-});
+  "include": ["src/**/*.ts"]
+}

@@ -17,26 +17,35 @@
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
-import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import QredexAgent from '../../src/index.js';
+import { resetConfig } from '../../src/bootstrap/config.js';
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@qredex/agent': resolve(__dirname, 'src/index.ts'),
-    },
-  },
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-    include: ['tests/unit/**/*.test.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
-    },
-  },
-  define: {
-    __QDX_ENV__: JSON.stringify('test'),
-  },
+describe('State change events', () => {
+  beforeEach(() => {
+    resetConfig();
+    delete window.QredexAgentConfig;
+    QredexAgent.destroy();
+    QredexAgent.clearIntent();
+  });
+
+  it('emits state changes when merchant reports a non-empty cart before lock', () => {
+    QredexAgent.init();
+
+    const handler = vi.fn();
+    QredexAgent.onStateChanged(handler);
+
+    QredexAgent.handleCartChange({
+      itemCount: 1,
+      previousCount: 0,
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler.mock.calls[0][0]).toMatchObject({
+      cartState: 'non-empty',
+      hasIIT: false,
+      hasPIT: false,
+      locked: false,
+    });
+  });
 });
