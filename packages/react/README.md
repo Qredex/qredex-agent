@@ -125,7 +125,7 @@ export function QredexCartBridge({ itemCount }: QredexCartBridgeProps) {
 | Merchant event | Call | Why |
 |---|---|---|
 | Cart becomes non-empty | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart changes while still non-empty | `agent.handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Cart changes while still non-empty | `agent.handleCartChange(...)` | Safe retry path on the next merchant-reported non-empty cart event if a previous lock failed |
 | Clear cart action | `clearCart() -> agent.handleCartEmpty()` | Clears IIT/PIT from the live session |
 | Need PIT for order submission | `state.pit` or `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
 | Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()` | Optional explicit cleanup path |

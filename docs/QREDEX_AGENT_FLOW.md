@@ -81,7 +81,7 @@ The agent maintains a simple cart state machine:
 |------------|-----------|--------|
 | `unknown` → `empty` | Initial load | None |
 | `empty` → `non-empty` | Merchant reports a non-empty cart | **Lock IIT → PIT** (if IIT exists, PIT doesn't) |
-| `non-empty` → `non-empty` | Merchant reports a live non-empty cart again | **Attempt or retry lock** if IIT exists and PIT doesn't |
+| `non-empty` → `non-empty` | Merchant reports a live non-empty cart again | **Attempt or retry lock on that cart event** if IIT exists and PIT doesn't |
 | `non-empty` → `empty` | Cart emptied | **Clear IIT + PIT** |
 
 ---
@@ -135,7 +135,7 @@ sequenceDiagram
 | URL has `?qdx_intent` | Capture and store in sessionStorage + cookie |
 | PIT already exists | **Ignore new IIT** (locked attribution wins) |
 | Lock succeeds | **Clear IIT** (PIT now authoritative) |
-| Lock fails | Keep IIT (allow retry on future cart events) |
+| Lock fails | Keep IIT (allow retry on the next merchant-reported non-empty cart event) |
 | Cart becomes empty | **Clear IIT** |
 
 ### PIT (Purchase Intent Token)
@@ -171,7 +171,7 @@ QredexAgent.handleCartChange({
 | `previousCount` | `itemCount` | Action |
 |-----------------|-------------|--------|
 | 0 | >0 | **Lock IIT → PIT** (if IIT exists) |
-| >0 | >0 | **Attempt or retry lock** if IIT exists and PIT doesn't |
+| >0 | >0 | **Attempt or retry lock on that cart event** if IIT exists and PIT doesn't |
 | >0 | 0 | **Clear IIT + PIT** |
 | 0 | 0 | None (state unchanged) |
 
@@ -230,10 +230,12 @@ The lock operation is **idempotent** - safe to call multiple times:
 
 | Scenario | Behavior |
 |----------|----------|
-| Lock fails (network error) | Keep IIT, **retry on every add-to-cart** while cart has items |
-| Lock fails (invalid IIT) | Keep IIT, **retry on every add-to-cart** while cart has items |
+| Lock fails (network error) | Keep IIT, **retry on the next merchant-reported non-empty cart event** |
+| Lock fails (invalid IIT) | Keep IIT, **retry on the next merchant-reported non-empty cart event** |
 | Lock succeeds | PIT stored, IIT cleared, no more retries |
 | Cart emptied, then items added again | Clear tokens, capture new IIT if URL has it |
+
+There is no background timer or scheduled retry loop. Retry is driven by a later merchant cart report through `handleCartChange()`.
 
 **Rule 13:** If another item is added and PIT still does not exist, try locking again.
 

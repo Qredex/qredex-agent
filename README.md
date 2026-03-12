@@ -134,7 +134,7 @@ The agent automatically:
 |---|---|---|
 | User lands from Qredex link | No manual call required | The agent captures `qdx_intent` automatically |
 | Cart becomes non-empty | `handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart changes while still non-empty | `handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Cart changes while still non-empty | `handleCartChange(...)` | Safe retry path on the next merchant-reported non-empty cart event if a previous lock failed |
 | Clear cart action | `clearCart() -> handleCartEmpty()` | Clears IIT/PIT from the live session |
 | Need PIT for order submission | `getPurchaseIntentToken()` | Attach PIT to the order or checkout payload |
 | Checkout completes without a cart-empty step | `handlePaymentSuccess()` | Optional explicit cleanup path |
@@ -565,10 +565,12 @@ User      →  Agent       →  Backend
 
 | Behavior | Description |
 |----------|-------------|
-| **Retry on failure** | If lock fails, retries on every subsequent add-to-cart while cart has items |
+| **Retry on failure** | If lock fails, IIT stays in place and retry happens on the next merchant-reported non-empty cart event via `handleCartChange()` |
 | **Idempotent** | Safe to call `handleCartChange()` multiple times; no duplicate locks |
 | **Cart-driven** | Lock only happens when: cart has items AND IIT exists AND PIT doesn't exist |
 | **First-touch attribution** | Once PIT exists, new IIT captures are ignored until cart is emptied |
+
+There is no background timer or automatic scheduled retry loop. Retry is merchant-driven through the next non-empty cart report.
 
 **See:** [docs/INTEGRATION_MODEL.md](docs/INTEGRATION_MODEL.md) for complete flow diagram.
 

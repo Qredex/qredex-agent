@@ -111,7 +111,7 @@ When `handleCartChange()` is called, the agent checks:
          │
          ▼
 ┌─────────────────┐
-│ Success?        │──── No ──► Keep IIT, retry on next add-to-cart
+│ Success?        │──── No ──► Keep IIT, retry on next non-empty cart report
 └────────────────┘
          │ Yes
          ▼
@@ -127,7 +127,7 @@ When `handleCartChange()` is called, the agent checks:
 - PIT doesn't exist
 - No lock in-flight
 
-This ensures retry on every add-to-cart if previous lock failed (Rule 13).
+This ensures retry on the next merchant-reported non-empty cart event if a previous lock failed (Rule 13). There is no background timer or scheduled retry loop.
 
 ---
 
@@ -282,9 +282,9 @@ if (!response.ok) {
 
 | Error Type | IIT | PIT | Retry |
 |------------|-----|-----|-------|
-| Network error | **Kept** | Not created | **Yes, on every add-to-cart** |
-| HTTP 4xx (invalid) | **Kept** | Not created | **Yes, on every add-to-cart** |
-| HTTP 5xx (server) | **Kept** | Not created | **Yes, on every add-to-cart** |
+| Network error | **Kept** | Not created | **Yes, on the next merchant-reported non-empty cart event** |
+| HTTP 4xx (invalid) | **Kept** | Not created | **Yes, on the next merchant-reported non-empty cart event** |
+| HTTP 5xx (server) | **Kept** | Not created | **Yes, on the next merchant-reported non-empty cart event** |
 | Cart emptied | **Cleared** | **Cleared** | No (state reset) |
 
 ---

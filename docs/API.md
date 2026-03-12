@@ -332,11 +332,11 @@ QredexAgent.handleCartChange({
 ```
 
 **What happens:**
-- **Reported cart is non-empty** (with IIT, without PIT): Locks or retries IIT → PIT
+- **Reported cart is non-empty** (with IIT, without PIT): Locks or retries IIT → PIT on that `handleCartChange()` call
 - **Reported cart becomes empty** (with PIT): Clears IIT and PIT
 - **Other transitions**: No action
 
-**Note:** Lock only occurs if IIT exists and PIT doesn't exist. Clear only occurs if PIT exists.
+**Note:** Lock only occurs if IIT exists and PIT doesn't exist. Clear only occurs if PIT exists. There is no background timer; retry happens when the merchant reports a later non-empty cart state.
 
 ---
 
