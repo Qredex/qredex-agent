@@ -359,7 +359,7 @@ function renderHeroNotes(notes) {
 
 function renderBridgePanel(config) {
   return `
-    <section class="panel panel-soft">
+    <section class="panel panel-soft bridge-panel">
       <div class="panel-header">
         <div>
           <p class="panel-label">${escapeHtml(config.bridgeLabel)}</p>
@@ -372,12 +372,18 @@ function renderBridgePanel(config) {
         <p class="state-title">Install</p>
         <code>${escapeHtml(config.installCommand)}</code>
       </div>
-      <div class="code-card">
-        <div class="code-card-header">
+      <details class="bridge-details">
+        <summary class="bridge-summary">
+          <span>Bridge code example</span>
           <span>${escapeHtml(config.codeLanguage.toUpperCase())}</span>
+        </summary>
+        <div class="code-card">
+          <div class="code-card-header">
+            <span>${escapeHtml(config.codeLanguage.toUpperCase())}</span>
+          </div>
+          <pre class="code-block"><code>${escapeHtml(config.codeSample)}</code></pre>
         </div>
-        <pre class="code-block"><code>${escapeHtml(config.codeSample)}</code></pre>
-      </div>
+      </details>
     </section>
   `;
 }
@@ -409,8 +415,6 @@ function renderShell(config, activeKind) {
 
       <section class="layout">
         <div class="stack">
-          ${renderBridgePanel(config)}
-
           <section class="panel">
             <div class="panel-header">
               <div>
@@ -471,31 +475,35 @@ function renderShell(config, activeKind) {
           </section>
         </div>
 
-        <aside class="panel cart-panel">
-          <div class="panel-header">
-            <div>
-              <p class="panel-label">Cart</p>
-              <h2>Persistent cart</h2>
+        <aside class="side-stack">
+          <section class="panel cart-panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-label">Cart</p>
+                <h2>Persistent cart</h2>
+              </div>
+              <button class="btn btn-danger" id="empty-cart-button" type="button">Empty cart</button>
             </div>
-            <button class="btn btn-danger" id="empty-cart-button" type="button">Empty cart</button>
-          </div>
 
-          <div class="cart-summary">
-            <div>
-              <span class="summary-label">Lines</span>
-              <strong id="summary-lines">0</strong>
+            <div class="cart-summary">
+              <div>
+                <span class="summary-label">Lines</span>
+                <strong id="summary-lines">0</strong>
+              </div>
+              <div>
+                <span class="summary-label">Units</span>
+                <strong id="summary-units">0</strong>
+              </div>
+              <div>
+                <span class="summary-label">Subtotal</span>
+                <strong id="summary-subtotal">£0.00</strong>
+              </div>
             </div>
-            <div>
-              <span class="summary-label">Units</span>
-              <strong id="summary-units">0</strong>
-            </div>
-            <div>
-              <span class="summary-label">Subtotal</span>
-              <strong id="summary-subtotal">£0.00</strong>
-            </div>
-          </div>
 
-          <div class="cart-list" id="cart-list"></div>
+            <div class="cart-list" id="cart-list"></div>
+          </section>
+
+          ${renderBridgePanel(config)}
         </aside>
       </section>
     </main>

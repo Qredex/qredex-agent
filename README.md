@@ -433,7 +433,7 @@ Then:
 - Add to cart and watch PIT get locked
 - Empty cart and watch PIT get cleared
 
-**See:** [examples/TESTING.md](examples/TESTING.md) for complete testing scenarios.
+**See:** [examples/README.md](examples/README.md) for complete example and testing scenarios.
 
 ### Vanilla JS
 
@@ -578,7 +578,7 @@ Open DevTools → Application → Storage:
 | **[API Reference](docs/API.md)** | Full API documentation |
 | **[Cart Change Behavior](docs/CART_CHANGE_BEHAVIOR.md)** | handleCartChange() state transitions |
 | **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
-| **[Testing Guide](examples/TESTING.md)** | Complete testing scenarios |
+| **[Examples Guide](examples/README.md)** | Examples, local run flow, and testing scenarios |
 | **[AGENTS.md](AGENTS.md)** | Development guidelines |
 
 ---
@@ -600,7 +600,7 @@ Each example includes:
 - The wrapper bridge code when a framework adapter is involved
 - Debugging guide
 
-**See:** [examples/TESTING.md](examples/TESTING.md) for detailed testing instructions.
+**See:** [examples/README.md](examples/README.md) for detailed example and testing instructions.
 
 ---
 

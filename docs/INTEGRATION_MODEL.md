@@ -438,7 +438,7 @@ type ErrorHandler = (event: ErrorEvent) => void;
 - [x] PIT storage (sessionStorage + cookie)
 - [x] Lock logic (IIT → PIT via `/api/v1/agent/intents/lock`)
 - [x] Clear logic (IIT/PIT cleanup)
-- [x] Basic APIs: `getInfluenceIntentToken()`, `getPurchaseIntentToken()`, `lockIntent({ token })`, `clearIntent()`
+- [x] Basic APIs: `getInfluenceIntentToken()`, `getPurchaseIntentToken()`, `lockIntent()`, `clearIntent()`
 
 ### Phase 2: Event Handlers
 - [x] `handleCartEmpty()` implementation + auto-clear

@@ -40,7 +40,6 @@ coverage/
 *.bak
 *.tmp
 /bun.lock
-/package-lock.json
 /examples/react/.next/*
 /examples/react/package-lock.json
 /examples/vue/package-lock.json
