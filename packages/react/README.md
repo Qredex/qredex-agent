@@ -30,11 +30,10 @@ npm install @qredex/react
 ## Usage
 
 ```tsx
-import { useQredexAgent, useQredexState } from '@qredex/react';
+import { useQredexAgent } from '@qredex/react';
 
 function CartBridge() {
-  const agent = useQredexAgent();
-  const state = useQredexState();
+  const { agent, state } = useQredexAgent();
 
   return (
     <button

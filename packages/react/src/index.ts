@@ -21,6 +21,10 @@ import { useEffect, useSyncExternalStore } from 'react';
 import CoreQredexAgent, { type AgentConfig } from '@qredex/agent';
 
 export type QredexState = ReturnType<typeof CoreQredexAgent.getState>;
+export interface QredexComposable {
+  agent: typeof CoreQredexAgent;
+  state: QredexState;
+}
 
 const SERVER_STATE: QredexState = {
   hasIIT: false,
@@ -68,18 +72,19 @@ export function initQredex(config?: AgentConfig): typeof CoreQredexAgent {
   return CoreQredexAgent;
 }
 
-export function useQredexAgent(config?: AgentConfig): typeof CoreQredexAgent {
+export function useQredexState(config?: AgentConfig): QredexState {
   useEffect(() => {
     initQredex(config);
   }, []);
 
-  return CoreQredexAgent;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
-export function useQredexState(config?: AgentConfig): QredexState {
-  useQredexAgent(config);
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+export function useQredexAgent(config?: AgentConfig): QredexComposable {
+  return {
+    agent: CoreQredexAgent,
+    state: useQredexState(config),
+  };
 }
 
 export { CoreQredexAgent as QredexAgent };

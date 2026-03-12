@@ -30,6 +30,10 @@ import {
 import CoreQredexAgent, { type AgentConfig } from '@qredex/agent';
 
 export type QredexState = ReturnType<typeof CoreQredexAgent.getState>;
+export interface QredexComposable {
+  agent: typeof CoreQredexAgent;
+  state: Readonly<ShallowRef<QredexState>>;
+}
 
 const SERVER_STATE: QredexState = {
   hasIIT: false,
@@ -72,10 +76,7 @@ export function useInjectedQredexAgent(): typeof CoreQredexAgent {
   return inject(QredexAgentKey, CoreQredexAgent);
 }
 
-export function useQredex(config?: AgentConfig): {
-  agent: typeof CoreQredexAgent;
-  state: Readonly<ShallowRef<QredexState>>;
-} {
+export function useQredexAgent(config?: AgentConfig): QredexComposable {
   const state = shallowRef<QredexState>(SERVER_STATE);
   let unsubscribe = () => undefined;
 
@@ -101,6 +102,13 @@ export function useQredex(config?: AgentConfig): {
     agent: CoreQredexAgent,
     state: readonly(state),
   };
+}
+
+/**
+ * @deprecated Use useQredexAgent() instead.
+ */
+export function useQredex(config?: AgentConfig): QredexComposable {
+  return useQredexAgent(config);
 }
 
 export { CoreQredexAgent as QredexAgent };

@@ -30,11 +30,11 @@ npm install @qredex/vue
 ## Usage
 
 ```ts
-import { createQredexPlugin, useQredex } from '@qredex/vue';
+import { createQredexPlugin, useQredexAgent } from '@qredex/vue';
 
 app.use(createQredexPlugin());
 
-const { agent, state } = useQredex();
+const { agent, state } = useQredexAgent();
 
 agent.handleCartChange({ itemCount: 1, previousCount: 0 });
 console.log(state.value.locked);

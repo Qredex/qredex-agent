@@ -23,19 +23,23 @@ import { resetConfig } from '../../src/bootstrap/config.js';
 import {
   getQredexAgent as getReactAgent,
   initQredex as initReactQredex,
+  useQredexAgent as useReactQredexAgent,
+  useQredexState,
 } from '../../packages/react/src/index.ts';
 import {
   QredexAgentKey,
   createQredexPlugin,
   getQredexAgent as getVueAgent,
   initQredex as initVueQredex,
+  useQredex as useVueQredex,
+  useQredexAgent as useVueQredexAgent,
 } from '../../packages/vue/src/index.ts';
 import {
   createQredexStateStore,
   getQredexAgent as getSvelteAgent,
   initQredex as initSvelteQredex,
-  useQredex,
-  useQredexAgent,
+  useQredex as useSvelteQredex,
+  useQredexAgent as useSvelteQredexAgent,
 } from '../../packages/svelte/src/index.ts';
 import {
   QREDEX_AGENT,
@@ -58,6 +62,8 @@ describe('Framework wrappers', () => {
 
     expect(agent.isInitialized()).toBe(true);
     expect(getReactAgent().handleCartChange).toBe(agent.handleCartChange);
+    expect(useReactQredexAgent).toEqual(expect.any(Function));
+    expect(useQredexState).toEqual(expect.any(Function));
   });
 
   it('vue wrapper installs a plugin around the core agent', () => {
@@ -73,6 +79,8 @@ describe('Framework wrappers', () => {
       handleCartChange: expect.any(Function),
       init: expect.any(Function),
     });
+    expect(useVueQredexAgent).toEqual(expect.any(Function));
+    expect(useVueQredex).toEqual(expect.any(Function));
   });
 
   it('svelte wrapper creates a readable state store around the core agent', () => {
@@ -92,9 +100,9 @@ describe('Framework wrappers', () => {
   });
 
   it('svelte wrapper exposes useQredexAgent as the primary composable', () => {
-    const qredex = useQredexAgent({ debug: true });
+    const qredex = useSvelteQredexAgent({ debug: true });
 
-    expect(qredex.agent.handleCartChange).toBe(useQredex({ debug: true }).agent.handleCartChange);
+    expect(qredex.agent.handleCartChange).toBe(useSvelteQredex({ debug: true }).agent.handleCartChange);
     expect(qredex.state.subscribe).toEqual(expect.any(Function));
   });
 
