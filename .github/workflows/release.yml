@@ -15,9 +15,9 @@
 #
 #  If you need additional information or have any questions, please email: copyright@qredex.com
 
-name: Publish production CDN assets
+name: Publish CDN
 run-name: >-
-  Publish production CDN from ${{ github.event.inputs.release_ref || github.event.workflow_run.head_sha || github.ref_name }}
+  Publish CDN from ${{ github.event.inputs.release_ref || github.event.workflow_run.head_sha || github.ref_name }}
 
 on:
   workflow_run:
@@ -46,6 +46,7 @@ jobs:
   publish:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     environment: production
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -58,6 +59,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.release_ref || github.event.workflow_run.head_sha || github.ref }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

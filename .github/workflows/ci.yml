@@ -15,7 +15,7 @@
 #
 #  If you need additional information or have any questions, please email: copyright@qredex.com
 
-name: Verify repo changes
+name: Verify repo
 run-name: >-
   Verify ${{ github.event_name == 'pull_request' && format('PR #{0}', github.event.pull_request.number) || github.ref_name }}
 
@@ -36,10 +36,13 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
