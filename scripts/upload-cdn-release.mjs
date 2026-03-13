@@ -22,6 +22,7 @@ import { dirname, extname, resolve } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
+import { isMissingR2ObjectError } from './cdn-r2-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
@@ -123,7 +124,7 @@ function readRemoteJson(key) {
 
     if (result.status !== 0) {
       const combinedOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;
-      if (combinedOutput.includes('NotFound') || combinedOutput.includes('No such object') || combinedOutput.includes('404')) {
+      if (isMissingR2ObjectError(combinedOutput)) {
         return null;
       }
 

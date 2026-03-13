@@ -22,6 +22,7 @@ import { spawnSync } from 'child_process';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { isMissingR2ObjectError } from './cdn-r2-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
@@ -59,7 +60,7 @@ function readRemoteJson(key) {
 
     if (result.status !== 0) {
       const combinedOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;
-      if (combinedOutput.includes('NotFound') || combinedOutput.includes('No such object') || combinedOutput.includes('404')) {
+      if (isMissingR2ObjectError(combinedOutput)) {
         return null;
       }
 
@@ -88,7 +89,7 @@ function fetchRemoteObject(key) {
 
     const combinedOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;
     if (result.status !== 0) {
-      if (combinedOutput.includes('NotFound') || combinedOutput.includes('No such object') || combinedOutput.includes('404')) {
+      if (isMissingR2ObjectError(combinedOutput)) {
         return false;
       }
 
