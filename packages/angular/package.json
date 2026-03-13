@@ -1,6 +1,6 @@
 {
   "name": "@qredex/angular",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Angular wrapper for Qredex Agent",
   "type": "module",
   "sideEffects": false,
@@ -22,7 +22,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@qredex/agent": "^1.0.2"
+    "@qredex/agent": "^1.0.3"
   },
   "devDependencies": {
     "@qredex/agent": "file:../.."
