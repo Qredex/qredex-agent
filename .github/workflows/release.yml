@@ -17,7 +17,7 @@
 
 name: Publish production CDN assets
 run-name: >-
-  Publish production CDN from ${{ github.event.workflow_run.head_sha || github.ref_name }}
+  Publish production CDN from ${{ github.event.inputs.release_ref || github.event.workflow_run.head_sha || github.ref_name }}
 
 on:
   workflow_run:
@@ -29,12 +29,17 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Existing release tag or commit to publish with the latest workflow
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.inputs.release_ref || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -51,7 +56,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          ref: ${{ github.event.inputs.release_ref || github.event.workflow_run.head_sha || github.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -70,7 +75,7 @@ jobs:
           VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
           TAG="v${VERSION}"
           TAG_COMMIT=$(git rev-list -n 1 "${TAG}")
-          CURRENT_COMMIT="${{ github.event.workflow_run.head_sha || github.sha }}"
+          CURRENT_COMMIT=$(git rev-parse HEAD)
 
           test -n "${TAG_COMMIT}"
           test "${TAG_COMMIT}" = "${CURRENT_COMMIT}"

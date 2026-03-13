@@ -79,10 +79,16 @@ GitHub Actions runs `.github/workflows/publish-npm.yml` after `.github/workflows
 The npm publish workflow:
 
 1. resolves `v<package.json version>` and verifies that the tag points at the release commit
-2. installs dependencies
+2. installs Node.js and npm CLI versions that satisfy npm Trusted Publishing requirements
 3. runs `npm run publish:npm`
 4. publishes npm packages with provenance via Trusted Publishing
 5. creates a GitHub Release with generated notes after npm publish succeeds
+
+For manual recovery of an existing release tag after workflow-only changes, dispatch the workflow from `main` and pass the tag as `release_ref`:
+
+```bash
+gh workflow run publish-npm.yml --ref main -f release_ref=v1.0.2
+```
 
 ### CDN Release Workflow
 
@@ -95,6 +101,12 @@ The release workflow:
 3. runs the final production release checks (`test`, `build`, tarball verification, export verification)
 4. prepares first-party CDN assets from the production build
 5. uploads versioned CDN assets to Cloudflare R2
+
+For manual recovery of an existing release tag after workflow-only changes, dispatch the workflow from `main` and pass the tag as `release_ref`:
+
+```bash
+gh workflow run release.yml --ref main -f release_ref=v1.0.2
+```
 
 ### Required GitHub Configuration
 
