@@ -18,9 +18,15 @@
 name: Release
 
 on:
+  workflow_run:
+    workflows:
+      - Tag release on version change
+    types:
+      - completed
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,6 +37,7 @@ concurrency:
 
 jobs:
   publish:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -41,6 +48,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -52,8 +62,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify tag matches package version
-        run: test "${GITHUB_REF_NAME}" = "v$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")"
+      - name: Resolve release tag
+        run: |
+          git fetch --force --tags origin
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
+          TAG="v${VERSION}"
+          TAG_COMMIT=$(git rev-list -n 1 "${TAG}")
+          CURRENT_COMMIT="${{ github.event.workflow_run.head_sha || github.sha }}"
+
+          test -n "${TAG_COMMIT}"
+          test "${TAG_COMMIT}" = "${CURRENT_COMMIT}"
 
       - name: Lint
         run: npm run lint

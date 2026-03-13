@@ -61,7 +61,7 @@ The automated release path is:
 1. run `npm run release:version -- <x.y.z>`
 2. commit and push the version change to `main`
 3. GitHub Actions creates tag `v<x.y.z>`
-4. the tag triggers npm publish and CDN release workflows
+4. the completed tag workflow triggers npm publish and CDN release workflows
 
 ### Auto Tag Workflow
 
@@ -74,16 +74,11 @@ It:
 
 ### NPM Publish Workflow
 
-GitHub Actions runs `.github/workflows/publish-npm.yml` on pushed version tags:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
+GitHub Actions runs `.github/workflows/publish-npm.yml` after `.github/workflows/tag-release-on-version-change.yml` completes successfully. It can also be run manually, and it still supports direct pushed version tags as a recovery path.
 
 The npm publish workflow:
 
-1. verifies the tag matches the root package version
+1. resolves `v<package.json version>` and verifies that the tag points at the release commit
 2. installs dependencies
 3. runs `npm run publish:npm`
 4. publishes npm packages with provenance via Trusted Publishing
@@ -91,16 +86,11 @@ The npm publish workflow:
 
 ### CDN Release Workflow
 
-GitHub Actions runs `.github/workflows/release.yml` on pushed version tags:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
+GitHub Actions runs `.github/workflows/release.yml` after `.github/workflows/tag-release-on-version-change.yml` completes successfully. It can also be run manually, and it still supports direct pushed version tags as a recovery path.
 
 The release workflow:
 
-1. verifies the tag matches `package.json`
+1. resolves `v<package.json version>` and verifies that the tag points at the release commit
 2. runs lint and browser smoke coverage
 3. runs the final production release checks (`test`, `build`, tarball verification, export verification)
 4. prepares first-party CDN assets from the production build
