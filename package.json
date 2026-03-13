@@ -43,6 +43,7 @@
     "release:version": "node scripts/set-release-version.mjs",
     "release:cdn": "npm run build && node scripts/prepare-cdn-release.mjs",
     "release:cdn:upload": "node scripts/upload-cdn-release.mjs",
+    "release:cdn:verify": "node scripts/verify-cdn-history.mjs",
     "release:cdn:staging": "npm run build:stage && node scripts/prepare-cdn-release.mjs staging",
     "release:cdn:staging:upload": "node scripts/upload-cdn-release.mjs staging",
     "publish:npm:dry-run": "npm run release:check && node scripts/publish-packages.mjs --dry-run",

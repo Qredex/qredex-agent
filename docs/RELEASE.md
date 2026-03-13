@@ -181,6 +181,7 @@ Use this order for the first public npm release:
 ```bash
 npm run release:cdn
 npm run release:cdn:upload
+npm run release:cdn:verify
 ```
 
 That prepares first-party CDN assets under:
@@ -188,11 +189,20 @@ That prepares first-party CDN assets under:
 - `release/agent/v<full-version>/`
 - `release/agent/v<major>/`
 - uploads them to `agent/v<full-version>/` and `agent/v<major>/` in the configured R2 bucket
+- updates `agent/releases.json` so production CDN history can be inspected after each successful upload
 
 Current production CDN asset:
 
 - `qredex-agent.iife.min.js`
 - `qredex-agent.iife.min.js.map`
+
+Use `npm run release:cdn:verify` to read back:
+
+- `agent/manifest.json` for the current production version and major alias
+- `agent/releases.json` for known pinned production releases
+
+Release history is tracked from the first production CDN upload after this feature lands.
+Older pinned versions are not inferred retroactively unless they are added back manually.
 
 ## Staging CDN
 

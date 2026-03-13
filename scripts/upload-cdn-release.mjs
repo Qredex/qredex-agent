@@ -17,8 +17,9 @@
  *  If you need additional information or have any questions, please email: copyright@qredex.com
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { dirname, extname, resolve } from 'path';
+import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
@@ -102,6 +103,78 @@ function uploadFile(localPath, key) {
   }
 }
 
+function createTempDir() {
+  return mkdtempSync(resolve(tmpdir(), 'qredex-cdn-'));
+}
+
+function readRemoteJson(key) {
+  const tempDir = createTempDir();
+  const tempPath = resolve(tempDir, key.replace(/\//g, '__'));
+
+  try {
+    const result = spawnSync(
+      'npm',
+      ['exec', '--', 'wrangler', 'r2', 'object', 'get', `${bucket}/${key}`, '--file', tempPath, '--remote'],
+      {
+        cwd: rootDir,
+        encoding: 'utf8',
+      }
+    );
+
+    if (result.status !== 0) {
+      const combinedOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;
+      if (combinedOutput.includes('NotFound') || combinedOutput.includes('No such object') || combinedOutput.includes('404')) {
+        return null;
+      }
+
+      throw new Error(`Failed to fetch ${key}\n${combinedOutput}`);
+    }
+
+    return JSON.parse(readFileSync(tempPath, 'utf8'));
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+function updateReleaseHistory() {
+  if (channel !== 'production') {
+    return;
+  }
+
+  const historyKey = 'agent/releases.json';
+  const existingHistory = readRemoteJson(historyKey);
+  const releasedAt = new Date().toISOString();
+  const nextEntry = {
+    version: manifest.version,
+    major: manifest.major,
+    releasedAt,
+    files: [...assetFiles],
+  };
+
+  const priorEntries = Array.isArray(existingHistory?.versions)
+    ? existingHistory.versions.filter((entry) => entry?.version !== manifest.version)
+    : [];
+
+  const nextHistory = {
+    channel: 'production',
+    current: manifest.version,
+    major: manifest.major,
+    updatedAt: releasedAt,
+    versions: [nextEntry, ...priorEntries],
+  };
+
+  const tempDir = createTempDir();
+  const tempPath = resolve(tempDir, 'releases.json');
+
+  try {
+    const content = JSON.stringify(nextHistory, null, 2);
+    writeFileSync(tempPath, `${content}\n`);
+    uploadFile(tempPath, historyKey);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 try {
   for (const file of assetFiles) {
     if (channel === 'production') {
@@ -114,6 +187,7 @@ try {
   }
 
   uploadFile(manifestPath, channel === 'production' ? 'agent/manifest.json' : 'agent/staging/manifest.json');
+  updateReleaseHistory();
   console.log(`✓ Uploaded CDN release assets to ${bucket}`);
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
