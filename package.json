@@ -40,6 +40,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"examples/**/*.html\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"examples/**/*.html\"",
     "release:check": "npm run test && npm run build && node scripts/verify-release.mjs",
+    "release:version": "node scripts/set-release-version.mjs",
     "release:cdn": "npm run build && node scripts/prepare-cdn-release.mjs",
     "release:cdn:upload": "node scripts/upload-cdn-release.mjs",
     "release:cdn:staging": "npm run build:stage && node scripts/prepare-cdn-release.mjs staging",

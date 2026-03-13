@@ -1,0 +1,108 @@
+# /**
+#  *    ▄▄▄▄
+#  *  ▄█▀▀███▄▄              █▄
+#  *  ██    ██ ▄             ██
+#  *  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+#  *  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+#  *   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+#  *        ▀█
+#  *
+#  *  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+#  *
+#  *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#  *
+#  *  Licensed under the MIT License. See LICENSE for the full license text.
+#  *  Redistribution and use are permitted under that license.
+#  *
+#  *  If you need additional information or have any questions, please email: copyright@qredex.com
+#  */
+
+name: Tag release on version change
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - packages/*/package.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+
+      - name: Verify workspace versions match root version
+        id: version
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+
+          const packagePaths = [
+            'package.json',
+            'packages/react/package.json',
+            'packages/vue/package.json',
+            'packages/svelte/package.json',
+            'packages/angular/package.json',
+          ];
+
+          const versions = packagePaths.map((packagePath) => {
+            const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            return {
+              packagePath,
+              version: packageJson.version,
+            };
+          });
+
+          const rootVersion = versions[0].version;
+          const mismatches = versions.filter(({ version }) => version !== rootVersion);
+
+          if (mismatches.length > 0) {
+            console.error('Workspace package versions must match the root package version before tagging a release.');
+            for (const mismatch of mismatches) {
+              console.error(`${mismatch.packagePath}: ${mismatch.version} != ${rootVersion}`);
+            }
+            process.exit(1);
+          }
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${rootVersion}\n`);
+          EOF
+
+      - name: Check whether release tag already exists
+        id: tag
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+            echo "Release tag ${TAG} already exists; skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push release tag
+        if: steps.tag.outputs.exists == 'false'
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin "${TAG}"
