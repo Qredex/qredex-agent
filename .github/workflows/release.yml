@@ -99,3 +99,6 @@ jobs:
 
       - name: Upload CDN release assets
         run: npm run release:cdn:upload
+
+      - name: Verify CDN history
+        run: npm run release:cdn:verify

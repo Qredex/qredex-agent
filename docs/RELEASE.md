@@ -204,6 +204,14 @@ Use `npm run release:cdn:verify` to read back:
 Release history is tracked from the first production CDN upload after this feature lands.
 Older pinned versions are not inferred retroactively unless they are added back manually.
 
+Because `release:cdn:verify` and `release:cdn:backfill` require the production
+bucket environment, the easiest way to run them is in GitHub Actions:
+
+- use the `Verify CDN` workflow for read-only verification
+- optionally pass `backfill_versions`, for example `1.0.0,1.0.1`, to backfill
+  older pinned versions only if their `agent/v<version>/...` objects still
+  exist in R2
+
 ## Staging CDN
 
 ```bash

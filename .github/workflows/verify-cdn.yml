@@ -1,0 +1,72 @@
+#    ▄▄▄▄
+#  ▄█▀▀███▄▄              █▄
+#  ██    ██ ▄             ██
+#  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+#  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+#   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+#        ▀█
+#
+#  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+#
+#  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+#  Licensed under the MIT License. See LICENSE for the full license text.
+#  Redistribution and use are permitted under that license.
+#
+#  If you need additional information or have any questions, please email: copyright@qredex.com
+
+name: Verify CDN
+run-name: >-
+  Verify CDN${{ github.event.inputs.backfill_versions && format(' and backfill {0}', github.event.inputs.backfill_versions) || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      backfill_versions:
+        description: Optional comma-separated pinned versions to add to CDN history after verifying they exist in R2
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-cdn-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      QREDEX_CDN_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify CDN history
+        run: npm run release:cdn:verify
+
+      - name: Backfill CDN history
+        if: github.event.inputs.backfill_versions != ''
+        run: node scripts/backfill-cdn-history.mjs "${{ github.event.inputs.backfill_versions }}"
+
+      - name: Verify CDN history after backfill
+        if: github.event.inputs.backfill_versions != ''
+        run: npm run release:cdn:verify

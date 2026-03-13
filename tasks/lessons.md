@@ -22,3 +22,4 @@
 - Do not rely on Mermaid for npm-facing package READMEs. Use committed SVG assets instead.
 - Do not expose internal endpoint selection or storage keys as public merchant runtime configuration.
 - When npm Trusted Publishing has a documented npm CLI minimum, pin that npm version in CI instead of assuming the bundled npm from the chosen Node version is sufficient.
+- CDN verification commands that depend on protected bucket configuration should have a first-class GitHub Actions path, not just a local npm script.
