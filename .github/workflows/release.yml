@@ -24,7 +24,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -38,7 +37,6 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       QREDEX_CDN_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
-      QREDEX_NPM_PROVENANCE: 'true'
 
     steps:
       - name: Checkout
@@ -68,9 +66,6 @@ jobs:
 
       - name: Release checks
         run: npm run release:check
-
-      - name: Publish npm packages
-        run: node scripts/publish-packages.mjs
 
       - name: Prepare CDN release assets
         run: node scripts/prepare-cdn-release.mjs
