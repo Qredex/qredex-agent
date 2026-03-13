@@ -16,10 +16,10 @@
 
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="360" viewBox="0 0 1180 360" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="390" viewBox="0 0 1180 390" role="img" aria-labelledby="title desc">
   <title id="title">Wrapper attribution flow</title>
   <desc id="desc">Framework cart UI calls useQredexAgent, forwards cart changes to the core agent, and reads PIT for checkout.</desc>
-  <rect width="1180" height="360" fill="#f6f1e8"/>
+  <rect width="1180" height="390" fill="#f6f1e8"/>
   <rect x="40" y="40" width="220" height="70" rx="18" fill="#1f1b18"/>
   <rect x="300" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
   <rect x="580" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
@@ -32,10 +32,10 @@
   <text x="1000" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#000">QredexAgent</text>
   <text x="1000" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#000">Core attribution runtime</text>
 
-  <path d="M150 130 L150 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M420 130 L420 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M700 130 L700 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M1000 130 L1000 320" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M150 130 L150 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M420 130 L420 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M700 130 L700 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1000 130 L1000 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
 
   <path d="M165 160 H685" stroke="#1f1b18" stroke-width="4" fill="none"/>
   <polygon points="685,160 670,152 670,168" fill="#1f1b18"/>
@@ -49,7 +49,7 @@
   <text x="1000" y="244" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Agent captures IIT and locks to PIT</text>
   <text x="1000" y="264" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">when lockable</text>
 
-  <path d="M435 300 H985" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="985,300 970,292 970,308" fill="#1f1b18"/>
-  <text x="710" y="288" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.getPurchaseIntentToken() → send PIT to your backend</text>
+  <path d="M435 338 H985" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="985,338 970,330 970,346" fill="#1f1b18"/>
+  <text x="710" y="326" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.getPurchaseIntentToken() → send PIT to your backend</text>
 </svg>
