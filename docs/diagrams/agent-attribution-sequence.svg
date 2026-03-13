@@ -16,10 +16,10 @@
 
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="410" viewBox="0 0 1420 410" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="450" viewBox="0 0 1420 450" role="img" aria-labelledby="title desc">
   <title id="title">Qredex attribution sequence</title>
-  <desc id="desc">Merchant storefront reports cart transitions to QredexAgent, which captures IIT, locks to PIT, then exposes PIT so the merchant backend can send order and PIT to Qredex attribution.</desc>
-  <rect width="1420" height="410" fill="#f6f1e8"/>
+  <desc id="desc">Merchant storefront reports cart transitions to QredexAgent, reads PIT back from the agent, then the merchant order flow sends order and PIT through backend attribution.</desc>
+  <rect width="1420" height="450" fill="#f6f1e8"/>
 
   <rect x="40" y="40" width="220" height="70" rx="18" fill="#1f1b18"/>
   <rect x="300" y="40" width="260" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
@@ -37,11 +37,11 @@
   <text x="1250" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Qredex</text>
   <text x="1250" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Resolves attribution</text>
 
-  <path d="M150 130 L150 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M430 130 L430 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M710 130 L710 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M980 130 L980 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M1250 130 L1250 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M150 130 L150 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M430 130 L430 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M710 130 L710 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M980 130 L980 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1250 130 L1250 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
 
   <path d="M165 160 H415" stroke="#1f1b18" stroke-width="4" fill="none"/>
   <polygon points="415,160 400,152 400,168" fill="#1f1b18"/>
@@ -52,15 +52,21 @@
   <text x="570" y="193" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">handleCartChange({ itemCount, previousCount })</text>
 
   <rect x="530" y="218" width="360" height="72" rx="16" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
-  <text x="710" y="243" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Agent captures IIT, locks to PIT when</text>
+  <text x="710" y="243" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Agent captures IIT, locks IIT -&gt; PIT when</text>
   <text x="710" y="263" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">the merchant reports a real cart</text>
 
-  <path d="M725 315 H965" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="965,315 950,307 950,323" fill="#1f1b18"/>
-  <text x="845" y="302" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">Merchant reads PIT for the order</text>
+  <path d="M445 315 H695" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="695,315 680,307 680,323" fill="#1f1b18"/>
+  <text x="570" y="302" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Merchant reads PIT</text>
+  <text x="570" y="321" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">with getPurchaseIntentToken()</text>
 
-  <path d="M995 315 H1235" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="1235,315 1220,307 1220,323" fill="#1f1b18"/>
-  <text x="1115" y="290" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Backend sends order + PIT</text>
-  <text x="1115" y="309" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">to Qredex ingestion</text>
+  <path d="M445 390 H965" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="965,390 950,382 950,398" fill="#1f1b18"/>
+  <text x="705" y="356" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Merchant sends order + PIT</text>
+  <text x="705" y="375" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">to merchant backend</text>
+
+  <path d="M995 390 H1235" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1235,390 1220,382 1220,398" fill="#1f1b18"/>
+  <text x="1115" y="356" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Backend forwards PIT</text>
+  <text x="1115" y="375" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">for attribution</text>
 </svg>
