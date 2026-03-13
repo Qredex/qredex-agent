@@ -55,8 +55,8 @@
   <text x="710" y="243" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Agent captures IIT, locks IIT -&gt; PIT when</text>
   <text x="710" y="263" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">the merchant reports a real cart</text>
 
-  <path d="M445 315 H695" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="695,315 680,307 680,323" fill="#1f1b18"/>
+  <path d="M445 334 H695" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="695,334 680,326 680,342" fill="#1f1b18"/>
   <text x="570" y="302" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Merchant reads PIT</text>
   <text x="570" y="321" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">with getPurchaseIntentToken()</text>
 
