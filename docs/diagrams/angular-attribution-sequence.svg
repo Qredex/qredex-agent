@@ -49,6 +49,7 @@
   <polygon points="1005,255 990,247 990,263" fill="#1f1b18"/>
   <text x="740" y="243" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.handleCartChange() and agent.getPurchaseIntentToken()</text>
 
-  <rect x="860" y="275" width="320" height="46" rx="14" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
-  <text x="1020" y="304" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Angular stays headless; the core agent still owns attribution state</text>
+  <rect x="820" y="271" width="400" height="58" rx="14" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
+  <text x="1020" y="295" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Angular stays headless; the core agent still</text>
+  <text x="1020" y="314" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">owns attribution state</text>
 </svg>
