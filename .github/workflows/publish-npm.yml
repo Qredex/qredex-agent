@@ -22,11 +22,11 @@ name: Publish npm packages
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 concurrency:
@@ -50,7 +50,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify tag matches package version
+        if: github.ref_type == 'tag'
+        run: test "${GITHUB_REF_NAME}" = "v$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")"
+
       - name: Publish packages to npm
         run: npm run publish:npm
         env:
           QREDEX_NPM_PROVENANCE: 'true'
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true

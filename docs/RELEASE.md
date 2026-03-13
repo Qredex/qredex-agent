@@ -83,9 +83,11 @@ git push origin v1.0.0
 
 The npm publish workflow:
 
-1. installs dependencies
-2. runs `npm run publish:npm`
-3. publishes npm packages with provenance via Trusted Publishing
+1. verifies the tag matches the root package version
+2. installs dependencies
+3. runs `npm run publish:npm`
+4. publishes npm packages with provenance via Trusted Publishing
+5. creates a GitHub Release with generated notes after npm publish succeeds
 
 ### CDN Release Workflow
 
@@ -119,6 +121,14 @@ The CDN release workflow runs in the `production` GitHub Actions environment.
 If you also create a `staging` environment, keep it for a separate staging
 workflow or manual non-production release path.
 
+Today, `production` and `staging` are used for CDN workflows:
+
+- `production` is used by `.github/workflows/release.yml`
+- `staging` is used by `.github/workflows/staging.yml`
+
+The npm publish workflow currently does not use a GitHub Actions environment.
+That keeps npm Trusted Publishing configured against the workflow file only.
+
 NPM trusted publishing must be configured for:
 
 - `@qredex/agent`
@@ -132,6 +142,17 @@ Trusted publishing should point at:
 - repository: `Qredex/qredex-agent`
 - workflow: `publish-npm.yml`
 - environment: leave blank unless the publish workflow is later moved into a GitHub Actions environment
+
+If npm publish is later moved into the `production` environment, npm trusted
+publishing must be updated to use:
+
+- repository: `Qredex/qredex-agent`
+- workflow: `publish-npm.yml`
+- environment: `production`
+
+With that setup, a release tag would still trigger npm publish, but the job
+would pause for any `production` environment protection rules before npm
+publishing proceeds.
 
 ## First Publish
 
