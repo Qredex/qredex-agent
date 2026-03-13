@@ -1,21 +1,4 @@
-<!--
-    ▄▄▄▄
-  ▄█▀▀███▄▄              █▄
-  ██    ██ ▄             ██
-  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
-  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
-   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
-        ▀█
-
-  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
-
-  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-
-  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
-  Redistribution and use are permitted under that license.
-
-  If you need additional information or have any questions, please email: copyright@qredex.com
--->
+span
 
 # @qredex/react
 
@@ -102,20 +85,22 @@ export function QredexCartBridge({ itemCount }: QredexCartBridgeProps) {
 
 ## What To Call When
 
-| Merchant event | Call | Why |
-|---|---|---|
-| Cart becomes non-empty | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart changes while still non-empty | `agent.handleCartChange(...)` | Safe retry path on the next merchant-reported non-empty cart event if a previous lock failed |
-| Clear cart action | `clearCart() -> agent.handleCartEmpty()` | Clears IIT/PIT from the live session |
-| Need PIT for order submission | `state.pit` or `agent.getPurchaseIntentToken()` | Attach PIT to the checkout payload |
-| Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()` | Optional explicit cleanup path |
+
+| Merchant event                               | Call                                                   | Why                                                                                          |
+| -------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Cart becomes non-empty                       | `agent.handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT                                      |
+| Cart changes while still non-empty           | `agent.handleCartChange(...)`                          | Safe retry path on the next merchant-reported non-empty cart event if a previous lock failed |
+| Clear cart action                            | `clearCart() -> agent.handleCartEmpty()`               | Clears IIT/PIT from the live session                                                         |
+| Need PIT for order submission                | `state.pit` or `agent.getPurchaseIntentToken()`        | Attach PIT to the checkout payload                                                           |
+| Checkout completes without a cart-empty step | `agent.handlePaymentSuccess()`                         | Optional explicit cleanup path                                                               |
 
 ## API Surface
 
-| Export | Use |
-|---|---|
-| `useQredexAgent()` | Primary React hook. Returns `{ agent, state }` |
+
+| Export             | Use                                                        |
+| ------------------ | ---------------------------------------------------------- |
+| `useQredexAgent()` | Primary React hook. Returns`{ agent, state }`              |
 | `useQredexState()` | State-only hook if you already have agent access elsewhere |
-| `getQredexAgent()` | Direct access to the singleton runtime |
-| `initQredex()` | Explicit browser init when needed |
-| `QredexAgent` | Re-export of the core agent |
+| `getQredexAgent()` | Direct access to the singleton runtime                     |
+| `initQredex()`     | Explicit browser init when needed                          |
+| `QredexAgent`      | Re-export of the core agent                                |
