@@ -17,12 +17,14 @@
 #  *  If you need additional information or have any questions, please email: copyright@qredex.com
 #  */
 
-name: Publish npm packages
+name: Publish packages to npm
+run-name: >-
+  Publish npm from ${{ github.event.workflow_run.head_sha || github.ref_name }}
 
 on:
   workflow_run:
     workflows:
-      - Tag release on version change
+      - Create release tag from version bump
     types:
       - completed
   push:

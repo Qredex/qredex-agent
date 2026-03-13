@@ -15,7 +15,9 @@
 #
 #  If you need additional information or have any questions, please email: copyright@qredex.com
 
-name: CI
+name: Verify repo changes
+run-name: >-
+  Verify ${{ github.event_name == 'pull_request' && format('PR #{0}', github.event.pull_request.number) || github.ref_name }}
 
 on:
   push:

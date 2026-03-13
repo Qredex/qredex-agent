@@ -17,7 +17,9 @@
 #  *  If you need additional information or have any questions, please email: copyright@qredex.com
 #  */
 
-name: Tag release on version change
+name: Create release tag from version bump
+run-name: >-
+  Create release tag from ${{ github.ref_name }}
 
 on:
   push:

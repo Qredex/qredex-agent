@@ -15,12 +15,14 @@
 #
 #  If you need additional information or have any questions, please email: copyright@qredex.com
 
-name: Release
+name: Publish production CDN assets
+run-name: >-
+  Publish production CDN from ${{ github.event.workflow_run.head_sha || github.ref_name }}
 
 on:
   workflow_run:
     workflows:
-      - Tag release on version change
+      - Create release tag from version bump
     types:
       - completed
   push:

@@ -15,7 +15,9 @@
 #
 #  If you need additional information or have any questions, please email: copyright@qredex.com
 
-name: Staging
+name: Publish staging CDN assets
+run-name: >-
+  Publish staging CDN from ${{ github.ref_name }}
 
 on:
   push:
