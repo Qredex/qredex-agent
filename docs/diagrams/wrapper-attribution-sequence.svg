@@ -45,8 +45,9 @@
   <polygon points="985,210 970,202 970,218" fill="#1f1b18"/>
   <text x="710" y="198" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.handleCartChange({ itemCount, previousCount })</text>
 
-  <rect x="860" y="223" width="280" height="46" rx="14" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
-  <text x="1000" y="252" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Agent captures IIT and locks to PIT when lockable</text>
+  <rect x="810" y="218" width="380" height="64" rx="18" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
+  <text x="1000" y="246" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Agent captures IIT and locks to PIT</text>
+  <text x="1000" y="266" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">when lockable</text>
 
   <path d="M435 300 H985" stroke="#1f1b18" stroke-width="4" fill="none"/>
   <polygon points="985,300 970,292 970,308" fill="#1f1b18"/>
