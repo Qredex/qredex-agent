@@ -16,10 +16,10 @@
 
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1450" height="400" viewBox="0 0 1450 400" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1450" height="440" viewBox="0 0 1450 440" role="img" aria-labelledby="title desc">
   <title id="title">Angular attribution flow</title>
   <desc id="desc">Angular provides the Qredex agent once, the cart component injects it, reports cart changes, reads PIT, and the backend carries order and PIT into Qredex attribution.</desc>
-  <rect width="1450" height="400" fill="#f6f1e8"/>
+  <rect width="1450" height="440" fill="#f6f1e8"/>
 
   <rect x="40" y="40" width="230" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
   <rect x="310" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
@@ -40,12 +40,12 @@
   <text x="1380" y="74" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle" fill="#1f1b18">Q</text>
   <text x="1380" y="100" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#1f1b18">Attr.</text>
 
-  <path d="M155 130 L155 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M430 130 L430 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M690 130 L690 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M940 130 L940 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M1200 130 L1200 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M1380 130 L1380 355" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M155 130 L155 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M430 130 L430 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M690 130 L690 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M940 130 L940 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1200 130 L1200 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1380 130 L1380 395" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
 
   <path d="M170 160 H415" stroke="#1f1b18" stroke-width="4" fill="none"/>
   <polygon points="415,160 400,152 400,168" fill="#1f1b18"/>
@@ -59,17 +59,17 @@
   <polygon points="925,250 910,242 910,258" fill="#1f1b18"/>
   <text x="685" y="238" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.handleCartChange() + agent.getPurchaseIntentToken()</text>
 
-  <rect x="730" y="266" width="420" height="72" rx="16" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
-  <text x="940" y="292" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Angular stays headless while the core agent</text>
-  <text x="940" y="312" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">owns IIT/PIT state and locks on a real cart</text>
+  <rect x="710" y="266" width="460" height="72" rx="16" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
+  <text x="940" y="292" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Headless Angular wrapper</text>
+  <text x="940" y="312" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Core agent owns IIT/PIT state</text>
 
-  <path d="M955 355 H1185" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="1185,355 1170,347 1170,363" fill="#1f1b18"/>
-  <text x="1070" y="323" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">order payload + PIT</text>
-  <text x="1070" y="343" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">travel to backend</text>
+  <path d="M955 390 H1185" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1185,390 1170,382 1170,398" fill="#1f1b18"/>
+  <text x="1070" y="356" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">order payload + PIT</text>
+  <text x="1070" y="376" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">travel to backend</text>
 
-  <path d="M1215 355 H1365" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="1365,355 1350,347 1350,363" fill="#1f1b18"/>
-  <text x="1290" y="323" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#1f1b18">backend forwards PIT</text>
-  <text x="1290" y="341" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#1f1b18">for attribution</text>
+  <path d="M1215 390 H1365" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1365,390 1350,382 1350,398" fill="#1f1b18"/>
+  <text x="1290" y="356" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#1f1b18">backend forwards PIT</text>
+  <text x="1290" y="374" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#1f1b18">for attribution</text>
 </svg>

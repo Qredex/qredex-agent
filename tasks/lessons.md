@@ -24,3 +24,4 @@
 - When npm Trusted Publishing has a documented npm CLI minimum, pin that npm version in CI instead of assuming the bundled npm from the chosen Node version is sufficient.
 - CDN verification commands that depend on protected bucket configuration should have a first-class GitHub Actions path, not just a local npm script.
 - In integration docs, do not phrase PIT as something Qredex "needs" in the order payload; Qredex creates PIT on lock, and the merchant/backend needs to forward that PIT with the order.
+- When fixing SVG label overlap, check the actual text and box coordinates. If text baseline equals or nearly equals the box edge, move the whole lane farther away instead of making only tiny y-offset tweaks.
