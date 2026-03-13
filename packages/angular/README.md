@@ -34,13 +34,17 @@ npm install @qredex/angular
 
 ## Attribution Flow
 
-![Angular wrapper attribution flow](https://raw.githubusercontent.com/Qredex/qredex-agent/main/docs/diagrams/angular-attribution-sequence.svg)
+![Angular wrapper attribution flow](https://raw.githubusercontent.com/Qredex/qredex-agent/main/docs/diagrams/angular-attribution-sequence.svg?v=20260313-3)
 
 Call `provideQredexAgent()` once at bootstrap, get the runtime with `injectQredexAgent()`, then forward merchant cart state with `agent.handleCartChange(...)`, read the PIT with `agent.getPurchaseIntentToken()`, and clear attribution with `agent.handleCartEmpty()`. Only call `agent.handlePaymentSuccess()` if your platform has no cart-empty step after checkout.
 
 ## Recommended Integration
 
 Register `provideQredexAgent()` once, then call `injectQredexAgent()` inside the existing cart surface you already control.
+The merchant still owns cart APIs, totals, checkout, and order submission.
+Qredex only needs the cart transition so the core runtime can lock IIT to PIT.
+After lock, the merchant reads that PIT and carries it with the normal order
+payload to the merchant backend or direct Qredex ingestion path.
 
 ```ts
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -71,25 +75,32 @@ export class QredexCartBridgeComponent implements OnChanges {
   readonly agent = injectQredexAgent();
 
   ngOnChanges(): void {
+    // [Qredex] Report the cart transition after your merchant cart changes.
     this.agent.handleCartChange({
       itemCount: this.itemCount,
       previousCount: this.previousCount,
     });
 
+    // [Merchant] Keep your local snapshot ready for the next transition.
     this.previousCount = this.itemCount;
   }
 
   async clearCart(): Promise<void> {
+    // [Merchant] Clear the real cart in your own backend/storefront first.
     await fetch('/api/cart/clear', {
       method: 'POST',
     });
 
+    // [Qredex] Clear attribution because the merchant cart is now empty.
     this.agent.handleCartEmpty();
   }
 
   async submitOrder(): Promise<void> {
+    // [Qredex] Read PIT from the core runtime before checkout.
     const pit = this.agent.getPurchaseIntentToken();
 
+    // [Merchant] Send the PIT as part of your normal order payload so the
+    // backend can carry order + PIT into attribution ingestion.
     await fetch('/api/orders', {
       method: 'POST',
       headers: {
@@ -101,6 +112,7 @@ export class QredexCartBridgeComponent implements OnChanges {
       }),
     });
 
+    // [Merchant + Qredex] Reuse the same clear path after checkout succeeds.
     await this.clearCart();
   }
 }

@@ -21,7 +21,7 @@
 
 ## Purpose
 
-Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` token issued by Qredex redirect traffic, stores it safely in the shopper session, and locks that IIT into a PIT through the public AGENT endpoint when the cart becomes non-empty. The goal is to make IIT → PIT handling simple, consistent, and easy to embed on any storefront.
+Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` token issued by Qredex redirect traffic, stores it safely in the shopper session, and locks that IIT into a PIT through the public AGENT endpoint when the merchant reports a non-empty cart. The goal is to keep commerce ownership with the merchant while making IIT → PIT handling deterministic, consistent, and easy to embed on any storefront.
 
 ## Core Terms
 
@@ -49,8 +49,9 @@ Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` tok
 10. Qredex validates the IIT and returns a PIT on success.
 11. Agent stores the PIT in browser storage.
 12. Agent clears the IIT (PIT is now authoritative).
-13. Storefront/cart flow carries PIT forward into checkout/order handoff.
-14. Qredex later resolves attribution from the PIT at order ingestion time.
+13. Merchant reads PIT from the agent during checkout/order assembly.
+14. Merchant backend or direct Qredex ingestion path receives order payload + PIT.
+15. Qredex resolves attribution from the PIT at order ingestion time.
 
 ---
 
@@ -117,6 +118,10 @@ The agent maintains a simple cart state machine:
 
 ## Merchant Integration
 
+The merchant owns cart mutations, totals, checkout, and order submission. The
+agent owns attribution state: IIT capture, IIT → PIT lock, and PIT exposure for
+the order path.
+
 ### Primary Method: `handleCartChange()`
 
 ```typescript
@@ -124,6 +129,19 @@ The agent maintains a simple cart state machine:
 QredexAgent.handleCartChange({
   itemCount: 3,        // Current cart item count
   previousCount: 0,    // Previous cart item count
+});
+```
+
+```typescript
+// Merchant reads PIT when assembling the final order payload
+const pit = QredexAgent.getPurchaseIntentToken();
+
+await fetch('/api/orders', {
+  method: 'POST',
+  body: JSON.stringify({
+    orderId: 'order-123',
+    qredex_pit: pit,
+  }),
 });
 ```
 

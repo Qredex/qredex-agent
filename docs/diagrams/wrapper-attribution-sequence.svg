@@ -16,41 +16,61 @@
 
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="390" viewBox="0 0 1180 390" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="430" viewBox="0 0 1560 430" role="img" aria-labelledby="title desc">
   <title id="title">Wrapper attribution flow</title>
-  <desc id="desc">Framework cart UI calls useQredexAgent, forwards cart changes to the core agent, and reads PIT for checkout.</desc>
-  <rect width="1180" height="390" fill="#f6f1e8"/>
-  <rect x="40" y="40" width="220" height="70" rx="18" fill="#1f1b18"/>
-  <rect x="300" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
-  <rect x="580" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
-  <rect x="860" y="40" width="280" height="70" rx="18" fill="#BDFF1C"/>
-  <text x="150" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
-  <text x="420" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Cart UI</text>
-  <text x="420" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Your existing surface</text>
-  <text x="700" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">useQredexAgent()</text>
-  <text x="700" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Thin framework adapter</text>
-  <text x="1000" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#000">QredexAgent</text>
-  <text x="1000" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#000">Core attribution runtime</text>
+  <desc id="desc">Framework cart UI calls useQredexAgent, forwards merchant cart changes to the core agent, then reads PIT so the backend can carry order and PIT into Qredex attribution.</desc>
+  <rect width="1560" height="430" fill="#f6f1e8"/>
 
-  <path d="M150 130 L150 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M420 130 L420 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M700 130 L700 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
-  <path d="M1000 130 L1000 350" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <rect x="40" y="40" width="200" height="70" rx="18" fill="#1f1b18"/>
+  <rect x="280" y="40" width="220" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <rect x="540" y="40" width="240" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <rect x="820" y="40" width="230" height="70" rx="18" fill="#BDFF1C"/>
+  <rect x="1090" y="40" width="220" height="70" rx="18" fill="#ede4d8" stroke="#cbb9a4" stroke-width="2"/>
+  <rect x="1350" y="40" width="170" height="70" rx="18" fill="#BDFF1C"/>
 
-  <path d="M165 160 H685" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="685,160 670,152 670,168" fill="#1f1b18"/>
-  <text x="425" y="148" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">Land with qdx_intent → call useQredexAgent()</text>
+  <text x="140" y="84" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#fff">User</text>
+  <text x="390" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Cart UI</text>
+  <text x="390" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Merchant surface</text>
+  <text x="660" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">useQredexAgent()</text>
+  <text x="660" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Thin wrapper</text>
+  <text x="935" y="74" font-family="Arial, sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#000">QredexAgent</text>
+  <text x="935" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#000">Core attribution runtime</text>
+  <text x="1200" y="74" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#1f1b18">Merchant Backend</text>
+  <text x="1200" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#5c5247">Carries order + PIT</text>
+  <text x="1435" y="74" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f1b18">Qredex</text>
+  <text x="1435" y="101" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">Attribution</text>
 
-  <path d="M435 210 H985" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="985,210 970,202 970,218" fill="#1f1b18"/>
-  <text x="710" y="198" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.handleCartChange({ itemCount, previousCount })</text>
+  <path d="M140 130 L140 375" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M390 130 L390 375" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M660 130 L660 375" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M935 130 L935 375" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1200 130 L1200 375" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M1435 130 L1435 375" stroke="#1f1b18" stroke-width="3" stroke-dasharray="8 8"/>
 
-  <rect x="780" y="222" width="440" height="72" rx="20" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
-  <text x="1000" y="252" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">Agent captures IIT and locks to PIT</text>
-  <text x="1000" y="272" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">when lockable</text>
+  <path d="M155 160 H645" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="645,160 630,152 630,168" fill="#1f1b18"/>
+  <text x="400" y="148" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">Land with qdx_intent → call useQredexAgent()</text>
 
-  <path d="M435 348 H985" stroke="#1f1b18" stroke-width="4" fill="none"/>
-  <polygon points="985,348 970,340 970,356" fill="#1f1b18"/>
-  <text x="615" y="316" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">agent.getPurchaseIntentToken()</text>
-  <text x="655" y="336" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">→ send PIT to your backend</text>
+  <path d="M405 210 H920" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="920,210 905,202 905,218" fill="#1f1b18"/>
+  <text x="662" y="198" font-family="Arial, sans-serif" font-size="17" text-anchor="middle" fill="#1f1b18">agent.handleCartChange({ itemCount, previousCount })</text>
+
+  <rect x="705" y="222" width="460" height="72" rx="20" fill="#fff" stroke="#d9cbb8" stroke-width="2"/>
+  <text x="935" y="250" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">The wrapper stays headless while the core agent</text>
+  <text x="935" y="270" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">captures IIT and locks to PIT on a real cart</text>
+
+  <path d="M405 356 H920" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="920,356 905,348 905,364" fill="#1f1b18"/>
+  <text x="620" y="324" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">agent.getPurchaseIntentToken()</text>
+  <text x="660" y="344" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">→ merchant reads PIT for the order</text>
+
+  <path d="M950 356 H1185" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1185,356 1170,348 1170,364" fill="#1f1b18"/>
+  <text x="1067" y="324" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">order payload + PIT</text>
+  <text x="1067" y="344" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f1b18">travel to backend</text>
+
+  <path d="M1215 356 H1420" stroke="#1f1b18" stroke-width="4" fill="none"/>
+  <polygon points="1420,356 1405,348 1405,364" fill="#1f1b18"/>
+  <text x="1317" y="324" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">backend forwards PIT</text>
+  <text x="1317" y="343" font-family="Arial, sans-serif" font-size="15" text-anchor="middle" fill="#1f1b18">into Qredex attribution</text>
 </svg>

@@ -19,7 +19,7 @@
 
 # Qredex Agent
 
-**Lightweight browser agent for Qredex intent capture and locking.**
+**Deterministic browser runtime for Qredex intent capture, locking, and PIT handoff.**
 
 [![CI](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Qredex/qredex-agent/actions/workflows/ci.yml)
 [![Release](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml/badge.svg)](https://github.com/Qredex/qredex-agent/actions/workflows/release.yml)
@@ -59,19 +59,29 @@ The wrapper packages include `@qredex/agent`, so framework consumers only need t
 
 ### 2. Attribution Sequence
 
-![Qredex attribution sequence](https://raw.githubusercontent.com/Qredex/qredex-agent/main/docs/diagrams/agent-attribution-sequence.svg)
+![Qredex attribution sequence](https://raw.githubusercontent.com/Qredex/qredex-agent/main/docs/diagrams/agent-attribution-sequence.svg?v=20260313-3)
 
-The agent never adds to cart, removes items, or clears the merchant cart. The storefront owns cart state and checkout; the agent only captures intent and reacts to merchant-reported cart events.
+The agent never adds to cart, removes items, or clears the merchant cart. The storefront owns cart state, checkout, and order submission; the agent only captures intent, locks IIT to PIT, and exposes PIT for backend attribution.
 
 ### 3. Connect Cart And Checkout
+
+Your storefront owns cart mutations and order creation. Qredex only needs the
+merchant-reported cart transition so it can lock IIT to PIT. After lock, the
+merchant reads that PIT and carries it with the normal order payload to the
+merchant backend or direct Qredex order ingestion path, where attribution is
+resolved.
 
 ```javascript
 const agent = window.QredexAgent;
 
 async function addToCart(product) {
+  // [Merchant] Snapshot the current cart before your platform changes it.
   const previousCount = cart.itemCount;
+
+  // [Merchant] Perform the real cart mutation in your own backend/storefront.
   await api.post('/cart', product);
 
+  // [Qredex] Report the cart transition after the merchant cart is updated.
   agent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount,
@@ -79,9 +89,13 @@ async function addToCart(product) {
 }
 
 async function removeFromCart(line) {
+  // [Merchant] Snapshot the current cart before your platform changes it.
   const previousCount = cart.itemCount;
+
+  // [Merchant] Perform the real cart mutation in your own backend/storefront.
   await api.delete(`/cart/${line.id}`);
 
+  // [Qredex] Report the new live cart state so attribution can stay in sync.
   agent.handleCartChange({
     itemCount: cart.itemCount,
     previousCount,
@@ -89,18 +103,25 @@ async function removeFromCart(line) {
 }
 
 async function clearCart() {
+  // [Merchant] Clear the real cart in your own system first.
   await api.post('/cart/clear');
+
+  // [Qredex] Clear IIT/PIT because the merchant cart is now empty.
   agent.handleCartEmpty();
 }
 
 async function checkout(order) {
+  // [Qredex] Read the locked PIT that must travel with this order.
   const pit = agent.getPurchaseIntentToken();
 
+  // [Merchant] Submit your normal order payload and include the PIT so the
+  // backend can forward order + PIT into Qredex attribution ingestion.
   await api.post('/orders', {
     ...order,
     qredex_pit: pit,
   });
 
+  // [Merchant + Qredex] Reuse the same clear path after checkout succeeds.
   await clearCart();
 }
 ```
@@ -112,7 +133,7 @@ The agent automatically:
 - ✅ Stores IIT in browser storage (sessionStorage + cookie fallback)
 - ✅ Locks IIT → PIT when the merchant reports a non-empty cart and the state is lockable
 - ✅ Clears PIT when the merchant reports that the cart became empty or checkout succeeds
-- ✅ Exposes PIT for checkout
+- ✅ Exposes PIT so the merchant/backend can carry it into order attribution
 
 ### What Merchants Actually Call
 
@@ -134,8 +155,12 @@ Qredex Agent is a **lightweight browser runtime** (~5KB minified) that:
 1. **Captures** the `qdx_intent` token from URLs when users arrive via Qredex tracking links
 2. **Stores** the token securely in browser storage (sessionStorage + cookie fallback)
 3. **Locks** the token via Qredex API when the merchant reports a non-empty cart
-4. **Manages** attribution state throughout the shopping session
-5. **Exposes** the Purchase Intent Token (PIT) for checkout
+4. **Owns** attribution state throughout the shopping session
+5. **Exposes** the Purchase Intent Token (PIT) so the merchant/backend can carry it into order ingestion
+
+Qredex is not a cart SDK or checkout SDK. The merchant owns commerce actions.
+Qredex owns deterministic attribution state: capture IIT, lock IIT to PIT when
+the merchant reports a real cart, then make PIT available for the order path.
 
 ### Key Features
 
@@ -431,6 +456,7 @@ Then:
 const agent = window.QredexAgent;
 
 async function reportCart(previousCount, itemCount) {
+  // [Qredex] This is the one call that keeps attribution aligned with your cart.
   agent.handleCartChange({
     previousCount,
     itemCount,
@@ -443,13 +469,16 @@ document.querySelector('.add-to-cart').addEventListener('click', async (event) =
     id: button.dataset.productId,
     price: parseFloat(button.dataset.price),
   };
+  // [Merchant] Capture the cart count before your mutation runs.
   const previousCount = cart.itemCount;
 
+  // [Merchant] Add the item using your existing cart endpoint.
   await fetch('/api/cart', {
     method: 'POST',
     body: JSON.stringify(product),
   });
 
+  // [Qredex] Tell Qredex what the cart count changed from and to.
   reportCart(previousCount, cart.itemCount);
 });
 
@@ -460,22 +489,27 @@ document.querySelector('.remove-from-cart').addEventListener('click', async (eve
     productId: button.dataset.productId,
     price: parseFloat(button.dataset.price),
   };
+  // [Merchant] Capture the cart count before your mutation runs.
   const previousCount = cart.itemCount;
 
+  // [Merchant] Remove the item using your existing cart endpoint.
   await fetch(`/api/cart/${line.id}`, {
     method: 'DELETE',
   });
 
+  // [Qredex] Report the resulting cart state back to the agent.
   reportCart(previousCount, cart.itemCount);
 });
 
 document.querySelector('.clear-cart').addEventListener('click', async () => {
   const previousCount = cart.itemCount;
 
+  // [Merchant] Clear the real cart in your own system first.
   await fetch('/api/cart/clear', {
     method: 'POST',
   });
 
+  // [Qredex] Report the empty-cart transition so attribution is cleared.
   reportCart(previousCount, 0);
 });
 ```

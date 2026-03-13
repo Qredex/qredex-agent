@@ -1,50 +1,63 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  Licensed under the MIT License. See LICENSE for the full license text.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+
 # Qredex Agent - Integration Guide
 
 **Document Type:** Implementation Guide  
-**Status:** Complete  
-**Version:** 1.0 (Final)
+**Status:** Current  
+**Version:** 1.1
 
 ---
 
 ## Overview
 
-The Qredex Agent is a browser library that captures intent tokens and manages attribution state. It supports **2 integration paths** for merchants.
+Qredex Agent is a deterministic browser runtime for attribution. It captures
+IIT from the landing URL, locks IIT to PIT when the merchant reports a real
+cart, and exposes PIT so the merchant can carry order + PIT into backend
+attribution.
 
-### The 2 Paths
+Qredex does **not** own cart logic, pricing, checkout, or order submission. The
+merchant owns commerce actions. Qredex owns attribution state.
+
+## Current Install Paths
 
 | Path | Who | Setup |
 |------|-----|-------|
-| **1. Frontend Hooks** (Recommended) | React, Next.js, Vue, vanilla JS SPAs | Add listeners to cart events |
-| **2. Minimal Helper** | Any platform | Just capture IIT, backend handles rest |
+| **CDN / core runtime** | Vanilla JS, script-tag installs, storefront-controlled integrations | Load the IIFE bundle or `@qredex/agent`, then report cart transitions |
+| **Framework wrappers** | React, Vue, Svelte, Angular | Use the thin wrapper, which delegates to the same core runtime |
 
-### Not Supported
+## Ownership Model
 
-- ❌ Auto-detect (non-technical merchants use Shopify)
-- ❌ WooCommerce (plugin needed)
-- ❌ Magento (extension needed)
-- ❌ Shopify (separate app, already solved)
+| Layer | Responsibility |
+|-------|----------------|
+| **Merchant storefront** | Cart mutations, cart counts, totals, checkout UX |
+| **Qredex Agent** | Capture IIT, store tokens, lock IIT to PIT, expose PIT |
+| **Merchant backend** | Submit the order payload and carry PIT with that order |
+| **Qredex ingestion** | Resolve attribution from PIT + order |
 
----
+## Philosophy
 
-## Future: Framework SDKs
-
-**@qredex/client** is a separate project (React, Next.js, Vue SDKs) with framework-specific APIs:
-
-```jsx
-// React SDK (@qredex/client/react)
-import { useQredex } from '@qredex/client/react';
-
-function Cart() {
-  const { lockIntent, purchaseToken } = useQredex();
-  // ...
-}
-```
-
-**@qredex/agent** (this project) is the vanilla JS browser library that works everywhere.
-
-Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need framework-specific APIs.
-
----
+- Qredex is not a cart SDK.
+- Qredex is not a checkout SDK.
+- Wrapper packages stay headless and do not change attribution semantics.
+- The merchant tells Qredex what happened; Qredex does not guess.
+- PIT is created at lock time in the browser, then carried forward by the merchant order path.
 
 ## Complete User Flow
 
@@ -66,423 +79,67 @@ Use **@qredex/agent** directly for vanilla JS, jQuery, or when you don't need fr
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ 3a. USER CONTINUES SHOPPING (adds more items)                          │
-│    → PIT already exists, no new lock needed                            │
-│    → PIT persists in storage                                           │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────┐
-│ 3b. USER EMPTIES CART                                                  │
-│    → Merchant calls: handleCartEmpty()                                 │
-│    → Agent clears PIT from sessionStorage + cookie                     │
-│    → User must start flow over (new IIT from new Qredex link)          │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────────┐
-│ 3c. USER CLICKS ANOTHER QREDEX LINK (new IIT)                          │
-│    → New IIT captured from URL                                         │
-│    → BUT PIT already exists → IGNORE new IIT                           │
-│    → Original PIT preserved (first-touch attribution)                  │
+│ 3. USER CONTINUES SHOPPING                                             │
+│    → Merchant keeps reporting live cart transitions                    │
+│    → PIT already exists, so attribution stays attached to the cart     │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ 4. USER CHECKS OUT                                                     │
 │    → Merchant reads PIT: QredexAgent.getPurchaseIntentToken()          │
-│    → Merchant sends PIT to backend with order details                  │
-│    → Qredex backend resolves attribution from PIT                      │
+│    → Merchant backend receives order payload + PIT                     │
+│    → Qredex ingestion resolves attribution from PIT + order            │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 5. CART IS EMPTIED OR CHECKOUT COMPLETES                               │
+│    → Merchant calls handleCartEmpty() or handlePaymentSuccess()        │
+│    → Agent clears attribution state                                    │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
----
+## Canonical Merchant Calls
 
-## Token Lifecycle Rules
+| Merchant event | Call | Why |
+|---|---|---|
+| Shopper lands from Qredex link | No manual call required | Agent captures `qdx_intent` automatically |
+| Cart becomes non-empty | `handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
+| Cart changes while still non-empty | `handleCartChange(...)` | Safe retry path if a previous lock failed |
+| Clear cart action | `handleCartEmpty()` | Clears IIT/PIT from the live session |
+| Need PIT for order submission | `getPurchaseIntentToken()` | Read PIT and attach it to the order payload |
+| Checkout completes without a cart-empty step | `handlePaymentSuccess()` | Optional explicit cleanup path |
 
-### IIT (Influence Intent Token)
-- **Captured:** From URL `?qdx_intent=xxx` on page load
-- **Stored:** sessionStorage + cookie (fallback)
-- **Cleared:** When PIT is successfully locked
-- **NEW IIT arrives:** **IGNORED if PIT exists** (attribution already locked)
-- **Expires:** Based on cookie expiry (default 30 days)
-
-### PIT (Purchase Intent Token)
-- **Created:** When IIT is locked (first item added to cart)
-- **Stored:** sessionStorage + cookie (fallback)
-- **Cleared:** When cart becomes empty **OR** after successful checkout
-- **Persists:** Through multiple cart additions, through new IIT captures, until cart emptied or checkout completed
-- **Irrecoverable:** Once cleared, user needs new IIT (new Qredex link)
-
-### Key Rules
-
-> **Rule 1: One PIT per shopping session.** Once cart is emptied, attribution flow must restart with new IIT from new Qredex tracking link.
-
-> **Rule 2: PIT takes precedence over IIT.** If PIT exists and new IIT is captured, ignore the new IIT. First touch attribution is preserved until cart is emptied.
-
-> **Rule 3: Clear PIT after successful checkout.** Merchant must clear PIT after order completion to allow new attribution flow.
-
-**See also:** [Cart Empty Policy](./CART_EMPTY_POLICY.md) - Complete rationale and implementation guidance.
-
----
-
-## Path 1: Frontend Hooks (Recommended)
-
-### Who Should Use This
-
-- React, Next.js, Vue storefronts
-- SPAs with frontend-managed cart
-- Merchants who want reliable integration
-- **Primary target for Qredex Agent**
-
-### Integration Steps
-
-**1. Install Agent**
-
-```html
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
-```
-
-**2. Handle Cart Events (Merchant → Agent)**
+## Example Integration Contract
 
 ```javascript
-// Merchant reports live cart state after cart changed
-QredexAgent.handleCartChange({
-  itemCount: cart.itemCount,
-  previousCount: cart.itemCount - 1,
-});
+async function addToCart(product) {
+  const previousCount = cart.itemCount;
 
-// Merchant tells agent when cart is emptied
-QredexAgent.handleCartEmpty();
-// → Agent auto-clears PIT from storage
+  await api.post('/cart', product);
 
-// Optional explicit clear if checkout completes without a cart-empty step
-QredexAgent.handlePaymentSuccess();
-// → Agent auto-clears PIT from storage
-```
+  QredexAgent.handleCartChange({
+    itemCount: cart.itemCount,
+    previousCount,
+  });
+}
 
-**3. Listen for Agent Events (Agent → Merchant) - Optional**
+async function submitOrder(order) {
+  const pit = QredexAgent.getPurchaseIntentToken();
 
-```javascript
-// Listen for successful lock
-QredexAgent.onLocked(({ purchaseToken }) => {
-  console.log('PIT locked:', purchaseToken);
-});
-
-// Listen for cleared state
-QredexAgent.onCleared(() => {
-  console.log('PIT cleared');
-});
-
-// Listen for errors
-QredexAgent.onError(({ error }) => {
-  console.error('Agent error:', error);
-});
-```
-
-**4. Read PIT at Checkout**
-
-```javascript
-const pit = QredexAgent.getPurchaseIntentToken();
-// Send to backend with order
-```
-
-### Example: React/Next.js
-
-```jsx
-function useQredexAgent() {
-  useEffect(() => {
-    // Listen for agent events (optional)
-    QredexAgent.onLocked(({ purchaseToken }) => {
-      console.log('PIT locked:', purchaseToken);
-    });
-  }, []);
-
-  const addToCart = async (product) => {
-    await api.post('/cart', { productId: product.id });
-
-    // Tell agent the live cart state after the cart changed
-    QredexAgent.handleCartChange({
-      itemCount: cart.itemCount,
-      previousCount: cart.itemCount - 1,
-    });
-  };
-
-  const completeCheckout = async (orderData) => {
-    const pit = QredexAgent.getPurchaseIntentToken();
-
-    const result = await api.post('/orders', {
-      ...orderData,
-      qredex_pit: pit,
-    });
-
-    // Optional explicit clear if checkout completes without a cart-empty step
-    QredexAgent.handlePaymentSuccess();
-
-    return result;
-  };
-
-  return { addToCart, completeCheckout };
+  await api.post('/orders', {
+    ...order,
+    qredex_pit: pit,
+  });
 }
 ```
 
----
-
-## Path 2: Minimal Helper
-
-### Who Should Use This
-
-- Platforms where backend handles everything
-- jQuery/traditional sites
-- Merchants who prefer backend integration
-- **Fallback option**
-
-### Integration Steps
-
-**1. Install Agent**
-
-```html
-<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
-```
-
-**2. Backend Reads IIT**
-
-```javascript
-// Backend reads IIT from browser
-const iit = QredexAgent.getInfluenceIntentToken();
-
-// Backend calls its own capture API
-await fetch('/api/capture-iit', {
-    method: 'POST',
-    body: JSON.stringify({ iit })
-});
-```
-
-**3. Backend Handles Everything**
-
-- Backend calls lock API on cart add
-- Backend clears PIT on cart empty
-- Backend sends PIT with order
-
-**Agent does NOT handle locking - just IIT capture.**
-
-### Example: jQuery/Traditional
-
-```javascript
-// Backend handles everything (PHP, Python, Ruby, etc.)
-// Frontend just uses jQuery for cart operations
-
-// Cart add (jQuery)
-$('.add-to-cart').on('click', function() {
-    $.post('/cart/add', {
-        product_id: $(this).data('product-id')
-    }, function(response) {
-        // Backend already called lock API
-        // No frontend Qredex code needed
-    });
-});
-
-// At checkout, backend sends PIT with order
-// No frontend Qredex code needed
-```
-
----
-
-## API Reference
-
-### Always Available (All Paths)
-
-```typescript
-// Get PIT for checkout
-getPurchaseIntentToken(): string | null
-
-// Get IIT (before locked)
-getInfluenceIntentToken(): string | null
-
-// Check if IIT exists
-hasInfluenceIntentToken(): boolean
-
-// Check if PIT exists
-hasPurchaseIntentToken(): boolean
-
-// Clear IIT/PIT tokens (after checkout or cart empty)
-clearIntent(): void
-
-// Manual lock (if not using handleCartChange)
-lockIntent(meta?: LockMeta): Promise<LockResult>
-```
-
-### Manual Methods (Direct Control)
-
-Use these if you prefer explicit control over auto-lock:
-
-```typescript
-// Lock IIT → PIT manually
-const result = await QredexAgent.lockIntent();
-
-// Clear IIT/PIT tokens manually
-QredexAgent.clearIntent();
-
-// Read PIT
-const pit = QredexAgent.getPurchaseIntentToken();
-```
-
-### Event Handlers (Merchant → Agent)
-
-Merchant tells agent when events happen:
-
-```typescript
-handleCartEmpty(): void
-handleCartChange(event: CartChangeEvent): void
-handlePaymentSuccess(event: PaymentSuccessEvent): void
-```
-
-### Event Listeners (Agent → Merchant) - Optional
-
-Listen for agent state changes:
-
-```typescript
-onLocked(handler: LockedHandler): void
-onCleared(handler: ClearedHandler): void
-onError(handler: ErrorHandler): void
-
-// Unregister listeners
-offLocked(handler: LockedHandler): void
-offCleared(handler: ClearedHandler): void
-offError(handler: ErrorHandler): void
-```
-
-**Event Types:**
-```typescript
-interface CartAddMeta {
-  productId?: string;
-  quantity?: number;
-  price?: number;
-  timestamp?: number;
-}
-
-interface CartChangeEvent {
-  itemCount: number;
-  previousCount: number;
-  timestamp?: number;
-}
-
-interface PaymentSuccessEvent {
-  orderId: string;
-  amount: number;
-  currency: string;
-  timestamp?: number;
-}
-
-interface LockedEvent {
-  purchaseToken: string;
-  alreadyLocked: boolean;
-  timestamp: number;
-}
-
-interface ClearedEvent {
-  timestamp: number;
-}
-
-interface ErrorEvent {
-  error: string;
-  context?: string;
-}
-
-interface LockMeta {
-  productId?: string;
-  quantity?: number;
-  price?: number;
-  [key: string]: unknown;
-}
-
-interface LockResult {
-  success: boolean;
-  purchaseToken: string | null;
-  alreadyLocked: boolean;
-  error?: string;
-}
-
-type LockedHandler = (event: LockedEvent) => void;
-type ClearedHandler = (event: ClearedEvent) => void;
-type ErrorHandler = (event: ErrorEvent) => void;
-```
-
-### API Summary
-
-| Method | Type | Purpose |
-|--------|------|---------|
-| `getInfluenceIntentToken()` | Manual | Read IIT |
-| `getPurchaseIntentToken()` | Manual | Read PIT |
-| `hasInfluenceIntentToken()` | Manual | Check IIT exists |
-| `hasPurchaseIntentToken()` | Manual | Check PIT exists |
-| `lockIntent(meta?)` | Manual | Lock IIT → PIT |
-| `clearIntent()` | Manual | Clear local IIT/PIT state |
-| `handleCartEmpty()` | Event Input | Merchant tells agent cart is empty |
-| `handleCartChange(event)` | Event Input | Merchant sends cart state change |
-| `handlePaymentSuccess(event?)` | Event Input | Optional explicit post-payment clear |
-| `onLocked(handler)` | Hook | Listen for successful lock |
-| `onCleared(handler)` | Hook | Listen for cleared state |
-| `onError(handler)` | Hook | Listen for agent errors |
-| `offLocked(handler)` | Hook | Unregister lock listener |
-| `offCleared(handler)` | Hook | Unregister clear listener |
-| `offError(handler)` | Hook | Unregister error listener |
-
-**Both approaches work!** Choose what fits your codebase:
-- **Event handlers** (`handleCartChange`) for merchant-driven cart state reporting
-- **Manual methods** (`lockIntent`) for explicit control
-
----
-
-## Implementation Plan
-
-### Phase 1: Core Agent (~150 lines)
-- [x] IIT capture from URL (auto-start)
-- [x] PIT storage (sessionStorage + cookie)
-- [x] Lock logic (IIT → PIT via `/api/v1/agent/intents/lock`)
-- [x] Clear logic (IIT/PIT cleanup)
-- [x] Basic APIs: `getInfluenceIntentToken()`, `getPurchaseIntentToken()`, `lockIntent()`, `clearIntent()`
-
-### Phase 2: Event Handlers
-- [x] `handleCartEmpty()` implementation + auto-clear
-- [x] `handleCartChange()` implementation (optional tracking)
-- [x] `handlePaymentSuccess()` implementation + auto-clear
-- [x] `onLocked()` listener registration
-- [x] `onCleared()` listener registration
-- [x] `onError()` listener registration
-- [x] Listener unregistration (`off*` functions)
-
-### Phase 3: Documentation
-- [x] React/Next.js examples
-- [x] Vanilla JS examples
-- [x] Vue/Nuxt examples
-- [x] Troubleshooting guide
-- [x] Migration guide (from Shopify tracker)
-
-### Phase 4: Testing
-- [ ] React/Next.js storefront (Path 1)
-- [ ] jQuery/traditional platform (Path 2)
-
----
-
-## Success Metrics
-
-| Metric | Target |
-|--------|--------|
-| Agent code size | <200 lines |
-| Documentation | <30 pages |
-| Path 1 coverage | React/Next.js/Vue SPAs |
-| Path 2 coverage | jQuery/traditional fallback |
-| Time to integrate | <1 hour for developers |
-| Support burden | Minimal (clear paths, no detection issues) |
-
----
-
-## Related Documentation
-
-- [Cart Empty Policy](./CART_EMPTY_POLICY.md) - Why and when to clear attribution
-- [API Reference](./API.md) - Complete API documentation
-- [Installation Guide](./INSTALLATION.md) - Setup instructions
-
----
-
-## Support
-
-For questions: support@qredex.com
+## Recommended Path
+
+Use the canonical cart transition flow. It is simpler, more deterministic, and
+more supportable than parallel helper flows. Whether you install through the
+CDN bundle, the core package, or a framework wrapper, the attribution contract
+stays the same:
+
+1. Merchant owns commerce state.
+2. Qredex owns attribution state.
+3. Merchant reads PIT and carries it with the order.

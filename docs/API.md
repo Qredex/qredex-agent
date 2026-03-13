@@ -1,6 +1,29 @@
+<!--
+    ▄▄▄▄
+  ▄█▀▀███▄▄              █▄
+  ██    ██ ▄             ██
+  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+        ▀█
+
+  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  Licensed under the MIT License. See LICENSE for the full license text.
+  Redistribution and use are permitted under that license.
+
+  If you need additional information or have any questions, please email: copyright@qredex.com
+-->
+
 # Qredex Agent - API Reference
 
 Complete reference for the Qredex Agent public API.
+
+Qredex does not own cart or checkout behavior. Merchants call this API to
+report cart transitions, read PIT, and carry PIT into the order payload that
+their backend or direct Qredex ingestion path uses for attribution.
 
 ---
 
@@ -121,7 +144,7 @@ function getPurchaseIntentToken(): string | null
 const pit = QredexAgent.getPurchaseIntentToken();
 if (pit) {
   console.log('PIT:', pit);
-  console.log('Ready for checkout!');
+  console.log('Ready to attach to the order payload!');
 }
 ```
 

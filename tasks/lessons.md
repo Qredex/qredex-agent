@@ -23,3 +23,4 @@
 - Do not expose internal endpoint selection or storage keys as public merchant runtime configuration.
 - When npm Trusted Publishing has a documented npm CLI minimum, pin that npm version in CI instead of assuming the bundled npm from the chosen Node version is sufficient.
 - CDN verification commands that depend on protected bucket configuration should have a first-class GitHub Actions path, not just a local npm script.
+- In integration docs, do not phrase PIT as something Qredex "needs" in the order payload; Qredex creates PIT on lock, and the merchant/backend needs to forward that PIT with the order.
