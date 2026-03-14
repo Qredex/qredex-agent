@@ -60,11 +60,21 @@ type LockedHandler = (event: {
   timestamp: number;
 }) => void;
 
+export type ClearReason = 'cart_empty' | 'payment_success' | 'manual_clear';
+
 type ClearedHandler = (event: {
+  reason: ClearReason;
   timestamp: number;
 }) => void;
 
+export type AgentErrorCode =
+  | 'invalid_cart_counts'
+  | 'lock_failed'
+  | 'lock_request_failed';
+
 type ErrorHandler = (event: {
+  code: AgentErrorCode;
+  message: string;
   error: string;
   context?: string;
 }) => void;
@@ -366,6 +376,8 @@ function emitStateChanged(): void {
 }
 
 function emitErrorEvent(event: {
+  code: AgentErrorCode;
+  message: string;
   error: string;
   context?: string;
 }): void {
@@ -440,14 +452,34 @@ export async function lockIntent(meta?: LockMeta): Promise<LockResult> {
  * @see {@link handleCartChange} - Automatically clears on cart empty
  * @see {@link handlePaymentSuccess} - Automatically clears on payment success
  */
-function clearIntent(): void {
+function clearAttributionState(reason: ClearReason, timestamp?: number): void {
   const config = getConfig();
   clearAllTokens({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
     cookieExpireDays: config.cookieExpireDays,
   });
+  info(`Attribution state cleared (${reason})`);
   debug('Tokens cleared');
+
+  const clearedEvent = {
+    reason,
+    timestamp: timestamp ?? Date.now(),
+  };
+
+  for (const handler of clearedHandlers) {
+    try {
+      handler(clearedEvent);
+    } catch (err) {
+      reportInternalError('onCleared handler error', err);
+    }
+  }
+
+  emitStateChanged();
+}
+
+export function clearIntent(): void {
+  clearAttributionState('manual_clear');
 }
 
 // ============================================
@@ -525,6 +557,8 @@ export function handleCartChange(event: {
   // Validate inputs
   if (typeof itemCount !== 'number' || typeof previousCount !== 'number') {
     emitErrorEvent({
+      code: 'invalid_cart_counts',
+      message: 'itemCount and previousCount must be numbers',
       error: 'itemCount and previousCount must be numbers',
       context: 'handleCartChange',
     });
@@ -533,6 +567,8 @@ export function handleCartChange(event: {
 
   if (itemCount < 0 || previousCount < 0) {
     emitErrorEvent({
+      code: 'invalid_cart_counts',
+      message: 'itemCount and previousCount must be non-negative',
       error: 'itemCount and previousCount must be non-negative',
       context: 'handleCartChange',
     });
@@ -581,6 +617,8 @@ export function handleCartChange(event: {
         } else {
           // Emit error event
           emitErrorEvent({
+            code: 'lock_failed',
+            message: result.error ?? 'Lock failed',
             error: result.error ?? 'Lock failed',
             context: 'handleCartChange',
           });
@@ -590,6 +628,8 @@ export function handleCartChange(event: {
         reportInternalError('handleCartChange lock failed', err);
 
         emitErrorEvent({
+          code: 'lock_request_failed',
+          message: err instanceof Error ? err.message : 'Unknown error',
           error: err instanceof Error ? err.message : 'Unknown error',
           context: 'handleCartChange',
         });
@@ -600,25 +640,7 @@ export function handleCartChange(event: {
   if (itemCount === 0 && previousCount > 0 && hasPurchaseIntentToken()) {
     info('Merchant reported cart empty; clearing IIT/PIT state');
     debug('Cart emptied, clearing tokens');
-
-    // Auto-clear tokens
-    clearIntent();
-
-    // Emit cleared event to listeners
-    const clearedEvent = {
-      timestamp: timestamp ?? Date.now(),
-    };
-
-    for (const handler of clearedHandlers) {
-      try {
-        handler(clearedEvent);
-      } catch (err) {
-        reportInternalError('onCleared handler error', err);
-      }
-    }
-
-    // Emit state changed event
-    emitStateChanged();
+    clearAttributionState('cart_empty', timestamp);
   }
 }
 
@@ -656,6 +678,8 @@ export function handleCartAdd(
 
   if (typeof itemCount !== 'number' || itemCount < 0) {
     emitErrorEvent({
+      code: 'invalid_cart_counts',
+      message: 'itemCount must be a non-negative number',
       error: 'itemCount must be a non-negative number',
       context: 'handleCartAdd',
     });
@@ -747,25 +771,7 @@ export function handlePaymentSuccess(event?: PaymentSuccessEvent): void {
   warnIfMissingPurchaseToken('handlePaymentSuccess');
   info('Merchant reported payment success; clearing IIT/PIT state');
   debug('Payment success event received', event);
-
-  // Auto-clear tokens
-  clearIntent();
-
-  // Emit cleared event to listeners
-  const clearedEvent = {
-    timestamp: event?.timestamp ?? Date.now(),
-  };
-
-  for (const handler of clearedHandlers) {
-    try {
-      handler(clearedEvent);
-    } catch (err) {
-      reportInternalError('onCleared handler error', err);
-    }
-  }
-
-  // Emit state changed event
-  emitStateChanged();
+  clearAttributionState('payment_success', event?.timestamp);
 }
 
 // ============================================
@@ -806,8 +812,8 @@ export function onLocked(handler: LockedHandler): void {
  *
  * @example
  * ```TypeScript
- * QredexAgent.onCleared(({ timestamp }) => {
- *   console.log('🗑️ Cleared');
+ * QredexAgent.onCleared(({ reason, timestamp }) => {
+ *   console.log('🗑️ Cleared because', reason);
  *   showNotification('Attribution cleared');
  * });
  * ```
@@ -830,9 +836,9 @@ export function onCleared(handler: ClearedHandler): void {
  *
  * @example
  * ```TypeScript
- * QredexAgent.onError(({ error, context }) => {
- *   console.error('❌ Error in', context, ':', error);
- *   showNotification('Error: ' + error, 'error');
+ * QredexAgent.onError(({ code, message, context }) => {
+ *   console.error('❌ Error in', context, code, message);
+ *   showNotification('Error: ' + message, 'error');
  * });
  * ```
  *

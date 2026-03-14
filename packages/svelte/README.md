@@ -38,6 +38,14 @@ npm install @qredex/svelte
 
 Call `useQredexAgent()`, then forward merchant cart state with `agent.handleCartChange(...)`, read the PIT with `agent.getPurchaseIntentToken()`, and clear attribution with `agent.handleCartEmpty()`. Only call `agent.handlePaymentSuccess()` if your platform has no cart-empty step after checkout.
 
+## Merchant Integration Checklist
+
+- Initialize the wrapper in the cart surface you already own
+- Report every real merchant cart transition with `agent.handleCartChange(...)`
+- Read PIT during checkout or order assembly
+- Send `order + PIT` to your backend or direct ingestion path
+- Clear attribution with `agent.handleCartEmpty()` or `agent.handlePaymentSuccess()`
+
 ## Recommended Integration
 
 Use `useQredexAgent()` inside the existing cart surface you already own. The wrapper stays headless.

@@ -292,6 +292,9 @@ QredexAgent.clearIntent();
 - When cart is emptied
 - When user logs out
 
+**Event behavior:**
+- Emits `onCleared({ reason: 'manual_clear' })`
+
 ---
 
 ## Event Handlers (Merchant → Agent)
@@ -353,7 +356,7 @@ function clearCart() {
 **What happens:**
 1. Clears IIT from storage
 2. Clears PIT from storage
-3. Emits `onCleared` event
+3. Emits `onCleared({ reason: 'cart_empty' })`
 
 ---
 
@@ -413,7 +416,7 @@ QredexAgent.handlePaymentSuccess();
 **What happens:**
 1. Clears IIT from storage
 2. Clears PIT from storage
-3. Emits `onCleared` event
+3. Emits `onCleared({ reason: 'payment_success' })`
 
 ---
 
@@ -454,14 +457,15 @@ Listen for cleared state events.
 **Signature:**
 ```typescript
 function onCleared(handler: (event: {
+  reason: 'cart_empty' | 'payment_success' | 'manual_clear';
   timestamp: number;
 }) => void): void
 ```
 
 **Example:**
 ```javascript
-QredexAgent.onCleared(() => {
-  console.log('🗑️ Cleared');
+QredexAgent.onCleared(({ reason }) => {
+  console.log('🗑️ Cleared because', reason);
   showNotification('Attribution cleared');
 });
 ```
@@ -475,6 +479,8 @@ Listen for agent error events.
 **Signature:**
 ```typescript
 function onError(handler: (event: {
+  code: 'invalid_cart_counts' | 'lock_failed' | 'lock_request_failed';
+  message: string;
   error: string;
   context?: string;
 }) => void): void
@@ -482,9 +488,9 @@ function onError(handler: (event: {
 
 **Example:**
 ```javascript
-QredexAgent.onError(({ error, context }) => {
-  console.error('❌ Error in', context, ':', error);
-  showNotification('Error: ' + error, 'error');
+QredexAgent.onError(({ code, message, context }) => {
+  console.error('❌ Error in', context, code, message);
+  showNotification('Error: ' + message, 'error');
 });
 ```
 

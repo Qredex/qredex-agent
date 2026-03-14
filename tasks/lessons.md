@@ -27,3 +27,4 @@
 - 2026-03-13: When fixing SVG label overlap, check the actual text and box coordinates. If text baseline equals or nearly equals the box edge, move the whole lane farther away instead of making only tiny y-offset tweaks.
 - 2026-03-13: In sequence diagrams, arrow origin is part of the product contract. If the merchant owns order submission, the order arrow must start from the merchant lane, not the QredexAgent lane.
 - 2026-03-14: When documenting optional manual init for CDN/script-tag usage, explicitly state that auto-init and automatic IIT capture remain the default and recommended path. Do not let the docs imply merchants should manually capture IIT.
+- 2026-03-14: Be proactively opinionated about platform and documentation improvements. Do not wait for the user to ask before recommending the cleaner, safer, more customer-facing path when it is materially better.

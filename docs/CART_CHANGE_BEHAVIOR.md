@@ -225,8 +225,9 @@ QredexAgent.handleCartChange({
 
 **Error emitted:**
 ```javascript
-QredexAgent.onError(({ error, context }) => {
-  // error: "itemCount and previousCount must be numbers"
+QredexAgent.onError(({ code, message, context }) => {
+  // code: "invalid_cart_counts"
+  // message: "itemCount and previousCount must be numbers"
   // context: "handleCartChange"
 });
 ```

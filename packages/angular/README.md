@@ -38,6 +38,14 @@ npm install @qredex/angular
 
 Call `provideQredexAgent()` once at bootstrap, get the runtime with `injectQredexAgent()`, then forward merchant cart state with `agent.handleCartChange(...)`, read the PIT with `agent.getPurchaseIntentToken()`, and clear attribution with `agent.handleCartEmpty()`. Only call `agent.handlePaymentSuccess()` if your platform has no cart-empty step after checkout.
 
+## Merchant Integration Checklist
+
+- Register `provideQredexAgent()` once at bootstrap
+- Report every real merchant cart transition with `agent.handleCartChange(...)`
+- Read PIT during checkout or order assembly
+- Send `order + PIT` to your backend or direct ingestion path
+- Clear attribution with `agent.handleCartEmpty()` or `agent.handlePaymentSuccess()`
+
 ## Recommended Integration
 
 Register `provideQredexAgent()` once, then call `injectQredexAgent()` inside the existing cart surface you already control.

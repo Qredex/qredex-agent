@@ -65,7 +65,24 @@ describe('State change events', () => {
     expect(QredexAgent.getPurchaseIntentToken()).toBeNull();
     expect(cleared).toHaveBeenCalledTimes(1);
     expect(cleared.mock.calls[0][0]).toMatchObject({
+      reason: 'payment_success',
       timestamp: expect.any(Number),
     });
+  });
+
+  it('emits manual_clear when clearIntent is called directly', () => {
+    QredexAgent.init();
+
+    const cleared = vi.fn();
+    QredexAgent.onCleared(cleared);
+
+    QredexAgent.clearIntent();
+
+    expect(cleared).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reason: 'manual_clear',
+        timestamp: expect.any(Number),
+      })
+    );
   });
 });

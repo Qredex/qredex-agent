@@ -40,20 +40,7 @@
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-**Dev CDN / local Core E2E**
-
-```html
-<script src="https://cdn.qredex.com/agent/dev/qredex-agent.iife.min.js"></script>
-```
-
-The `/dev/` script is engineer-only and always calls:
-
-```text
-http://127.0.0.1:8080/api/v1/agent/intents/lock
-```
-
-So it only makes sense when the page and the local Core service are running on
-the same machine.
+For local engineer E2E, dev CDN usage, and local Core sandbox setup, see [docs/DEVELOPMENT.md](/Users/bobai/Workspace/Qredex/qredex-agent/docs/DEVELOPMENT.md).
 
 **Core package**
 
@@ -225,6 +212,23 @@ const state = QredexAgent.getState();
 // }
 ```
 
+### Tiny Support Panel
+
+```html
+<button onclick="renderQredexDebug()">Refresh Qredex state</button>
+<pre id="qredex-debug"></pre>
+
+<script>
+  function renderQredexDebug() {
+    const snapshot = QredexAgent.getState();
+    document.getElementById('qredex-debug').textContent =
+      JSON.stringify(snapshot, null, 2);
+  }
+
+  renderQredexDebug();
+</script>
+```
+
 ### Event Handlers (Merchant → Agent)
 
 Tell the agent when events happen:
@@ -284,6 +288,14 @@ await fetch('/orders', {
 QredexAgent.handlePaymentSuccess();
 ```
 
+### Merchant Integration Checklist
+
+- Load the agent and let it auto-init
+- Report every real merchant cart transition with `handleCartChange(...)`
+- Read PIT with `getPurchaseIntentToken()` during checkout or order assembly
+- Send `order + PIT` to your backend or direct ingestion path
+- Clear attribution with `handleCartEmpty()` or `handlePaymentSuccess()`
+
 ### Tiny Cart Restore Helper
 
 ```javascript
@@ -313,13 +325,13 @@ QredexAgent.onLocked(({ purchaseToken, alreadyLocked, timestamp }) => {
 });
 
 // Listen for cleared state
-QredexAgent.onCleared(({ timestamp }) => {
-  console.log('🗑️ Cleared');
+QredexAgent.onCleared(({ reason, timestamp }) => {
+  console.log('🗑️ Cleared because', reason);
 });
 
 // Listen for errors
-QredexAgent.onError(({ error, context }) => {
-  console.error('❌ Error in', context, ':', error);
+QredexAgent.onError(({ code, message, context }) => {
+  console.error('❌ Error in', context, code, message);
 });
 
 // Listen for attribution state changes (NEW)
@@ -674,6 +686,7 @@ Open DevTools → Application → Storage:
 
 | Document | Description |
 |----------|-------------|
+| **[Development](docs/DEVELOPMENT.md)** | Engineer-only dev CDN, local Core, and sandbox guidance |
 | **[Integration Model](docs/INTEGRATION_MODEL.md)** | Complete integration guide with 2 paths |
 | **[API Reference](docs/API.md)** | Full API documentation |
 | **[Cart Change Behavior](docs/CART_CHANGE_BEHAVIOR.md)** | handleCartChange() state transitions |

@@ -114,4 +114,23 @@ describe('Public init', () => {
       expect.stringContaining('handlePaymentSuccess called without a PIT')
     );
   });
+
+  it('should emit stable error codes for invalid cart counts', () => {
+    const handler = vi.fn();
+
+    QredexAgent.onError(handler);
+    QredexAgent.handleCartChange({
+      itemCount: -1,
+      previousCount: 0,
+    });
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: 'invalid_cart_counts',
+        message: 'itemCount and previousCount must be non-negative',
+        error: 'itemCount and previousCount must be non-negative',
+        context: 'handleCartChange',
+      })
+    );
+  });
 });

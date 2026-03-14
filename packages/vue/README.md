@@ -38,6 +38,14 @@ npm install @qredex/vue
 
 Call `useQredexAgent()`, then forward merchant cart state with `agent.handleCartChange(...)`, read the PIT with `agent.getPurchaseIntentToken()`, and clear attribution with `agent.handleCartEmpty()`. Only call `agent.handlePaymentSuccess()` if your platform has no cart-empty step after checkout.
 
+## Merchant Integration Checklist
+
+- Register the plugin once in the browser app
+- Report every real merchant cart transition with `agent.handleCartChange(...)`
+- Read PIT during checkout or order assembly
+- Send `order + PIT` to your backend or direct ingestion path
+- Clear attribution with `agent.handleCartEmpty()` or `agent.handlePaymentSuccess()`
+
 ## Recommended Integration
 
 Register the plugin once, then use `useQredexAgent()` inside the cart surface you already control.
