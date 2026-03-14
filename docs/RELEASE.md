@@ -102,6 +102,11 @@ The release workflow:
 4. prepares first-party CDN assets from the production build
 5. uploads versioned CDN assets to Cloudflare R2
 
+If a `main` push changes `package.json` files without creating a new release tag,
+the production npm/CDN workflows now exit cleanly as no-ops instead of failing.
+That keeps `dev` and `staging` publishing on every `main` push without creating
+false production release failures.
+
 For manual recovery of an existing release tag after workflow-only changes, dispatch the workflow from `main` and pass the tag as `release_ref`:
 
 ```bash

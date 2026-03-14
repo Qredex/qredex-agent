@@ -77,21 +77,31 @@ jobs:
           git fetch --force --tags origin
           VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
           TAG="v${VERSION}"
-          TAG_COMMIT=$(git rev-list -n 1 "${TAG}")
+          TAG_COMMIT=$(git rev-list -n 1 "${TAG}" 2>/dev/null || true)
           CURRENT_COMMIT=$(git rev-parse HEAD)
-
-          test -n "${TAG_COMMIT}"
-          test "${TAG_COMMIT}" = "${CURRENT_COMMIT}"
 
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
+          if [ -n "${TAG_COMMIT}" ] && [ "${TAG_COMMIT}" = "${CURRENT_COMMIT}" ]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "No release tag for commit ${CURRENT_COMMIT}; skipping npm publish."
+          fi
+
+      - name: Skip non-release commit
+        if: steps.release.outputs.should_publish != 'true'
+        run: echo "Skipping npm publish because this main commit did not create a production release tag."
+
       - name: Publish packages to npm
+        if: steps.release.outputs.should_publish == 'true'
         run: npm run publish:npm
         env:
           QREDEX_NPM_PROVENANCE: 'true'
 
       - name: Create GitHub Release
+        if: steps.release.outputs.should_publish == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}

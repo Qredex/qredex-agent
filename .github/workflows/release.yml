@@ -72,33 +72,49 @@ jobs:
         run: npm ci
 
       - name: Resolve release tag
+        id: release
         run: |
           git fetch --force --tags origin
           VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
           TAG="v${VERSION}"
-          TAG_COMMIT=$(git rev-list -n 1 "${TAG}")
+          TAG_COMMIT=$(git rev-list -n 1 "${TAG}" 2>/dev/null || true)
           CURRENT_COMMIT=$(git rev-parse HEAD)
 
-          test -n "${TAG_COMMIT}"
-          test "${TAG_COMMIT}" = "${CURRENT_COMMIT}"
+          if [ -n "${TAG_COMMIT}" ] && [ "${TAG_COMMIT}" = "${CURRENT_COMMIT}" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "No release tag for commit ${CURRENT_COMMIT}; skipping production CDN publish."
+          fi
+
+      - name: Skip non-release commit
+        if: steps.release.outputs.should_release != 'true'
+        run: echo "Skipping production CDN publish because this main commit did not create a production release tag."
 
       - name: Lint
+        if: steps.release.outputs.should_release == 'true'
         run: npm run lint
 
       - name: Install Playwright browser
+        if: steps.release.outputs.should_release == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Browser smoke test
+        if: steps.release.outputs.should_release == 'true'
         run: npm run test:browser
 
       - name: Release checks
+        if: steps.release.outputs.should_release == 'true'
         run: npm run release:check
 
       - name: Prepare CDN release assets
+        if: steps.release.outputs.should_release == 'true'
         run: node scripts/prepare-cdn-release.mjs
 
       - name: Upload CDN release assets
+        if: steps.release.outputs.should_release == 'true'
         run: npm run release:cdn:upload
 
       - name: Verify CDN history
+        if: steps.release.outputs.should_release == 'true'
         run: npm run release:cdn:verify
