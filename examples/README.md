@@ -85,7 +85,7 @@ The examples demonstrate the complete Qredex Agent flow:
 2. **Lock IIT → PIT** - Exchanges intent token for purchase token on "Add to Cart"
 3. **Clear Tokens** - Clears all attribution state on "Clear Cart"
 
-**Note:** The CDN page uses `dist/qredex-agent.iife.dev.min.js` with `useMockEndpoint: true`. The wrapper pages use their wrapper packages directly with the same mock setting, so they generate fake PIT tokens locally without network calls.
+**Note:** The CDN page uses `dist/qredex-agent.iife.dev.min.js` with `useMockEndpoint: true` and auto-inits through the script-tag path. The wrapper pages use their wrapper packages directly with the same mock setting and initialize through the wrapper bootstrap/hook layer, so they generate fake PIT tokens locally without network calls.
 
 Wrapper pages stay honest:
 - each page is a real mounted framework app

@@ -63,9 +63,9 @@ const PAGE_CONFIG = {
     heroNotes: ['Canonical customer path', 'Generated IIFE bundle', 'Shared live cart harness'],
     badge: 'CDN-first example',
     bridgeLabel: 'Script tag setup',
-    bridgeTitle: 'Pre-load config, then call the global agent',
+    bridgeTitle: 'Pre-load config, then use the global agent',
     bridgeCopy:
-      'This is the canonical delivery path. Load config before the bundle, initialize the global once, then report cart state from your existing storefront.',
+      'This is the canonical delivery path. Load config before the bundle, let the global auto-init, then report cart state from your existing storefront.',
     installCommand: '<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>',
     codeLanguage: 'html',
     codeSample: [
@@ -77,7 +77,6 @@ const PAGE_CONFIG = {
       '<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>',
       '<script>',
       '  const agent = window.QredexAgent;',
-      '  agent.init();',
       '',
       '  async function addToCart(product) {',
       '    const previousCount = cart.itemCount;',
@@ -652,8 +651,6 @@ async function main() {
     if (!agent) {
       throw new Error('Generated IIFE bundle not loaded');
     }
-
-    agent.init();
 
     agent.onLocked(({ purchaseToken, alreadyLocked }) => {
       log(`Locked PIT ${purchaseToken.substring(0, 18)}…`, alreadyLocked ? 'info' : 'success');
