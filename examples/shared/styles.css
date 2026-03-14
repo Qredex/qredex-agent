@@ -18,19 +18,20 @@
  */
 
 :root {
-  --bg: #f4efe7;
-  --panel: rgba(255, 250, 243, 0.92);
-  --panel-strong: #fff9f1;
-  --ink: #1f1e1b;
-  --muted: #6b655c;
-  --line: rgba(50, 43, 30, 0.12);
-  --accent: #b6461b;
-  --accent-deep: #882f0e;
-  --accent-soft: #f3d8c8;
-  --success: #1f7a54;
-  --warning: #a56700;
+  --bg: #f6faeb;
+  --panel: rgba(255, 255, 255, 0.94);
+  --panel-strong: #ffffff;
+  --ink: #11130e;
+  --muted: #59614c;
+  --line: rgba(17, 19, 14, 0.12);
+  --accent: #bdff1c;
+  --accent-deep: #95d100;
+  --accent-soft: #efffc3;
+  --success: #187845;
+  --warning: #8d6900;
   --danger: #a63c32;
-  --shadow: 0 24px 60px rgba(58, 40, 21, 0.12);
+  --info: #355d28;
+  --shadow: 0 24px 60px rgba(42, 56, 17, 0.12);
 }
 
 * {
@@ -43,9 +44,9 @@ body {
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(230, 197, 167, 0.7), transparent 30%),
-    radial-gradient(circle at right, rgba(206, 108, 56, 0.16), transparent 28%),
-    linear-gradient(180deg, #f6f0e6 0%, #efe4d7 100%);
+    radial-gradient(circle at top left, rgba(189, 255, 28, 0.34), transparent 28%),
+    radial-gradient(circle at right, rgba(17, 19, 14, 0.08), transparent 24%),
+    linear-gradient(180deg, #fbfff3 0%, #eef6dd 100%);
 }
 
 code {
@@ -88,16 +89,16 @@ code {
   padding: 9px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 250, 243, 0.72);
+  background: rgba(255, 255, 255, 0.78);
   color: var(--muted);
   text-decoration: none;
   font-size: 0.88rem;
 }
 
 .example-link-active {
-  background: #1f1e1b;
-  border-color: #1f1e1b;
-  color: #fffaf4;
+  background: var(--accent);
+  border-color: rgba(17, 19, 14, 0.24);
+  color: var(--ink);
 }
 
 .hero {
@@ -109,7 +110,7 @@ code {
   margin-bottom: 20px;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: linear-gradient(135deg, rgba(255, 247, 238, 0.94), rgba(247, 227, 211, 0.88));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 255, 195, 0.92));
   box-shadow: var(--shadow);
 }
 
@@ -154,8 +155,8 @@ code {
   align-items: center;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(50, 43, 30, 0.1);
-  background: rgba(255, 250, 243, 0.72);
+  border: 1px solid rgba(17, 19, 14, 0.08);
+  background: rgba(239, 255, 195, 0.72);
   color: var(--muted);
   font-size: 0.82rem;
 }
@@ -203,7 +204,7 @@ code {
 }
 
 .panel-soft {
-  background: linear-gradient(180deg, rgba(255, 249, 241, 0.95), rgba(251, 238, 225, 0.92));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 255, 216, 0.92));
 }
 
 .bridge-copy,
@@ -226,8 +227,8 @@ code {
   align-items: center;
   border-radius: 999px;
   padding: 8px 12px;
-  background: #1f1e1b;
-  color: #fffaf4;
+  background: var(--accent);
+  color: var(--ink);
   font-size: 0.8rem;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -282,7 +283,7 @@ code {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(31, 30, 27, 0.04);
+  background: rgba(189, 255, 28, 0.12);
   color: var(--ink);
   cursor: pointer;
   font-weight: 600;
@@ -334,10 +335,10 @@ code {
 .copy-install-button {
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(180, 70, 27, 0.18);
+  border: 1px solid rgba(17, 19, 14, 0.14);
   border-radius: 16px;
-  background: #f35a22;
-  color: #fff8f2;
+  background: var(--accent);
+  color: var(--ink);
   cursor: pointer;
   flex: 0 0 auto;
   font-size: 1.15rem;
@@ -347,7 +348,7 @@ code {
 
 .copy-install-button:hover {
   transform: translateY(-1px);
-  background: #d94815;
+  background: var(--accent-deep);
 }
 
 .copy-install-button:active {
@@ -367,7 +368,7 @@ code {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(31, 30, 27, 0.06);
+  background: rgba(189, 255, 28, 0.1);
   color: var(--ink);
   cursor: pointer;
   font-weight: 600;
@@ -501,7 +502,7 @@ code {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: #efe0d4;
+  background: var(--accent-soft);
   color: var(--ink);
   font-size: 1.2rem;
 }
@@ -524,7 +525,7 @@ code {
 
 .btn-primary {
   background: var(--accent);
-  color: #fff8f2;
+  color: var(--ink);
 }
 
 .btn-primary:hover {
@@ -532,7 +533,7 @@ code {
 }
 
 .btn-secondary {
-  background: rgba(31, 30, 27, 0.08);
+  background: rgba(17, 19, 14, 0.06);
   color: var(--ink);
 }
 
@@ -555,7 +556,7 @@ code {
 
 .hub-card-featured {
   grid-column: 1 / -1;
-  background: linear-gradient(135deg, rgba(255, 249, 241, 0.95), rgba(247, 227, 211, 0.92));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(239, 255, 195, 0.94));
 }
 
 .hub-notes span {
@@ -563,8 +564,8 @@ code {
   align-items: center;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(50, 43, 30, 0.1);
-  background: rgba(255, 250, 243, 0.72);
+  border: 1px solid rgba(17, 19, 14, 0.08);
+  background: rgba(239, 255, 195, 0.72);
   color: var(--muted);
   font-size: 0.82rem;
 }
@@ -587,7 +588,7 @@ code {
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
   font-size: 0.85rem;
   line-height: 1.5;
-  background: rgba(255, 248, 240, 0.9);
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .log-success {
@@ -595,7 +596,7 @@ code {
 }
 
 .log-info {
-  color: #355d8c;
+  color: var(--info);
 }
 
 .log-warning {
