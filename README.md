@@ -207,15 +207,19 @@ QredexAgent.hasPurchaseIntentToken()      // boolean
 ### State Inspection
 
 ```javascript
-// Get current attribution state (for debugging/inspection)
+// Canonical snapshot for browser integrations, support, and workbenches
 const state = QredexAgent.getState();
 // Returns:
 // {
+//   initialized: boolean,
+//   lifecycleState: 'idle' | 'running' | 'locking' | 'destroyed',
+//   lockInProgress: boolean,
+//   lockAttempts: number,
 //   hasIIT: boolean,
 //   hasPIT: boolean,
 //   iit: string | null,
 //   pit: string | null,
-//   cartState: 'empty' | 'non-empty',
+//   cartState: 'unknown' | 'empty' | 'non-empty',
 //   locked: boolean,
 //   timestamp: number
 // }
@@ -258,6 +262,42 @@ QredexAgent.handlePaymentSuccess();
 | Empty cart becomes non-empty | empty cart -> 1 item | Attempts IIT -> PIT lock |
 | Merchant reports a live non-empty cart again | 1 item -> 2 items | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
 | Partial remove | 2 items -> 1 item | No clear; attribution stays attached to the live cart |
+
+### Minimum Correct Merchant Sequence
+
+```javascript
+// 1. Load the script (CDN auto-inits by default)
+// 2. Merchant reports a real cart transition
+QredexAgent.handleCartChange({ itemCount: 1, previousCount: 0 });
+
+// 3. Merchant reads PIT during checkout/order assembly
+const pit = QredexAgent.getPurchaseIntentToken();
+
+// 4. Merchant sends order + PIT to their backend
+await fetch('/orders', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ ...order, qredex_pit: pit }),
+});
+
+// 5. Merchant clears attribution after checkout if needed
+QredexAgent.handlePaymentSuccess();
+```
+
+### Tiny Cart Restore Helper
+
+```javascript
+function syncRestoredCart(restoredItemCount) {
+  if (restoredItemCount > 0) {
+    // On refresh, treat merchant cart restore as empty -> non-empty unless you
+    // already track a previous merchant cart count elsewhere.
+    QredexAgent.handleCartChange({
+      itemCount: restoredItemCount,
+      previousCount: 0,
+    });
+  }
+}
+```
 | Full clear | non-empty cart -> empty cart | Clears IIT and PIT |
 | Optional explicit post-payment clear | payment completed | Clears IIT and PIT |
 
@@ -410,6 +450,7 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 <script>
   window.QredexAgentConfig = {
     debug: true,
+    autoInit: true,
     useMockEndpoint: true,
   };
 </script>
@@ -420,10 +461,30 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
+| `autoInit` | boolean | `true` | CDN/IIFE preload only. Default and recommended. Set `false` only for advanced script-tag integrations that need to call `init()` themselves |
 | `debug` | boolean | `false` | Non-production logging. Forced to `false` in production |
 | `useMockEndpoint` | boolean | `false` | ⚠️ **DEVELOPMENT ONLY** for merchant usage. Generates fake PIT tokens locally |
 
 Production does not support runtime endpoint overrides, storage-key overrides, or mock mode. The production bundle always uses the built-in Qredex production lock endpoint and stable storage keys.
+
+The canonical browser path is:
+- script loads
+- agent auto-inits
+- agent auto-captures IIT from `qdx_intent` if present
+
+Merchants should not manually capture IIT. That is always agent-owned.
+
+If you disable CDN auto-init, call `QredexAgent.init()` yourself after the script loads. This is an advanced escape hatch, not the recommended path:
+
+```html
+<script>
+  window.QredexAgentConfig = { autoInit: false, debug: true };
+</script>
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script>
+  QredexAgent.init();
+</script>
+```
 
 For real non-production network testing, build the bundle with `QREDEX_AGENT_LOCK_ENDPOINT` so the endpoint is baked into the staging/dev artifact instead of passed at runtime.
 

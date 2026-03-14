@@ -27,7 +27,7 @@
  * - Manages attribution state
  */
 
-import { setDebugMode, debug, error as logError } from './utils/log.js';
+import { setDebugMode, debug, info, warn, error as logError } from './utils/log.js';
 import { getConfig, initConfig } from './bootstrap/config.js';
 import { autoStart } from './bootstrap/auto-start.js';
 import {
@@ -39,9 +39,12 @@ import {
 } from './storage/tokens.js';
 import { lockIntent as apiLockIntent } from './api/lock.js';
 import {
+  getState as getRuntimeState,
   getCartState,
+  markInitialized,
   setCartState,
   hasCartItems as checkHasCartItems,
+  destroyState,
 } from './core/state.js';
 
 import type { AgentConfig } from './bootstrap/config.js';
@@ -89,7 +92,6 @@ const errorHandlers: ErrorHandler[] = [];
 const stateChangeHandlers: StateChangeHandler[] = [];
 const intentCapturedHandlers: IntentCapturedHandler[] = [];
 
-let initialized = false;
 let browserBootstrapCompleted = false;
 
 function canUseBrowserRuntime(): boolean {
@@ -98,6 +100,36 @@ function canUseBrowserRuntime(): boolean {
 
 function reportInternalError(context: string, err: unknown): void {
   logError(`${context}:`, err);
+}
+
+function warnIfNotInitialized(methodName: string): void {
+  if (!isInitialized()) {
+    warn(
+      `${methodName} called before init(). CDN/script-tag integrations auto-init by default, but ESM/framework/browser integrations should call init() first.`
+    );
+  }
+}
+
+function warnSuspiciousCartTransition(itemCount: number, previousCount: number): void {
+  if (previousCount === itemCount) {
+    warn(
+      `handleCartChange received an unchanged cart count (${previousCount} -> ${itemCount}). Report only real merchant cart transitions or restored cart state.`
+    );
+  }
+
+  if (previousCount === 0 && itemCount === 0) {
+    warn(
+      'handleCartChange received an empty -> empty transition. Prefer handleCartEmpty() only when the merchant cart actually became empty.'
+    );
+  }
+}
+
+function warnIfMissingPurchaseToken(methodName: string): void {
+  if (!hasPurchaseIntentToken()) {
+    warn(
+      `${methodName} called without a PIT. Ensure the merchant reads PIT and sends order + PIT before cleanup.`
+    );
+  }
 }
 
 function emitIntentCaptured(): void {
@@ -268,7 +300,11 @@ export function hasPurchaseIntentToken(): boolean {
  * // }
  * ```
  */
-export function getState(): {
+export interface AgentStateSnapshot {
+  initialized: boolean;
+  lifecycleState: 'idle' | 'running' | 'locking' | 'destroyed';
+  lockInProgress: boolean;
+  lockAttempts: number;
   hasIIT: boolean;
   hasPIT: boolean;
   iit: string | null;
@@ -276,8 +312,11 @@ export function getState(): {
   cartState: 'unknown' | 'empty' | 'non-empty';
   locked: boolean;
   timestamp: number;
-} {
+}
+
+export function getState(): AgentStateSnapshot {
   const config = getConfig();
+  const runtimeState = getRuntimeState();
   const iit = getStoredInfluenceIntentToken({
     influenceIntentToken: config.influenceIntentToken,
     purchaseIntentToken: config.purchaseIntentToken,
@@ -290,11 +329,15 @@ export function getState(): {
   });
 
   return {
+    initialized: runtimeState.initialized,
+    lifecycleState: runtimeState.state,
+    lockInProgress: runtimeState.lockInProgress,
+    lockAttempts: runtimeState.lockAttempts,
     hasIIT: iit !== null,
     hasPIT: pit !== null,
     iit,
     pit,
-    cartState: checkHasCartItems() ? 'non-empty' : 'empty',
+    cartState: runtimeState.cartState,
     locked: pit !== null,
     timestamp: Date.now(),
   };
@@ -477,6 +520,8 @@ export function handleCartChange(event: {
 }): void {
   const { itemCount, previousCount, meta, timestamp } = event;
 
+  warnIfNotInitialized('handleCartChange');
+
   // Validate inputs
   if (typeof itemCount !== 'number' || typeof previousCount !== 'number') {
     emitErrorEvent({
@@ -494,6 +539,7 @@ export function handleCartChange(event: {
     return;
   }
 
+  warnSuspiciousCartTransition(itemCount, previousCount);
   debug('Cart change event received', event);
 
   // Update cart state for tracking
@@ -508,6 +554,7 @@ export function handleCartChange(event: {
   // Lock when cart has items, IIT exists, and PIT doesn't exist
   // This retries on every add-to-cart if lock previously failed (Rule 13)
   if (itemCount > 0 && hasInfluenceIntentToken() && !hasPurchaseIntentToken()) {
+    info('Merchant reported a live non-empty cart; attempting IIT -> PIT lock');
     debug('Cart has items, IIT exists, no PIT - attempting lock');
 
     // Auto-lock IIT → PIT
@@ -551,6 +598,7 @@ export function handleCartChange(event: {
 
   // Clear when the merchant reports that a non-empty cart became empty and PIT exists
   if (itemCount === 0 && previousCount > 0 && hasPurchaseIntentToken()) {
+    info('Merchant reported cart empty; clearing IIT/PIT state');
     debug('Cart emptied, clearing tokens');
 
     // Auto-clear tokens
@@ -604,6 +652,8 @@ export function handleCartAdd(
     price?: number;
   }
 ): void {
+  warnIfNotInitialized('handleCartAdd');
+
   if (typeof itemCount !== 'number' || itemCount < 0) {
     emitErrorEvent({
       error: 'itemCount must be a non-negative number',
@@ -640,6 +690,7 @@ export function handleCartAdd(
  * @see {@link handleCartAdd} - Convenience wrapper for adding to cart
  */
 export function handleCartEmpty(): void {
+  warnIfNotInitialized('handleCartEmpty');
   const previousCount = hasCartItems() ? 1 : 0;
 
   handleCartChange({
@@ -692,6 +743,9 @@ export interface PaymentSuccessEvent {
  * @see {@link handleCartChange} - Cart state change event
  */
 export function handlePaymentSuccess(event?: PaymentSuccessEvent): void {
+  warnIfNotInitialized('handlePaymentSuccess');
+  warnIfMissingPurchaseToken('handlePaymentSuccess');
+  info('Merchant reported payment success; clearing IIT/PIT state');
   debug('Payment success event received', event);
 
   // Auto-clear tokens
@@ -976,7 +1030,7 @@ export function offIntentCaptured(handler: IntentCapturedHandler): void {
 export function init(_config?: AgentConfig): void {
   const cfg = initConfig(_config);
   setDebugMode(cfg.debug);
-  initialized = true;
+  markInitialized();
   bootstrapBrowserRuntime();
   debug('Agent initialized');
 }
@@ -985,7 +1039,7 @@ export function init(_config?: AgentConfig): void {
  * Check whether the agent lifecycle has been initialized.
  */
 export function isInitialized(): boolean {
-  return initialized;
+  return getRuntimeState().initialized;
 }
 
 /**
@@ -1018,9 +1072,8 @@ export function destroy(): void {
   errorHandlers.length = 0;
   stateChangeHandlers.length = 0;
   intentCapturedHandlers.length = 0;
-  initialized = false;
   browserBootstrapCompleted = false;
-  setCartState('unknown');
+  destroyState();
   debug('Agent destroyed');
 }
 
@@ -1043,6 +1096,7 @@ export function stop(): void {
 // ============================================
 
 export type { AgentConfig } from './bootstrap/config.js';
+export type { PreloadAgentConfig } from './bootstrap/config.js';
 export type { LockResult, LockMeta } from './api/types.js';
 
 /**

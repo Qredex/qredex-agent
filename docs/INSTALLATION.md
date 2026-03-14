@@ -50,6 +50,7 @@ For custom configuration:
 ```html
 <script>
   window.QredexAgentConfig = {
+    autoInit: true,
     debug: false,
   };
 </script>
@@ -129,10 +130,31 @@ Set `window.QredexAgentConfig` **before** the script loads:
 
 | Option | Type | Default | Production | Description |
 |--------|------|---------|------------|-------------|
+| `autoInit` | `boolean` | `true` | ✅ Yes | CDN/IIFE preload only. Default and recommended. Set `false` only for advanced script-tag integrations that need manual `init()` |
 | `debug` | `boolean` | `false` | ❌ Forced Off | Non-production logging only |
 | `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEVELOPMENT ONLY** for merchant usage - Generate fake PIT tokens (no network calls) |
 
 Runtime configuration does not support `lockEndpoint`, storage-key overrides, or cookie-expiry overrides. Those are internal agent settings. Production always uses the built-in Qredex lock endpoint and stable storage keys.
+
+The canonical CDN/script-tag path is automatic:
+
+1. the script loads
+2. the agent auto-initializes
+3. the agent auto-captures IIT from `qdx_intent` when present
+
+Merchants should not manually capture IIT.
+
+If you disable auto-init, call `QredexAgent.init()` after the script loads. This is an advanced escape hatch, not the normal integration path:
+
+```html
+<script>
+  window.QredexAgentConfig = { autoInit: false, debug: true };
+</script>
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script>
+  QredexAgent.init();
+</script>
+```
 
 ---
 

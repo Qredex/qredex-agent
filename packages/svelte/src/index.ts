@@ -28,6 +28,10 @@ export interface QredexComposable {
 }
 
 const SERVER_STATE: QredexState = {
+  initialized: false,
+  lifecycleState: 'idle',
+  lockInProgress: false,
+  lockAttempts: 0,
   hasIIT: false,
   hasPIT: false,
   iit: null,

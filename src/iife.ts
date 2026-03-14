@@ -23,10 +23,13 @@
  */
 
 import QredexAgent from './index.js';
+import { shouldAutoInitFromPreload } from './bootstrap/config.js';
 
 if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).QredexAgent = QredexAgent;
-  QredexAgent.init();
+  if (shouldAutoInitFromPreload()) {
+    QredexAgent.init();
+  }
 }
 
 export default QredexAgent;

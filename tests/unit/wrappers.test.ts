@@ -93,7 +93,7 @@ describe('Framework wrappers', () => {
     expect(getSvelteAgent().handleCartChange).toBe(initSvelteQredex().handleCartChange);
     expect(states.at(-1)).toMatchObject({
       locked: false,
-      cartState: 'empty',
+      cartState: 'unknown',
     });
 
     unsubscribe();

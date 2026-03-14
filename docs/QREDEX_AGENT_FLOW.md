@@ -53,6 +53,16 @@ Qredex Agent is a lightweight browser runtime that captures the `qdx_intent` tok
 14. Merchant backend or direct Qredex ingestion path receives order payload + PIT.
 15. Qredex resolves attribution from the PIT at order ingestion time.
 
+### Minimum Correct Merchant Sequence
+
+1. Load the agent bundle. CDN/script-tag integrations auto-init unless preload config sets `autoInit: false`.
+   The default and recommended path is auto-init. IIT capture remains agent-owned.
+2. Merchant reports the first real non-empty cart transition with `handleCartChange({ itemCount, previousCount })`.
+3. Agent locks IIT → PIT when the reported cart is lockable.
+4. Merchant reads PIT with `getPurchaseIntentToken()` during checkout or order assembly.
+5. Merchant sends `order + PIT` to the backend or direct ingestion path.
+6. Merchant clears attribution with `handleCartEmpty()` or `handlePaymentSuccess()` when commerce state is done.
+
 ---
 
 ## State Machine

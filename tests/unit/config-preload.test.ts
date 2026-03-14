@@ -28,6 +28,7 @@ import {
   getConfigValue,
   resetConfig,
   isConfigInitialized,
+  shouldAutoInitFromPreload,
 } from '../../src/bootstrap/config.js';
 import {
   hasInfluenceIntentToken,
@@ -110,6 +111,16 @@ describe('Config Pre-load', () => {
     getConfig();
 
     expect(isConfigInitialized()).toBe(true);
+  });
+
+  it('should auto-init the CDN bundle by default', () => {
+    expect(shouldAutoInitFromPreload()).toBe(true);
+  });
+
+  it('should allow preload config to disable CDN auto-init', () => {
+    (window as Record<string, unknown>).QredexAgentConfig = { autoInit: false };
+
+    expect(shouldAutoInitFromPreload()).toBe(false);
   });
 });
 

@@ -60,6 +60,12 @@ function init(config?: AgentConfig): void
 | `debug` | `boolean` | `false` | ❌ Forced Off | Enable debug logging outside production only |
 | `useMockEndpoint` | `boolean` | `false` | ❌ Never | ⚠️ **DEVELOPMENT ONLY** for merchant usage - Generate fake PIT tokens (no network calls) |
 
+**CDN preload-only option (`window.QredexAgentConfig` before the script tag):**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `autoInit` | `boolean` | `true` | Default and recommended for CDN/script-tag usage. Set `false` only for advanced integrations that need manual `init()` |
+
 **⚠️ Production Safety:**
 - `useMockEndpoint: true` is for local development only - ignored in staging and production
 - `debug: true` is ignored in production and agent `debug`/`info`/`warn` console output is suppressed
@@ -77,11 +83,48 @@ QredexAgentConfig = {
 // QredexAgentConfig omitted entirely
 ```
 
-**Note:** Usually not needed for the CDN/IIFE bundle, which auto-starts on script load. ESM and framework consumers should call `init()` in the browser.
+**Note:** The canonical CDN/IIFE path is automatic: script loads, agent auto-initializes, and IIT capture remains agent-owned. ESM and framework consumers should call `init()` in the browser.
+
+If you disable CDN auto-init:
+
+```html
+<script>
+  window.QredexAgentConfig = { autoInit: false, debug: true };
+</script>
+<script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
+<script>
+  QredexAgent.init();
+</script>
+```
+
+Disabling auto-init is an advanced escape hatch. Merchants should not manually capture IIT.
 
 ---
 
 ## Token Access
+
+### `getState()`
+
+Get the canonical browser snapshot of the agent lifecycle and attribution state.
+
+**Signature:**
+```typescript
+function getState(): {
+  initialized: boolean;
+  lifecycleState: 'idle' | 'running' | 'locking' | 'destroyed';
+  lockInProgress: boolean;
+  lockAttempts: number;
+  hasIIT: boolean;
+  hasPIT: boolean;
+  iit: string | null;
+  pit: string | null;
+  cartState: 'unknown' | 'empty' | 'non-empty';
+  locked: boolean;
+  timestamp: number;
+}
+```
+
+Use `getState()` as the single support/debug snapshot for browser integrations.
 
 ### `getInfluenceIntentToken()`
 

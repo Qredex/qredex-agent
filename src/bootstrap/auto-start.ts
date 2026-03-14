@@ -121,7 +121,7 @@ export function captureIntentToken(): boolean {
   // Clean the URL
   cleanUrl();
 
-  info('Intent token captured and stored');
+  info('IIT captured from URL and stored');
 
   return true;
 }

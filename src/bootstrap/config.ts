@@ -54,6 +54,18 @@ export interface AgentConfig {
   useMockEndpoint?: boolean;
 }
 
+/**
+ * Pre-load global config options for the CDN/IIFE bundle.
+ */
+export interface PreloadAgentConfig extends AgentConfig {
+  /**
+   * Control whether the CDN/IIFE bundle should call init() automatically on load.
+   * Only applies to window.QredexAgentConfig before the script tag executes.
+   * @default true
+   */
+  autoInit?: boolean;
+}
+
 interface InternalAgentConfig extends Required<AgentConfig> {
   lockEndpoint: string;
   influenceIntentToken: string;
@@ -66,7 +78,7 @@ interface InternalAgentConfig extends Required<AgentConfig> {
  */
 declare global {
   interface Window {
-    QredexAgentConfig?: AgentConfig;
+    QredexAgentConfig?: PreloadAgentConfig;
   }
 }
 
@@ -82,12 +94,17 @@ const DEFAULT_CONFIG: InternalAgentConfig = {
 let currentConfig: InternalAgentConfig = { ...DEFAULT_CONFIG };
 let isInitialized = false;
 
-function getPreloadConfig(): AgentConfig | undefined {
+function getPreloadConfig(): PreloadAgentConfig | undefined {
   if (typeof window === 'undefined') {
     return undefined;
   }
 
   return window.QredexAgentConfig;
+}
+
+export function shouldAutoInitFromPreload(): boolean {
+  const preloadConfig = getPreloadConfig();
+  return preloadConfig?.autoInit !== false;
 }
 
 function warnUnsupportedRuntimeConfig(userConfig: Record<string, unknown>): void {
@@ -158,7 +175,13 @@ function ensureConfigInitialized(): void {
  */
 export function initConfig(userConfig?: AgentConfig): InternalAgentConfig {
   const preloadConfig = getPreloadConfig();
-  const finalInput = preloadConfig ? { ...(userConfig ?? {}), ...preloadConfig } : userConfig;
+  const runtimePreloadConfig = preloadConfig ? { ...preloadConfig } : undefined;
+  if (runtimePreloadConfig) {
+    delete runtimePreloadConfig.autoInit;
+  }
+  const finalInput = preloadConfig
+    ? { ...(userConfig ?? {}), ...runtimePreloadConfig }
+    : userConfig;
   const finalConfig = resolveConfig(finalInput);
 
   currentConfig = finalConfig;

@@ -119,7 +119,7 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
 
         endLock();
         inFlightPromise = null;
-        info('Intent locked successfully (mock)');
+        info('IIT locked to PIT successfully (mock)');
         return {
           success: true,
           purchaseToken: mockPit,
@@ -189,7 +189,7 @@ export const lockIntent = async (_meta?: LockMeta): Promise<LockResult> => {
         cookieExpireDays: config.cookieExpireDays,
       });
 
-      info('Intent locked successfully');
+      info('IIT locked to PIT successfully');
       return {
         success: true,
         purchaseToken: data.token,

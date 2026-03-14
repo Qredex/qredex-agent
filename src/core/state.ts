@@ -196,7 +196,7 @@ export function destroyState(): void {
     }
   }
 
-  state = { ...initialState, state: 'destroyed', initialized: true };
+  state = { ...initialState, state: 'destroyed', initialized: false };
   debug('Agent destroyed');
 }
 
