@@ -454,6 +454,9 @@ QredexAgent.onLocked(({ purchaseToken, alreadyLocked }) => {
 
 Listen for cleared state events.
 
+This is an advanced observability hook. Most merchants do not need it for the
+minimum integration flow.
+
 **Signature:**
 ```typescript
 function onCleared(handler: (event: {
@@ -475,6 +478,9 @@ QredexAgent.onCleared(({ reason }) => {
 ### `onError(handler)`
 
 Listen for agent error events.
+
+This is one of the two most useful merchant-facing hooks, alongside
+`onStateChanged()`. Use it for QA, support visibility, or error reporting.
 
 **Signature:**
 ```typescript

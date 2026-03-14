@@ -315,6 +315,17 @@ function syncRestoredCart(restoredItemCount) {
 
 ### Event Listeners (Agent → Merchant)
 
+Optional observability hooks.
+
+Most merchants only need:
+- `onStateChanged` to reflect attribution state in UI or debug panels
+- `onError` to surface integration mistakes and lock failures
+
+Use these only if you want extra lifecycle visibility:
+- `onLocked`
+- `onCleared`
+- `onIntentCaptured`
+
 Listen for agent events:
 
 ```javascript
@@ -348,19 +359,21 @@ QredexAgent.onIntentCaptured(({ timestamp }) => {
 ### Unregister Listeners
 
 ```javascript
-const handler = ({ purchaseToken }) => {
+const lockedHandler = ({ purchaseToken }) => {
   console.log('Locked:', purchaseToken);
 };
 
-QredexAgent.onLocked(handler);
+QredexAgent.onLocked(lockedHandler);
 // ... later
-QredexAgent.offLocked(handler);
+QredexAgent.offLocked(lockedHandler);
 
-// Similarly for other listeners
-QredexAgent.offCleared(handler);
-QredexAgent.offError(handler);
-QredexAgent.offStateChanged(handler);
-QredexAgent.offIntentCaptured(handler);
+const errorHandler = ({ code, message }) => {
+  console.error(code, message);
+};
+
+QredexAgent.onError(errorHandler);
+// ... later
+QredexAgent.offError(errorHandler);
 ```
 
 ### Manual Commands
@@ -441,16 +454,9 @@ QredexAgent.init();
 
 ### Framework Wrappers
 
-Thin framework adapters are available as separate packages:
-
-```bash
-npm install @qredex/react
-npm install @qredex/vue
-npm install @qredex/svelte
-npm install @qredex/angular
-```
-
 Each wrapper stays thin, delegates runtime behavior to `@qredex/agent`, and brings the core agent with it. Install the wrapper inside its matching framework app.
+
+If you are using React, Vue, Svelte, or Angular, install the matching wrapper from the Quick Start section above and follow that package README for framework-specific usage.
 
 ---
 
