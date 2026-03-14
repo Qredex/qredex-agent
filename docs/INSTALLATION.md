@@ -95,6 +95,9 @@ http://127.0.0.1:8080/api/v1/agent/intents/lock
 
 That means the browser running the page must also be the machine running the local Qredex Core engineer service.
 
+Channel manifests include `updatedAt` so you can confirm when `dev` or
+`staging` last refreshed without relying on dashboard cache state.
+
 ### Caching Headers
 
 **Pinned versions:**

@@ -29,6 +29,7 @@ const majorVersion = version.split('.')[0];
 const distDir = resolve(rootDir, 'dist');
 const releaseRoot = resolve(rootDir, 'release', 'agent');
 const channel = process.argv[2] || 'production';
+const updatedAt = new Date().toISOString();
 
 const channelConfig = {
   dev: {
@@ -41,6 +42,7 @@ const channelConfig = {
     manifest: {
       channel: 'dev',
       version,
+      updatedAt,
       files: ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'],
       lockEndpoint: 'http://127.0.0.1:8080/api/v1/agent/intents/lock',
     },
@@ -55,6 +57,7 @@ const channelConfig = {
     manifest: {
       channel: 'production',
       version,
+      updatedAt,
       major: `v${majorVersion}`,
       files: ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'],
     },
@@ -69,6 +72,7 @@ const channelConfig = {
     manifest: {
       channel: 'staging',
       version,
+      updatedAt,
       files: ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'],
     },
   },

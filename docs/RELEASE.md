@@ -228,6 +228,9 @@ Use `npm run release:cdn:verify` to read back:
 - `agent/manifest.json` for the current production version and major alias
 - `agent/releases.json` for known pinned production releases
 
+All channel manifests now include `updatedAt` so release freshness is visible
+without relying on bucket UI caching behavior.
+
 Release history is tracked from the first production CDN upload after this feature lands.
 Older pinned versions are not inferred retroactively unless they are added back manually.
 
