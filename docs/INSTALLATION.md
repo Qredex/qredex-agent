@@ -69,7 +69,6 @@ The agent uses semantic versioning for CDN delivery.
 | **Major** | `/v1/` | Auto-updates within v1.x.x | Production (recommended) |
 | **Pinned** | `/v1.0.0/` | Immutable | Critical production, testing |
 | **Development** | `/dev/` | Tracks latest main-backed dev bundle | Local Core engineer E2E only |
-| **Latest** | `/latest/` | Always newest | Development only |
 
 ### Examples
 
