@@ -1,0 +1,77 @@
+#    ▄▄▄▄
+#  ▄█▀▀███▄▄              █▄
+#  ██    ██ ▄             ██
+#  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
+#  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
+#   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
+#        ▀█
+#
+#  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
+#
+#  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+#  Licensed under the MIT License. See LICENSE for the full license text.
+#  Redistribution and use are permitted under that license.
+#
+#  If you need additional information or have any questions, please email: copyright@qredex.com
+
+name: Publish dev CDN assets
+run-name: >-
+  Publish dev CDN from ${{ github.ref_name }}
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dev-cdn-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: development
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      QREDEX_CDN_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke test
+        run: npm run test:browser
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Prepare dev CDN release assets
+        run: npm run release:cdn:dev
+
+      - name: Upload dev CDN release assets
+        run: npm run release:cdn:dev:upload
