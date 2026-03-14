@@ -31,6 +31,20 @@ const releaseRoot = resolve(rootDir, 'release', 'agent');
 const channel = process.argv[2] || 'production';
 
 const channelConfig = {
+  dev: {
+    assetMap: {
+      'qredex-agent.iife.dev.min.js': 'qredex-agent.iife.min.js',
+      'qredex-agent.iife.dev.min.js.map': 'qredex-agent.iife.min.js.map',
+    },
+    targetDirs: [resolve(releaseRoot, 'dev')],
+    manifestPath: resolve(releaseRoot, 'dev', 'manifest.json'),
+    manifest: {
+      channel: 'dev',
+      version,
+      files: ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'],
+      lockEndpoint: 'http://127.0.0.1:8080/api/v1/agent/intents/lock',
+    },
+  },
   production: {
     assetMap: {
       'qredex-agent.iife.min.js': 'qredex-agent.iife.min.js',

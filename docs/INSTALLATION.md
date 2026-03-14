@@ -68,6 +68,7 @@ The agent uses semantic versioning for CDN delivery.
 |--------|---------|----------|----------|
 | **Major** | `/v1/` | Auto-updates within v1.x.x | Production (recommended) |
 | **Pinned** | `/v1.0.0/` | Immutable | Critical production, testing |
+| **Development** | `/dev/` | Tracks latest main-backed dev bundle | Local Core engineer E2E only |
 | **Latest** | `/latest/` | Always newest | Development only |
 
 ### Examples
@@ -81,6 +82,19 @@ The agent uses semantic versioning for CDN delivery.
 ```html
 <script src="https://cdn.qredex.com/agent/v1.0.0/qredex-agent.iife.min.js"></script>
 ```
+
+**Development script (fixed local Core endpoint):**
+```html
+<script src="https://cdn.qredex.com/agent/dev/qredex-agent.iife.min.js"></script>
+```
+
+The `/dev/` script is for engineer sandboxes only. It always points lock requests to:
+
+```text
+http://127.0.0.1:8080/api/v1/agent/intents/lock
+```
+
+That means the browser running the page must also be the machine running the local Qredex Core engineer service.
 
 ### Caching Headers
 

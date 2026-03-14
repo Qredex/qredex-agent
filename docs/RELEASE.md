@@ -196,6 +196,28 @@ Current production CDN asset:
 - `qredex-agent.iife.min.js`
 - `qredex-agent.iife.min.js.map`
 
+## Dev CDN
+
+```bash
+npm run release:cdn:dev
+npm run release:cdn:dev:upload
+```
+
+That publishes an engineer-only dev script to:
+
+- `agent/dev/qredex-agent.iife.min.js`
+- `agent/dev/qredex-agent.iife.min.js.map`
+- `agent/dev/manifest.json`
+
+The dev bundle always bakes in this fixed local Core endpoint:
+
+```text
+http://127.0.0.1:8080/api/v1/agent/intents/lock
+```
+
+Use it only for same-machine local Core E2E. It is intentionally separate from
+the hosted `staging` and `production` channels.
+
 Use `npm run release:cdn:verify` to read back:
 
 - `agent/manifest.json` for the current production version and major alias
@@ -218,6 +240,16 @@ bucket environment, the easiest way to run them is in GitHub Actions:
 npm run release:cdn:staging
 npm run release:cdn:staging:upload
 ```
+
+## Dev CDN Workflow
+
+GitHub Actions runs `.github/workflows/dev.yml` on pushes to `main` and on manual dispatch.
+
+It:
+
+1. runs lint, browser smoke, and unit tests
+2. builds the fixed-localhost dev CDN bundle
+3. uploads `agent/dev/...` assets to Cloudflare R2
 
 That prepares and uploads the staging bundle to:
 

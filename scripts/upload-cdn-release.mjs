@@ -29,9 +29,9 @@ const rootDir = resolve(__dirname, '..');
 const releaseRoot = resolve(rootDir, 'release', 'agent');
 const channel = process.argv[2] || 'production';
 const manifestPath =
-  channel === 'staging'
-    ? resolve(releaseRoot, 'staging', 'manifest.json')
-    : resolve(releaseRoot, 'manifest.json');
+  channel === 'production'
+    ? resolve(releaseRoot, 'manifest.json')
+    : resolve(releaseRoot, channel, 'manifest.json');
 const bucket = process.env.QREDEX_CDN_BUCKET;
 
 if (!bucket) {
@@ -47,7 +47,7 @@ if (!existsSync(manifestPath)) {
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const assetFiles = manifest.files;
 
-if (channel !== 'production' && channel !== 'staging') {
+if (channel !== 'production' && channel !== 'staging' && channel !== 'dev') {
   console.error(`Unknown CDN upload channel "${channel}"`);
   process.exit(1);
 }
@@ -182,12 +182,17 @@ try {
       const pinnedVersion = `v${manifest.version}`;
       uploadFile(resolve(releaseRoot, pinnedVersion, file), `agent/${pinnedVersion}/${file}`);
       uploadFile(resolve(releaseRoot, manifest.major, file), `agent/${manifest.major}/${file}`);
+    } else if (channel === 'dev') {
+      uploadFile(resolve(releaseRoot, 'dev', file), `agent/dev/${file}`);
     } else {
       uploadFile(resolve(releaseRoot, 'staging', file), `agent/staging/${file}`);
     }
   }
 
-  uploadFile(manifestPath, channel === 'production' ? 'agent/manifest.json' : 'agent/staging/manifest.json');
+  uploadFile(
+    manifestPath,
+    channel === 'production' ? 'agent/manifest.json' : `agent/${channel}/manifest.json`
+  );
   updateReleaseHistory();
   console.log(`✓ Uploaded CDN release assets to ${bucket}`);
 } catch (error) {

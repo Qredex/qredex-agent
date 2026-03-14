@@ -40,6 +40,21 @@
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
+**Dev CDN / local Core E2E**
+
+```html
+<script src="https://cdn.qredex.com/agent/dev/qredex-agent.iife.min.js"></script>
+```
+
+The `/dev/` script is engineer-only and always calls:
+
+```text
+http://127.0.0.1:8080/api/v1/agent/intents/lock
+```
+
+So it only makes sense when the page and the local Core service are running on
+the same machine.
+
 **Core package**
 
 ```bash
