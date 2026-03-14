@@ -1,21 +1,4 @@
-<!--
-    ▄▄▄▄
-  ▄█▀▀███▄▄              █▄
-  ██    ██ ▄             ██
-  ██    ██ ████▄▄█▀█▄ ▄████ ▄█▀█▄▀██ ██▀
-  ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
-   ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
-        ▀█
-
-  Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
-
-  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-
-  This file is part of the Qredex Agent SDK and is licensed under the MIT License. See LICENSE.
-  Redistribution and use are permitted under that license.
-
-  If you need additional information or have any questions, please email: copyright@qredex.com
--->
+span
 
 # Qredex Agent
 
@@ -131,6 +114,7 @@ async function checkout(order) {
 ### 4. Done!
 
 The agent automatically:
+
 - ✅ Captures `qdx_intent` from URL
 - ✅ Stores IIT in browser storage (sessionStorage + cookie fallback)
 - ✅ Locks IIT → PIT when the merchant reports a non-empty cart and the state is lockable
@@ -139,14 +123,15 @@ The agent automatically:
 
 ### What Merchants Actually Call
 
-| Merchant event | Call | Why |
-|---|---|---|
-| User lands from Qredex link | No manual call required | The agent captures `qdx_intent` automatically |
-| Cart becomes non-empty | `handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT |
-| Cart changes while still non-empty | `handleCartChange(...)` | Safe retry path on the next merchant-reported non-empty cart event if a previous lock failed |
-| Clear cart action | `clearCart() -> handleCartEmpty()` | Clears IIT/PIT from the live session |
-| Need PIT for order submission | `getPurchaseIntentToken()` | Attach PIT to the order or checkout payload |
-| Checkout completes without a cart-empty step | `handlePaymentSuccess()` | Optional explicit cleanup path |
+
+| Merchant event                               | Call                                             | Why                                                                                          |
+| -------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| User lands from Qredex link                  | No manual call required                          | The agent captures`qdx_intent` automatically                                                 |
+| Cart becomes non-empty                       | `handleCartChange({ itemCount, previousCount })` | Gives Qredex the live cart state so IIT can lock to PIT                                      |
+| Cart changes while still non-empty           | `handleCartChange(...)`                          | Safe retry path on the next merchant-reported non-empty cart event if a previous lock failed |
+| Clear cart action                            | `clearCart() -> handleCartEmpty()`               | Clears IIT/PIT from the live session                                                         |
+| Need PIT for order submission                | `getPurchaseIntentToken()`                       | Attach PIT to the order or checkout payload                                                  |
+| Checkout completes without a cart-empty step | `handlePaymentSuccess()`                         | Optional explicit cleanup path                                                               |
 
 ---
 
@@ -261,11 +246,12 @@ QredexAgent.handlePaymentSuccess();
 
 **Behavior:**
 
-| Event | Example | Agent behavior |
-|-------|---------|----------------|
-| Empty cart becomes non-empty | empty cart -> 1 item | Attempts IIT -> PIT lock |
-| Merchant reports a live non-empty cart again | 1 item -> 2 items | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
-| Partial remove | 2 items -> 1 item | No clear; attribution stays attached to the live cart |
+
+| Event                                        | Example              | Agent behavior                                                            |
+| -------------------------------------------- | -------------------- | ------------------------------------------------------------------------- |
+| Empty cart becomes non-empty                 | empty cart -> 1 item | Attempts IIT -> PIT lock                                                  |
+| Merchant reports a live non-empty cart again | 1 item -> 2 items    | Attempts or retries IIT -> PIT lock if IIT exists and PIT is still absent |
+| Partial remove                               | 2 items -> 1 item    | No clear; attribution stays attached to the live cart                     |
 
 ### Minimum Correct Merchant Sequence
 
@@ -310,18 +296,18 @@ function syncRestoredCart(restoredItemCount) {
   }
 }
 ```
-| Full clear | non-empty cart -> empty cart | Clears IIT and PIT |
-| Optional explicit post-payment clear | payment completed | Clears IIT and PIT |
 
 ### Event Listeners (Agent → Merchant)
 
 Optional observability hooks.
 
 Most merchants only need:
+
 - `onStateChanged` to reflect attribution state in UI or debug panels
 - `onError` to surface integration mistakes and lock failures
 
 Use these only if you want extra lifecycle visibility:
+
 - `onLocked`
 - `onCleared`
 - `onIntentCaptured`
@@ -452,11 +438,7 @@ import QredexAgent from '@qredex/agent';
 QredexAgent.init();
 ```
 
-### Framework Wrappers
-
-Each wrapper stays thin, delegates runtime behavior to `@qredex/agent`, and brings the core agent with it. Install the wrapper inside its matching framework app.
-
-If you are using React, Vue, Svelte, or Angular, install the matching wrapper from the Quick Start section above and follow that package README for framework-specific usage.
+For React, Vue, Svelte, or Angular, use the matching wrapper from the Quick Start section above and follow that package README for framework-specific usage.
 
 ---
 
@@ -477,15 +459,17 @@ Optional configuration via `window.QredexAgentConfig`. Set **before** the script
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `autoInit` | boolean | `true` | CDN/IIFE preload only. Default and recommended. Set `false` only for advanced script-tag integrations that need to call `init()` themselves |
-| `debug` | boolean | `false` | Non-production logging. Forced to `false` in production |
-| `useMockEndpoint` | boolean | `false` | ⚠️ **DEVELOPMENT ONLY** for merchant usage. Generates fake PIT tokens locally |
+
+| Option            | Type    | Default | Description                                                                                                                                |
+| ----------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autoInit`        | boolean | `true`  | CDN/IIFE preload only. Default and recommended. Set`false` only for advanced script-tag integrations that need to call `init()` themselves |
+| `debug`           | boolean | `false` | Non-production logging. Forced to`false` in production                                                                                     |
+| `useMockEndpoint` | boolean | `false` | ⚠️**DEVELOPMENT ONLY** for merchant usage. Generates fake PIT tokens locally                                                             |
 
 Production does not support runtime endpoint overrides, storage-key overrides, or mock mode. The production bundle always uses the built-in Qredex production lock endpoint and stable storage keys.
 
 The canonical browser path is:
+
 - script loads
 - agent auto-inits
 - agent auto-captures IIT from `qdx_intent` if present
@@ -505,17 +489,6 @@ If you disable CDN auto-init, call `QredexAgent.init()` yourself after the scrip
 ```
 
 For real non-production network testing, build the bundle with `QREDEX_AGENT_LOCK_ENDPOINT` so the endpoint is baked into the staging/dev artifact instead of passed at runtime.
-
-### ⚠️ Development-Only Mock Mode
-
-```javascript
-useMockEndpoint: true  // ⚠️ DEVELOPMENT ONLY
-```
-
-- Generates fake PIT tokens locally (no network calls)
-- Only use for local development/testing
-- Ignored in staging and production
-- **Never rely on `useMockEndpoint` outside local development**
 
 ---
 
@@ -537,6 +510,7 @@ open http://localhost:3000/examples/index.html
 ```
 
 Then:
+
 - Start with the featured CDN card
 - Simulate intent URL by adding `?qdx_intent=test123` to the CDN page URL and pressing Enter
 - Add to cart and watch PIT get locked
@@ -617,6 +591,7 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
 **Symptoms:** `getInfluenceIntentToken()` returns `null`
 
 **Solutions:**
+
 1. Check URL parameter is exactly `?qdx_intent=xxx`
 2. Reload the page
 3. Verify sessionStorage is available (not private browsing)
@@ -627,6 +602,7 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
 **Symptoms:** Add to cart clicked but PIT not created
 
 **Solutions:**
+
 1. Check IIT exists: `QredexAgent.hasInfluenceIntentToken()`
 2. Check Network tab for API errors
 3. Verify CORS is configured on backend
@@ -637,6 +613,7 @@ document.querySelector('.clear-cart').addEventListener('click', async () => {
 **Symptoms:** Handlers registered but not called
 
 **Solutions:**
+
 1. Verify handler is registered before event occurs
 2. Check handler function signature matches expected params
 3. Ensure handler not unregistered accidentally
@@ -652,6 +629,7 @@ window.QredexAgentConfig = { debug: true };
 Production always forces `debug` back to `false` and suppresses agent `debug`/`info`/`warn` console output.
 
 **Example output:**
+
 ```
 [QredexAgent] Intent token captured from URL
 [QredexAgent] Cart change event received { itemCount: 1, previousCount: 0 }
@@ -666,10 +644,12 @@ Production always forces `debug` back to `false` and suppresses agent `debug`/`i
 Open DevTools → Application → Storage:
 
 **Session Storage:**
+
 - `__qdx_iit` - IIT token
 - `__qdx_pit` - PIT token
 
 **Cookies:**
+
 - `__qdx_iit` - IIT fallback
 - `__qdx_pit` - PIT fallback
 
@@ -677,12 +657,13 @@ Open DevTools → Application → Storage:
 
 ## Browser Support
 
+
 | Browser | Version |
-|---------|---------|
-| Chrome | Latest |
-| Firefox | Latest |
-| Safari | Latest |
-| Edge | Latest |
+| ------- | ------- |
+| Chrome  | Latest  |
+| Firefox | Latest  |
+| Safari  | Latest  |
+| Edge    | Latest  |
 
 **Requirements:** ES2020+, sessionStorage, cookies enabled
 
@@ -690,30 +671,33 @@ Open DevTools → Application → Storage:
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| **[Development](docs/DEVELOPMENT.md)** | Engineer-only dev CDN, local Core, and sandbox guidance |
-| **[Integration Model](docs/INTEGRATION_MODEL.md)** | Complete integration guide with 2 paths |
-| **[API Reference](docs/API.md)** | Full API documentation |
-| **[Cart Change Behavior](docs/CART_CHANGE_BEHAVIOR.md)** | handleCartChange() state transitions |
-| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)** | Attribution clearing rationale |
-| **[Examples Guide](examples/README.md)** | Examples, local run flow, and testing scenarios |
-| **[AGENTS.md](AGENTS.md)** | Development guidelines |
+
+| Document                                                 | Description                                             |
+| -------------------------------------------------------- | ------------------------------------------------------- |
+| **[Development](docs/DEVELOPMENT.md)**                   | Engineer-only dev CDN, local Core, and sandbox guidance |
+| **[Integration Model](docs/INTEGRATION_MODEL.md)**       | Complete integration guide with 2 paths                 |
+| **[API Reference](docs/API.md)**                         | Full API documentation                                  |
+| **[Cart Change Behavior](docs/CART_CHANGE_BEHAVIOR.md)** | handleCartChange() state transitions                    |
+| **[Cart Empty Policy](docs/CART_EMPTY_POLICY.md)**       | Attribution clearing rationale                          |
+| **[Examples Guide](examples/README.md)**                 | Examples, local run flow, and testing scenarios         |
+| **[AGENTS.md](AGENTS.md)**                               | Development guidelines                                  |
 
 ---
 
 ## Examples Directory
 
-| Example | Description | Quick Start |
-|---------|-------------|-------------|
-| [examples/index.html](examples/index.html) | Example hub for CDN and wrapper pages | `npm run example` |
-| [examples/cdn/index.html](examples/cdn/index.html) | Canonical script-tag customer path | Open from the hub |
-| [examples/wrappers/react/index.html](examples/wrappers/react/index.html) | Real React app using `@qredex/react` | Open from the hub |
-| [examples/wrappers/vue/index.html](examples/wrappers/vue/index.html) | Real Vue app using `@qredex/vue` | Open from the hub |
-| [examples/wrappers/svelte/index.html](examples/wrappers/svelte/index.html) | Real Svelte app using `@qredex/svelte` | Open from the hub |
-| [examples/wrappers/angular/index.html](examples/wrappers/angular/index.html) | Real Angular app using `@qredex/angular` | Open from the hub |
+
+| Example                                                                      | Description                             | Quick Start       |
+| ---------------------------------------------------------------------------- | --------------------------------------- | ----------------- |
+| [examples/index.html](examples/index.html)                                   | Example hub for CDN and wrapper pages   | `npm run example` |
+| [examples/cdn/index.html](examples/cdn/index.html)                           | Canonical script-tag customer path      | Open from the hub |
+| [examples/wrappers/react/index.html](examples/wrappers/react/index.html)     | Real React app using`@qredex/react`     | Open from the hub |
+| [examples/wrappers/vue/index.html](examples/wrappers/vue/index.html)         | Real Vue app using`@qredex/vue`         | Open from the hub |
+| [examples/wrappers/svelte/index.html](examples/wrappers/svelte/index.html)   | Real Svelte app using`@qredex/svelte`   | Open from the hub |
+| [examples/wrappers/angular/index.html](examples/wrappers/angular/index.html) | Real Angular app using`@qredex/angular` | Open from the hub |
 
 Each example includes:
+
 - A focused integration path
 - The same IIT/PIT cart scenario for behavior checks
 - Real framework apps for React, Vue, Svelte, and Angular
