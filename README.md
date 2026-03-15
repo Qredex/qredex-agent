@@ -1,6 +1,7 @@
 span
 
-# Qredex Agent
+# `@qredex/agent`
+
 
 **Deterministic browser runtime for Qredex intent capture, locking, and PIT handoff.**
 
