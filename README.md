@@ -47,7 +47,7 @@ span
 <script src="https://cdn.qredex.com/agent/v1/qredex-agent.iife.min.js"></script>
 ```
 
-For local engineer E2E, dev CDN usage, and local Core sandbox setup, see [docs/DEVELOPMENT.md](/Users/bobai/Workspace/Qredex/qredex-agent/docs/DEVELOPMENT.md).
+For local engineer E2E, dev CDN usage, and local Core sandbox setup, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 **Core package**
 
