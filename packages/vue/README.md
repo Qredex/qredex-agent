@@ -21,7 +21,7 @@
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
 
-# @qredex/vue
+# `@qredex/vue`
 
 Thin Vue bindings for `@qredex/agent`.
 

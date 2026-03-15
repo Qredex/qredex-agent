@@ -6,7 +6,7 @@
   ██  ▄ ██ ██   ██▄█▀ ██ ██ ██▄█▀  ███
    ▀█████▄▄█▀  ▄▀█▄▄▄▄█▀███▄▀█▄▄▄▄██ ██▄
         ▀█
-
+ 
   Copyright (C) 2026 — 2026, Qredex, LTD. All Rights Reserved.
 
   DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -21,7 +21,7 @@
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
 
-# @qredex/react
+# `@qredex/react`
 
 Thin React bindings for `@qredex/agent`.
 

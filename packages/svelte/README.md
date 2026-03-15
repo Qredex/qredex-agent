@@ -21,7 +21,7 @@
   If you need additional information or have any questions, please email: copyright@qredex.com
 -->
 
-# @qredex/svelte
+# `@qredex/svelte`
 
 Thin Svelte bindings for `@qredex/agent`.
 
