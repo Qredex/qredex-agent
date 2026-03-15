@@ -22,6 +22,7 @@
  */
 
 import eslint from '@eslint/js';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 
@@ -42,6 +43,17 @@ export default tseslint.config(
     },
   },
   {
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: globals.node,
+    },
+    rules: {
+      'no-console': ['warn', { allow: ['log', 'warn', 'error', 'info', 'debug'] }],
+    },
+  },
+  {
     files: ['src/utils/log.ts'],
     rules: {
       'no-console': 'off',
@@ -53,7 +65,6 @@ export default tseslint.config(
       'packages/*/dist',
       'node_modules',
       'coverage',
-      '**/*.js',
       '**/*.js.map',
       '**/*.d.ts',
       '**/*.d.ts.map',
