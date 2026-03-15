@@ -1,6 +1,6 @@
 {
   "name": "@qredex/agent",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Lightweight browser agent for Qredex intent capture and locking",
   "private": false,
   "workspaces": [
