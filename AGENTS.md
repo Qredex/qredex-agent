@@ -23,7 +23,7 @@ Qredex is a source-agnostic attribution and integrity system for modern commerce
 - **Storage isolation is mandatory.** Each merchant's tokens are scoped to their session/cookie context.
 - **Idempotency is mandatory.** Lock operations and detection pipelines must be safe on retries.
 - **Don't leak tokens.** Never log raw IIT/PIT tokens, API keys, or secrets to console.
-- **Use constants, not magic strings.** Storage keys, config keys, and fixed values must use constants (e.g., `DEFAULT_CONFIG.influenceIntentToken`, not `"__qdx_iit"`).
+- **Use constants, not magic strings.** Storage keys, config keys, and fixed values must use constants (e.g., `DEFAULT_INFLUENCE_INTENT_TOKEN_KEY` from `utils/constants.ts`, not `"__qdx_iit"`).
 - **Test the full flow.** When fixing bugs, add tests that reproduce the exact failure scenario.
 - **Never create unused code.** Do not add exports, functions, parameters, imports, or variables that won't be used.
 - **Clean up after yourself.** If you refactor or change code, immediately remove any dead code you create.
