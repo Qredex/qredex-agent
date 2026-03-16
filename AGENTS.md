@@ -130,7 +130,9 @@ After any user correction, capture the lesson to prevent repeating mistakes.
 - `storage/` → Browser storage (sessionStorage, cookies), token coordination
 - `api/` → HTTP client for Qredex endpoints (lock, etc.)
 - `utils/` → Shared utilities (logging, type guards, storage helpers)
-- `index.ts` → Public API exports, window attachment, event handler orchestration
+- `src/index.ts` → Public API exports, named `QredexAgent` object, event handler orchestration
+- `src/iife.ts` → CDN/IIFE entry point only; attaches `window.QredexAgent` and calls `QredexAgent.init()` if `autoInit !== false`. Do not add business logic here.
+- `packages/react/`, `packages/vue/`, `packages/svelte/`, `packages/angular/` → Framework wrapper packages; each builds independently. Run `npm run build:wrappers` to build all. Do not duplicate core agent logic in wrappers.
 
 ## Naming Rules
 
@@ -145,6 +147,18 @@ After any user correction, capture the lesson to prevent repeating mistakes.
     - `qdx_intent` = URL parameter name for IIT
 - Canonical API endpoint:
     - `/api/v1/agent/intents/lock` = Lock endpoint for IIT → PIT exchange
+- Build-time globals (declared in `src/globals.d.ts`, injected by Vite):
+    - `__QDX_ENV__` = `'development' | 'staging' | 'production' | 'test'` — controls log gating and endpoint selection
+    - `__QDX_LOCK_ENDPOINT__` = Build-time lock endpoint override (empty string in production; set via `QREDEX_AGENT_LOCK_ENDPOINT` env var)
+    - Use `__QDX_ENV__` for environment checks. There is no `__DEV__` global in this codebase.
+
+### IIT Replacement Behavior
+
+IIT can be overwritten by a new `?qdx_intent=` URL parameter until a PIT exists. Once a PIT is locked, new IIT captures from the URL are silently ignored and the URL is still cleaned. On a **successful lock**, the IIT is **removed** from storage (both sessionStorage and cookie) — PIT becomes the sole authoritative token.
+
+### Lifecycle States (`AgentState` in `core/state.ts`)
+
+`'idle'` → `'running'` → `'locking'` (during API call) → back to `'running'` (or `'destroyed'` after `destroy()`). Read via `getState().lifecycleState`.
 
 ## Security Rules
 
@@ -350,14 +364,14 @@ function isValidToken(token: unknown): token is string {
 - [ ] **Idempotency verified** (lock, detection pipeline)
 - [ ] **Type safety correct** (no `any`, proper TypeScript types)
 - [ ] **No unused code** (remove unused exports, functions, parameters, imports)
-- [ ] **No console.log in production** (use debug logger with `__DEV__` guard)
+- [ ] **No console.log in production** (use `debug()`/`info()`/`warn()`/`error()` from `utils/log.ts`; behavior is environment-gated by `__QDX_ENV__` — not `__DEV__`, which does not exist)
 
 ## Common Pitfalls
 
 ### 1. Storage Key Mismatch
 - **Problem:** Using different keys for IIT/PIT across modules
 - **Result:** Token not found, lock fails silently
-- **Solution:** Use constants from `DEFAULT_CONFIG` consistently
+- **Solution:** Use constants from `src/utils/constants.ts` (`DEFAULT_INFLUENCE_INTENT_TOKEN_KEY`, `DEFAULT_PURCHASE_INTENT_TOKEN_KEY`) consistently
 
 ### 2. Idempotency Violations
 - **Problem:** Lock called multiple times without in-flight check
@@ -372,7 +386,7 @@ function isValidToken(token: unknown): token is string {
 ### 4. Magic Strings in Tests
 - **Problem:** Hardcoded storage keys don't match config
 - **Result:** Tests fail or don't match production behavior
-- **Solution:** Use config values from `DEFAULT_CONFIG`
+- **Solution:** Use constants from `DEFAULT_INFLUENCE_INTENT_TOKEN_KEY` / `DEFAULT_PURCHASE_INTENT_TOKEN_KEY`
 
 ### 5. URL Cleaning Failures
 - **Problem:** `history.replaceState` fails on cross-origin or restricted contexts
@@ -389,7 +403,43 @@ function isValidToken(token: unknown): token is string {
 - **Result:** Premature lock, wasted API calls
 - **Solution:** Use specific selectors (`data-add-to-cart`, `.add-to-cart` class)
 
+### 8. IIT Not Removed After Successful Lock
+- **Problem:** Assuming IIT persists after a successful lock
+- **Result:** IIT is always removed from sessionStorage and cookie on lock success (`removeInfluenceIntentToken` in `api/lock.ts`); code that reads IIT after lock returns `null`
+- **Solution:** After lock succeeds, read PIT via `getPurchaseIntentToken()` — IIT is gone by design
+
 ## Common Patterns
+
+### Complete Public API Surface (`src/index.ts`)
+
+All methods are exported both as named exports and on the `QredexAgent` named object.
+
+| Group | Method | Description |
+|-------|--------|-------------|
+| **Read** | `getInfluenceIntentToken()` | Returns current IIT or `null` |
+| **Read** | `getPurchaseIntentToken()` | Returns current PIT or `null` |
+| **Read** | `hasInfluenceIntentToken()` | `boolean` — IIT present |
+| **Read** | `hasPurchaseIntentToken()` | `boolean` — PIT present |
+| **Read** | `getState()` | Returns `AgentStateSnapshot` (see below) |
+| **Commands** | `lockIntent(meta?)` | Manually trigger IIT → PIT lock |
+| **Commands** | `clearIntent()` | Clear both tokens from storage (`manual_clear`) |
+| **Cart events** | `handleCartChange({ itemCount, previousCount, meta?, timestamp? })` | Main cart state event; locks or clears automatically |
+| **Cart events** | `handleCartAdd(itemCount, meta?)` | Convenience wrapper for add-to-cart |
+| **Cart events** | `handleCartEmpty()` | Convenience wrapper for cart → empty |
+| **Cart events** | `handlePaymentSuccess(event?)` | Explicit post-checkout clear (`payment_success`) |
+| **Listeners** | `onLocked(handler)` / `offLocked(handler)` | PIT lock success events |
+| **Listeners** | `onCleared(handler)` / `offCleared(handler)` | Token clear events (`ClearReason`) |
+| **Listeners** | `onError(handler)` / `offError(handler)` | Error events (`AgentErrorCode`) |
+| **Listeners** | `onStateChanged(handler)` / `offStateChanged(handler)` | Attribution state change events |
+| **Listeners** | `onIntentCaptured(handler)` / `offIntentCaptured(handler)` | IIT capture events |
+| **Lifecycle** | `init(config?)` | Initialize agent; required for ESM/framework consumers |
+| **Lifecycle** | `isInitialized()` | `boolean` — whether `init()` has been called |
+| **Lifecycle** | `destroy()` / `stop()` | Remove all handlers, reset state; call in SPA unmount |
+
+Key types:
+- `ClearReason = 'cart_empty' | 'payment_success' | 'manual_clear'`
+- `AgentErrorCode = 'invalid_cart_counts' | 'lock_failed' | 'lock_request_failed'`
+- `AgentStateSnapshot` — fields: `initialized`, `lifecycleState`, `lockInProgress`, `lockAttempts`, `hasIIT`, `hasPIT`, `iit`, `pit`, `cartState`, `locked`, `timestamp`
 
 ### Module Export Pattern
 
@@ -453,12 +503,18 @@ export const lockIntent = async (meta?: Record<string, unknown>): Promise<LockRe
 ### Debug Logging
 
 ```typescript
-// ✅ Good: Guard with debug mode
-import { debug, info, warn } from '../utils/log.js';
+// ✅ Good: Use log utilities from utils/log.ts
+import { debug, info, warn, error } from '../utils/log.js';
+
+// Log policy (controlled by __QDX_ENV__ + config.debug):
+//   debug() — non-production AND debug=true only
+//   info()  — non-production AND debug=true only (NOT always-on)
+//   warn()  — non-production always (regardless of debug flag)
+//   error() — always fires in all environments
 
 export function storeToken(token: string): void {
-  debug('Token stored');  // Only logs if debug mode enabled
-  info('Token captured'); // Always logs important events
+  debug('Token stored');   // Only in non-production with debug=true
+  warn('Unexpected path'); // Non-production, always visible
 }
 ```
 
@@ -507,11 +563,19 @@ The library produces two bundles:
 
 ### Environment Configuration
 
-Required configuration:
-- `debug` = Enable debug logging (default: false)
-- `useMockEndpoint` = Generate mock PIT tokens for development/test only (default: false)
+Required configuration (passed to `init()` or `window.QredexAgentConfig`):
+- `debug` = Enable debug logging in non-production runtimes (default: false; silently ignored in production)
+- `useMockEndpoint` = Generate mock PIT tokens locally for dev/test only (default: false; silently ignored outside `development`/`test`)
 
-Internal runtime defaults:
+Preload-only option (valid only in `window.QredexAgentConfig`, not in `init()`):
+- `autoInit` = Whether the CDN/IIFE bundle calls `init()` automatically on load (default: true)
+
+**⚠️ NOT runtime configurable** — the following emit a warning and are ignored if passed:
+- `lockEndpoint` — build-time only (controlled by `QREDEX_AGENT_LOCK_ENDPOINT` env var at build time)
+- `influenceIntentToken` / `purchaseIntentToken` — storage keys are fixed constants
+- `cookieExpireDays` — fixed by the agent
+
+Internal constants (from `src/utils/constants.ts`):
 - `DEFAULT_LOCK_ENDPOINT` = Built-in Qredex lock API URL (build-time selected outside production)
 - `DEFAULT_INFLUENCE_INTENT_TOKEN_KEY` = IIT storage key (default: `__qdx_iit`)
 - `DEFAULT_PURCHASE_INTENT_TOKEN_KEY` = PIT storage key (default: `__qdx_pit`)
@@ -719,12 +783,15 @@ export function getPit(): string | null { ... } // Changed behavior without warn
 ### Core Documentation
 
 - [README.md](README.md) - Installation, API reference, usage examples
-- [Qredex Agent Flow](docs/QREDEX_AGENT_FLOW.md) - Canonical flow documentation
-
-### AI & Protocol
-
-- [Qredex AI Protocol](docs/QREDEX_AI_PROTOCOL.md) - AI interaction guidelines
-- [Qredex Context](docs/QREDEX_CONTEXT.md)
+- [docs/QREDEX_AGENT_FLOW.md](docs/QREDEX_AGENT_FLOW.md) - Canonical flow documentation
+- [docs/API.md](docs/API.md) - Full public API reference
+- [docs/LOCK_FLOW.md](docs/LOCK_FLOW.md) - IIT → PIT lock flow details
+- [docs/CART_CHANGE_BEHAVIOR.md](docs/CART_CHANGE_BEHAVIOR.md) - Cart event handling rules
+- [docs/CART_EMPTY_POLICY.md](docs/CART_EMPTY_POLICY.md) - Cart empty / token clear policy
+- [docs/INTEGRATION_MODEL.md](docs/INTEGRATION_MODEL.md) - Merchant integration patterns
+- [docs/INSTALLATION.md](docs/INSTALLATION.md) - Installation and setup guide
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - Local development workflow
+- [docs/RELEASE.md](docs/RELEASE.md) - Release and CDN publishing process
 
 ### Documentation Maintenance
 
