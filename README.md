@@ -737,6 +737,8 @@ Apache-2.0
 
 ---
 
-## Support
+## Qredex Contact
 
-For questions: [support@qredex.com](mailto:support@qredex.com)
+- **Website**: <https://qredex.com>
+- **X**: <https://x.com/qredex>
+- **Email**: [os@qredex.com](mailto:os@qredex.com)

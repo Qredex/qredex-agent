@@ -1036,3 +1036,79 @@ Clearly separate:
 - **Be concise, precise, and implementation-focused**
 - **When a request would degrade the system, challenge it and suggest a better path**
 - **Always optimize for systems that remain reliable and understandable years from now**
+
+---
+
+## Release and Changelog Instructions
+
+When preparing a release or making release-related documentation updates, you must follow these rules:
+
+### Changelog Requirements
+
+- **Ensure `CHANGELOG.md` exists** — create it if missing
+- **All changelog entries must be grounded in actual repository history** — review git history before writing entries
+- **Do not invent versions, dates, entries, or release notes** — everything must reflect real implemented changes
+- **Follow the format in `CHANGELOG.md`** — use Keep a Changelog format with Semantic Versioning
+
+### Release Process
+
+1. **Read the release guide first** — review `docs/RELEASE.md` before any release work
+2. **Follow the documented process exactly** — do not invent a new release process
+3. **Review git history** — check `git log --oneline` since the last release tag
+4. **Update `CHANGELOG.md`** — add entries for all meaningful changes since the last release
+5. **Run release checks** — execute `npm run release:check` before proceeding
+6. **Version bump** — use `npm run release:version -- <x.y.z>` following semver
+7. **Commit and push** — commit the version changes and push to `main`
+8. **GitHub automation** — tag creation triggers npm publish and CDN release workflows
+
+### If the Release Guide Conflicts
+
+- **Stop and surface the conflict** — do not guess or proceed with assumptions
+- **Ask for clarification** — release integrity is more important than speed
+
+### README Contact Section
+
+Ensure the bottom of `README.md` contains a `Qredex Contact` section with exactly:
+
+- **Website**: `https://qredex.com`
+- **X**: `https://x.com/qredex`
+- **Email**: `os@qredex.com`
+
+Do not omit any of these contact points.
+
+---
+
+## Resources
+
+### Core Documentation
+
+- [README.md](README.md) - Installation, API reference, usage examples
+- [docs/QREDEX_AGENT_FLOW.md](docs/QREDEX_AGENT_FLOW.md) - Canonical flow documentation
+- [docs/API.md](docs/API.md) - Full public API reference
+- [docs/LOCK_FLOW.md](docs/LOCK_FLOW.md) - IIT → PIT lock flow details
+- [docs/CART_CHANGE_BEHAVIOR.md](docs/CART_CHANGE_BEHAVIOR.md) - Cart event handling rules
+- [docs/CART_EMPTY_POLICY.md](docs/CART_EMPTY_POLICY.md) - Cart empty / token clear policy
+- [docs/INTEGRATION_MODEL.md](docs/INTEGRATION_MODEL.md) - Merchant integration patterns
+- [docs/INSTALLATION.md](docs/INSTALLATION.md) - Installation and setup guide
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - Local development workflow
+- [docs/RELEASE.md](docs/RELEASE.md) - Release and CDN publishing process
+- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+
+### Documentation Maintenance
+
+- **Keep docs updated**: When adding/changing APIs, update both README and flow docs
+- **Single source of truth**: README is the canonical API reference
+- **Test docs**: Verify examples in README work with current implementation
+
+---
+
+## Support
+
+For questions or clarifications:
+
+- **Technical issues**: Check existing documentation first
+- **Review similar implementations**: Look for patterns in the codebase
+- **Ask for clarification**: Before proceeding with ambiguous requirements
+- **Use plan mode**: For complex changes requiring architectural decisions
+
+Remember: When in doubt, ask. Never guess or assume.
