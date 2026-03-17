@@ -126,6 +126,9 @@ After any user correction, capture the lesson to prevent repeating mistakes.
 ## Package / Layer Rules
 
 - `bootstrap/` → Auto-start logic, configuration loading, URL capture
+  - `auto-start.ts` — `captureIntentToken()`, `cleanUrl()`, `autoStart()` (URL capture + IIT storage)
+  - `config.ts` — `initConfig()`, `getConfig()`, `getConfigValue<K>()`, `resolveConfig()`, `resetConfig()`
+  - `config-policy.ts` — Build-time policy gate (`AgentConfigPolicy`, `getCurrentConfigPolicy()`); controls whether `debug` and `useMockEndpoint` are allowed for the current `__QDX_ENV__`
 - `core/` → Centralized state management, lifecycle control, cart event handling
 - `storage/` → Browser storage (sessionStorage, cookies), token coordination
 - `api/` → HTTP client for Qredex endpoints (lock, etc.)
@@ -300,9 +303,11 @@ try {
 
 **Validation:**
 ```typescript
-function isValidToken(token: unknown): token is string {
+// src/utils/guards.ts — actual implementation returns boolean, not a type predicate
+function isValidToken(value: unknown): boolean {
   // Tokens must be non-empty string, 8-2048 characters
-  return typeof token === 'string' && token.length >= 8 && token.length <= 2048;
+  if (typeof value !== 'string' || value.length === 0) return false;
+  return value.length >= 8 && value.length <= 2048;
 }
 ```
 
@@ -408,6 +413,11 @@ function isValidToken(token: unknown): token is string {
 - **Result:** IIT is always removed from sessionStorage and cookie on lock success (`removeInfluenceIntentToken` in `api/lock.ts`); code that reads IIT after lock returns `null`
 - **Solution:** After lock succeeds, read PIT via `getPurchaseIntentToken()` — IIT is gone by design
 
+### 9. Suspicious Cart Transition Warnings
+- **Problem:** Calling `handleCartChange` with `itemCount === previousCount` or both zero
+- **Result:** Agent emits a `warn()` log: "unchanged cart count" or "empty → empty transition" — these are developer hints, not errors; they don't block execution
+- **Solution:** Only call `handleCartChange` on real merchant cart state transitions; use `handleCartAdd()` / `handleCartEmpty()` convenience wrappers where count tracking is hard
+
 ## Common Patterns
 
 ### Complete Public API Surface (`src/index.ts`)
@@ -440,6 +450,8 @@ Key types:
 - `ClearReason = 'cart_empty' | 'payment_success' | 'manual_clear'`
 - `AgentErrorCode = 'invalid_cart_counts' | 'lock_failed' | 'lock_request_failed'`
 - `AgentStateSnapshot` — fields: `initialized`, `lifecycleState`, `lockInProgress`, `lockAttempts`, `hasIIT`, `hasPIT`, `iit`, `pit`, `cartState`, `locked`, `timestamp`
+
+> **Type note:** `handleCartChange.meta` and `handleCartAdd.meta` accept `{ productId?: string; quantity?: number; price?: number }` (narrower). `lockIntent(meta?)` accepts `LockMeta = Record<string, unknown>` (open). Use `lockIntent()` directly when you need to pass arbitrary metadata fields.
 
 ### Module Export Pattern
 
@@ -525,8 +537,10 @@ export function storeToken(token: string): void {
 - Test individual modules in isolation
 - Mock `window`, `fetch`, and storage APIs appropriately
 - Cover edge cases (null tokens, network failures, storage unavailable)
-- **Use Vitest** for all unit tests
+- **Use Vitest** for all unit tests (`tests/unit/**/*.test.ts`)
 - **Test full flows**, not just individual functions (capture → store → lock)
+- **Test environment**: `happy-dom` (configured in `vitest.config.ts`); `__QDX_ENV__` is `'test'` and `__QDX_LOCK_ENDPOINT__` is `''` in tests
+- **Import alias**: `@qredex/agent` resolves to `src/index.ts` in test context (see `vitest.config.ts`)
 
 ### 2. Browser Tests
 
@@ -575,7 +589,10 @@ Preload-only option (valid only in `window.QredexAgentConfig`, not in `init()`):
 - `influenceIntentToken` / `purchaseIntentToken` — storage keys are fixed constants
 - `cookieExpireDays` — fixed by the agent
 
+**Config merge precedence:** `window.QredexAgentConfig` (preload) overrides values passed to `init()`. The `autoInit` field is stripped before merging so it never bleeds into internal config.
+
 Internal constants (from `src/utils/constants.ts`):
+- `PRODUCTION_LOCK_ENDPOINT` = `'https://api.qredex.com/api/v1/agent/intents/lock'` (always-production URL)
 - `DEFAULT_LOCK_ENDPOINT` = Built-in Qredex lock API URL (build-time selected outside production)
 - `DEFAULT_INFLUENCE_INTENT_TOKEN_KEY` = IIT storage key (default: `__qdx_iit`)
 - `DEFAULT_PURCHASE_INTENT_TOKEN_KEY` = PIT storage key (default: `__qdx_pit`)
@@ -656,14 +673,18 @@ export interface TokenStorageConfig {
   cookieExpireDays: number;
 }
 
-export type LockResult = 
-  | { success: true; purchaseToken: string; alreadyLocked: boolean }
-  | { success: false; purchaseToken: null; alreadyLocked: false; error: string };
+// src/api/types.ts — actual shape (interface, not discriminated union)
+export interface LockResult {
+  success: boolean;
+  purchaseToken: string | null;
+  alreadyLocked: boolean;
+  error?: string;
+}
 ```
 
 #### Type Guards for Validation
 ```typescript
-export function isValidToken(token: unknown): token is string {
+export function isValidToken(token: unknown): boolean {
   // Tokens must be non-empty string, 8-2048 characters
   return typeof token === 'string' && token.length >= 8 && token.length <= 2048;
 }
