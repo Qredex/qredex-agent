@@ -1,0 +1,245 @@
+version: 1
+project:
+  name: '@qredex/agent'
+  description: Lightweight browser agent for Qredex intent capture and locking
+  type: library
+metadata:
+  team: frontend
+  owner: qredex
+  repo_class: browser-sdk
+execution:
+  preferred: native
+  supported:
+    - native
+tools:
+  bun: '*'
+tasks:
+  setup:
+    description: Install agent dependencies
+    category: setup
+    run: bun install
+    safe_for_agent: true
+  build:
+    description: Build the core package and wrappers
+    category: build
+    run: bun run build
+    depends_on:
+      - setup
+    safe_for_agent: true
+  build:agent:
+    description: Build the core browser agent artifacts
+    category: build
+    run: bun run build:agent
+    depends_on:
+      - setup
+    safe_for_agent: true
+  build:cdn:dev:
+    description: Build the development CDN bundle
+    category: build
+    run: bun run build:cdn:dev
+    depends_on:
+      - setup
+    safe_for_agent: true
+  build:dev:
+    description: Build the development bundles
+    category: build
+    run: bun run build:dev
+    depends_on:
+      - setup
+    safe_for_agent: true
+  build:stage:
+    description: Build the staging bundles
+    category: build
+    run: bun run build:stage
+    depends_on:
+      - setup
+    safe_for_agent: true
+  build:wrappers:
+    description: Build framework wrappers
+    category: build
+    run: bun run build:wrappers
+    depends_on:
+      - setup
+    safe_for_agent: true
+  dev:
+    description: Start the agent development server
+    category: dev
+    run: bun run dev
+  example:
+    description: Run the example harness
+    category: dev
+    run: bun run example
+  example:serve:
+    description: Serve the example harness
+    category: dev
+    run: bun run example:serve
+  format:
+    description: Format the agent sources
+    category: test
+    run: bun run format
+    depends_on:
+      - setup
+    safe_for_agent: true
+  format:check:
+    description: Check agent formatting
+    category: test
+    run: bun run format:check
+    depends_on:
+      - setup
+    safe_for_agent: true
+  lint:
+    description: Lint the agent sources
+    category: test
+    run: bun run lint
+    depends_on:
+      - setup
+    safe_for_agent: true
+  preview:
+    description: Preview the built agent bundle
+    category: dev
+    run: bun run preview
+  publish:npm:
+    description: Publish the npm package
+    category: release
+    run: bun run publish:npm
+  publish:npm:dry-run:
+    description: Dry-run the npm publish flow
+    category: release
+    run: bun run publish:npm:dry-run
+  release:cdn:
+    description: Prepare the production CDN release
+    category: release
+    run: bun run release:cdn
+  release:cdn:backfill:
+    description: Backfill CDN history
+    category: release
+    run: bun run release:cdn:backfill
+  release:cdn:dev:
+    description: Prepare a development CDN release
+    category: release
+    run: bun run release:cdn:dev
+  release:cdn:dev:upload:
+    description: Upload the development CDN release
+    category: release
+    run: bun run release:cdn:dev:upload
+  release:cdn:staging:
+    description: Prepare a staging CDN release
+    category: release
+    run: bun run release:cdn:staging
+  release:cdn:staging:upload:
+    description: Upload the staging CDN release
+    category: release
+    run: bun run release:cdn:staging:upload
+  release:cdn:upload:
+    description: Upload the production CDN release
+    category: release
+    run: bun run release:cdn:upload
+  release:cdn:verify:
+    description: Verify CDN history and published artifacts
+    category: release
+    run: bun run release:cdn:verify
+    safe_for_agent: true
+  release:check:
+    description: Run the release verification suite
+    category: release
+    run: bun run release:check
+    depends_on:
+      - setup
+    safe_for_agent: true
+  release:version:
+    description: Bump the release version
+    category: release
+    run: bun run release:version
+  test:
+    description: Run the unit test suite
+    category: test
+    run: bun run test
+    depends_on:
+      - setup
+    safe_for_agent: true
+  test:browser:
+    description: Run browser-backed tests
+    category: test
+    run: bun run test:browser
+    depends_on:
+      - setup
+    safe_for_agent: true
+  test:bun:
+    description: Run the Bun test path
+    category: test
+    run: bun run test:bun
+    depends_on:
+      - setup
+    safe_for_agent: true
+  test:ui:
+    description: Run the Vitest UI
+    category: test
+    run: bun run test:ui
+    depends_on:
+      - setup
+    safe_for_agent: true
+  test:watch:
+    description: Run watch mode tests
+    category: test
+    run: bun run test:watch
+  unlink:
+    description: Remove the local Bun link
+    category: dev
+    run: bun run unlink
+  ci:
+    description: Run the standard agent verification suite
+    category: test
+    run: bun run release:check
+    depends_on:
+      - setup
+    safe_for_agent: true
+agent:
+  entrypoint: setup
+  default_task: ci
+  safe_tasks:
+    - setup
+    - build
+    - build:agent
+    - build:cdn:dev
+    - build:dev
+    - build:stage
+    - build:wrappers
+    - format
+    - format:check
+    - lint
+    - release:check
+    - test
+    - test:browser
+    - test:bun
+    - test:ui
+    - ci
+  verify_after_changes:
+    - format:check
+    - lint
+    - test
+    - release:check
+    - ci
+  writable_paths:
+    - docs
+    - examples
+    - packages
+    - scripts
+    - src
+    - tests
+    - README.md
+  protected_paths:
+    - dist
+    - node_modules
+    - package-lock.json
+    - bun.lock
+  notes: |
+    Use the Ota workflow first for setup, validation, and task execution.
+    Treat Ota as the default workflow, the way npm is the default in Node repos.
+    Use `ota validate` to verify the contract.
+    Use `ota doctor` to inspect readiness and agent guidance.
+    Use `ota tasks` to discover runnable repo actions.
+    Use `ota run setup` to prepare the repo.
+    Use `ota run ci` to run the canonical verification path.
+    Use bun for the primary workflow in this repo.
+    Keep wrapper packages and the core browser agent aligned.
+    Prefer release:check for confidence before publishing.

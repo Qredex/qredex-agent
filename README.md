@@ -524,7 +524,7 @@ The fastest way to test Qredex Agent:
 
 ```bash
 # Build the development IIFE bundle, start the local server, and open the test page
-npm run example
+ota run example
 ```
 
 If the browser does not open automatically:
@@ -713,7 +713,7 @@ Open DevTools → Application → Storage:
 
 | Example                                                                      | Description                             | Quick Start       |
 | ---------------------------------------------------------------------------- | --------------------------------------- | ----------------- |
-| [examples/index.html](examples/index.html)                                   | Example hub for CDN and wrapper pages   | `npm run example` |
+| [examples/index.html](examples/index.html)                                   | Example hub for CDN and wrapper pages   | `ota run example` |
 | [examples/cdn/index.html](examples/cdn/index.html)                           | Canonical script-tag customer path      | Open from the hub |
 | [examples/wrappers/react/index.html](examples/wrappers/react/index.html)     | Real React app using`@qredex/react`     | Open from the hub |
 | [examples/wrappers/vue/index.html](examples/wrappers/vue/index.html)         | Real Vue app using`@qredex/vue`         | Open from the hub |
