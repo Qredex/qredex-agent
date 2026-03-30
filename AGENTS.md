@@ -3,6 +3,8 @@
 This document defines how any AI agent (or engineer acting as an agent) must work inside the Qredex repositories to
 avoid drift, regressions, and "helpful but wrong" changes. It serves as a comprehensive guide for maintaining code quality, security, and architectural integrity.
 
+The authoritative machine-readable agent contract for this repository lives in [`ota.yaml`](ota.yaml). This file is human-facing guidance that must stay aligned with that contract and must not override it.
+
 ## System Overview
 
 Qredex is a source-agnostic attribution and integrity system for modern commerce that verifies and records purchase influence while detecting attribution corruption (coupon theft, link hijacking, tampering).
@@ -102,6 +104,9 @@ Use subagents for focused exploration and parallel research to keep the main con
 - **Avoid speculative work.** Do not browse adjacent code, run optional checks, or expand scope unless the current task or integration risk requires it.
 - **Compress communication.** Keep responses short, direct, and action-focused so unnecessary conversational token usage does not accumulate.
 - **Escalate only when necessary.** If certainty would require materially more usage, state the trade-off briefly and ask before doing broad exploration or expensive validation.
+- **Tell the user when the task should move to a higher reasoning level** (`high` or `xhigh`) for architecture, wide refactors, or deep review.
+- **If this repo has an `ota` manifest, use `ota validate`, `ota doctor`, `ota tasks`, and `ota run` first; treat `ota` as the canonical task runner.**
+- **If a new repo command is needed, update `ota` so the command becomes discoverable and reusable instead of creating one-off shell instructions.**
 
 ## Change Discipline
 
@@ -984,8 +989,10 @@ Use the minimum context, tokens, tool calls, edits, and validation needed to com
 - Avoid speculative work. Do not expand scope unless the task or integration risk requires it.
 - Keep communication compressed, direct, and high-signal.
 - Escalate only when necessary. If materially more usage would be required to increase certainty, state the trade-off briefly before doing broader exploration or heavier validation.
+- Tell the user when the task should move to a higher reasoning level (`high` or `xhigh`) for architecture, wide refactors, or deep review.
+- If this repo has an `ota` manifest, use `ota validate`, `ota doctor`, `ota tasks`, and `ota run` first; treat `ota` as the canonical task runner.
+- If a new repo command is needed, update `ota` so the command becomes discoverable and reusable instead of creating one-off shell instructions.
 
----
 
 ## Engineering High-Leverage Mode
 

@@ -32,3 +32,4 @@
 - 2026-03-13: In sequence diagrams, arrow origin is part of the product contract. If the merchant owns order submission, the order arrow must start from the merchant lane, not the QredexAgent lane.
 - 2026-03-14: When documenting optional manual init for CDN/script-tag usage, explicitly state that auto-init and automatic IIT capture remain the default and recommended path. Do not let the docs imply merchants should manually capture IIT.
 - 2026-03-14: Be proactively opinionated about platform and documentation improvements. Do not wait for the user to ask before recommending the cleaner, safer, more customer-facing path when it is materially better.
+- 2026-03-29: If work is drifting into architecture, wide refactors, or deep review, explicitly tell the user to step up the reasoning level instead of silently staying on medium.
