@@ -28,10 +28,11 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 
-const version = process.argv[2];
+const version = process.env.OTA_INPUT_VERSION ?? process.argv[2];
 
 if (!version) {
-  console.error('Usage: npm run release:version -- <x.y.z>');
+  console.error('Usage: ota run release:version --version <x.y.z>');
+  console.error('Or: npm run release:version -- <x.y.z>');
   process.exit(1);
 }
 

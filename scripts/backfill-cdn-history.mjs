@@ -31,7 +31,12 @@ import { isMissingR2ObjectError } from './cdn-r2-utils.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 const bucket = process.env.QREDEX_CDN_BUCKET;
-const rawVersions = process.argv.slice(2).flatMap((value) => value.split(',')).map((value) => value.trim()).filter(Boolean);
+const rawVersions = (
+  process.env.OTA_INPUT_VERSIONS?.split(',') ?? process.argv.slice(2)
+)
+  .flatMap((value) => value.split(','))
+  .map((value) => value.trim())
+  .filter(Boolean);
 const assetFiles = ['qredex-agent.iife.min.js', 'qredex-agent.iife.min.js.map'];
 
 if (!bucket) {
@@ -40,7 +45,8 @@ if (!bucket) {
 }
 
 if (rawVersions.length === 0) {
-  console.error('Provide one or more versions to backfill, for example: node scripts/backfill-cdn-history.mjs 1.0.0 1.0.1');
+  console.error('Provide one or more versions to backfill, for example: ota run release:cdn:backfill --versions 1.0.0,1.0.1');
+  console.error('Or: node scripts/backfill-cdn-history.mjs 1.0.0 1.0.1');
   process.exit(1);
 }
 
