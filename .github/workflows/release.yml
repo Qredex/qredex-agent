@@ -65,6 +65,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Install ota
+        run: |
+          curl -fsSL https://dist.ota.run/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate ota contract
+        run: ota validate
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -97,7 +105,7 @@ jobs:
 
       - name: Lint
         if: steps.release.outputs.should_release == 'true'
-        run: npm run lint
+        run: ota run lint
 
       - name: Install Playwright browser
         if: steps.release.outputs.should_release == 'true'
@@ -105,20 +113,20 @@ jobs:
 
       - name: Browser smoke test
         if: steps.release.outputs.should_release == 'true'
-        run: npm run test:browser
+        run: ota run test:browser
 
       - name: Release checks
         if: steps.release.outputs.should_release == 'true'
-        run: npm run release:check
+        run: ota run release:check
 
       - name: Prepare CDN release assets
         if: steps.release.outputs.should_release == 'true'
-        run: node scripts/prepare-cdn-release.mjs
+        run: ota run release:cdn
 
       - name: Upload CDN release assets
         if: steps.release.outputs.should_release == 'true'
-        run: npm run release:cdn:upload
+        run: ota run release:cdn:upload
 
       - name: Verify CDN history
         if: steps.release.outputs.should_release == 'true'
-        run: npm run release:cdn:verify
+        run: ota run release:cdn:verify

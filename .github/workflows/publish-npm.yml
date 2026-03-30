@@ -62,6 +62,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Install ota
+        run: |
+          curl -fsSL https://dist.ota.run/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate ota contract
+        run: ota validate
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -100,7 +108,7 @@ jobs:
 
       - name: Publish packages to npm
         if: steps.release.outputs.should_publish == 'true'
-        run: npm run publish:npm
+        run: ota run publish:npm
         env:
           QREDEX_NPM_PROVENANCE: 'true'
 

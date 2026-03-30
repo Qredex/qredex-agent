@@ -54,6 +54,14 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install ota
+        run: |
+          curl -fsSL https://dist.ota.run/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate ota contract
+        run: ota validate
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -65,12 +73,12 @@ jobs:
         run: npm ci
 
       - name: Verify CDN history
-        run: npm run release:cdn:verify
+        run: ota run release:cdn:verify
 
       - name: Backfill CDN history
         if: github.event.inputs.backfill_versions != ''
-        run: node scripts/backfill-cdn-history.mjs "${{ github.event.inputs.backfill_versions }}"
+        run: ota run release:cdn:backfill --versions "${{ github.event.inputs.backfill_versions }}"
 
       - name: Verify CDN history after backfill
         if: github.event.inputs.backfill_versions != ''
-        run: npm run release:cdn:verify
+        run: ota run release:cdn:verify

@@ -53,6 +53,14 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install ota
+        run: |
+          curl -fsSL https://dist.ota.run/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate ota contract
+        run: ota validate
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -64,19 +72,19 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: ota run lint
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
       - name: Browser smoke test
-        run: npm run test:browser
+        run: ota run test:browser
 
       - name: Unit tests
-        run: npm run test
+        run: ota run test
 
       - name: Prepare staging CDN release assets
-        run: npm run release:cdn:staging
+        run: ota run release:cdn:staging
 
       - name: Upload staging CDN release assets
-        run: npm run release:cdn:staging:upload
+        run: ota run release:cdn:staging:upload
