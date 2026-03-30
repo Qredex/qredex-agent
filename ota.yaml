@@ -12,21 +12,22 @@ execution:
   supported:
     - native
 tools:
-  bun: '*'
+  node: '>=18'
+  npm: '*'
 tasks:
   setup:
     description: Install agent dependencies
     notes: |
       Use this first after cloning or when dependencies change.
     category: setup
-    run: bun install
+    run: npm ci
     safe_for_agent: true
   build:
     description: Build the core package and wrappers
     notes: |
       Use this to verify the package and wrapper bundles still build cleanly.
     category: build
-    run: bun run build
+    run: npm run build
     depends_on:
       - setup
     safe_for_agent: true
@@ -35,7 +36,7 @@ tasks:
     notes: |
       Use this when you need the browser agent bundles specifically.
     category: build
-    run: bun run build:agent
+    run: npm run build:agent
     depends_on:
       - setup
     safe_for_agent: true
@@ -44,7 +45,7 @@ tasks:
     notes: |
       Use this to produce the development CDN artifact.
     category: build
-    run: bun run build:cdn:dev
+    run: npm run build:cdn:dev
     depends_on:
       - setup
     safe_for_agent: true
@@ -53,7 +54,7 @@ tasks:
     notes: |
       Use this for local development bundle verification.
     category: build
-    run: bun run build:dev
+    run: npm run build:dev
     depends_on:
       - setup
     safe_for_agent: true
@@ -62,7 +63,7 @@ tasks:
     notes: |
       Use this when preparing the staging bundle set.
     category: build
-    run: bun run build:stage
+    run: npm run build:stage
     depends_on:
       - setup
     safe_for_agent: true
@@ -71,7 +72,7 @@ tasks:
     notes: |
       Use this when the framework wrapper packages need to be rebuilt.
     category: build
-    run: bun run build:wrappers
+    run: npm run build:wrappers
     depends_on:
       - setup
     safe_for_agent: true
@@ -80,25 +81,25 @@ tasks:
     notes: |
       Use this for local development and manual debugging.
     category: dev
-    run: bun run dev
+    run: npm run dev
   example:
     description: Run the example harness
     notes: |
       Use this to exercise the example integration harness.
     category: dev
-    run: bun run example
+    run: npm run example
   example:serve:
     description: Serve the example harness
     notes: |
       Use this when you need to serve the example app directly.
     category: dev
-    run: bun run example:serve
+    run: npm run example:serve
   format:
     description: Format the agent sources
     notes: |
       Use this before committing to keep source formatting consistent.
     category: test
-    run: bun run format
+    run: npm run format
     depends_on:
       - setup
     safe_for_agent: true
@@ -107,7 +108,7 @@ tasks:
     notes: |
       Use this as a quick formatting gate without rewriting files.
     category: test
-    run: bun run format:check
+    run: npm run format:check
     depends_on:
       - setup
     safe_for_agent: true
@@ -116,7 +117,7 @@ tasks:
     notes: |
       Use this to catch source issues before tests or releases.
     category: test
-    run: bun run lint
+    run: npm run lint
     depends_on:
       - setup
     safe_for_agent: true
@@ -125,74 +126,130 @@ tasks:
     notes: |
       Use this to inspect the built package before release or publication.
     category: dev
-    run: bun run preview
+    run: npm run preview
   publish:npm:
     description: Publish the npm package
     notes: |
       Use this only when you are ready to release the package publicly.
+      Example: ota run publish:npm
+      Typical flow:
+        ota run release:check
+        ota run publish:npm
     category: release
-    run: bun run publish:npm
+    run: npm run publish:npm
   publish:npm:dry-run:
     description: Dry-run the npm publish flow
     notes: |
       Use this to validate the publish flow without publishing.
+      Example: ota run publish:npm:dry-run
+      Typical flow:
+        ota run release:check
+        ota run publish:npm:dry-run
     category: release
-    run: bun run publish:npm:dry-run
+    run: npm run publish:npm:dry-run
   release:cdn:
     description: Prepare the production CDN release
     notes: |
       Use this when preparing the production CDN artifact.
+      Example: ota run release:cdn
+      Typical flow:
+        ota run release:check
+        ota run release:cdn
+        ota run release:cdn:verify
     category: release
-    run: bun run release:cdn
+    run: npm run release:cdn
   release:cdn:backfill:
     description: Backfill CDN history
     notes: |
       Use this for CDN history repair or backfill work.
+      Example: ota run release:cdn:backfill --versions 1.0.0,1.0.1
+      Example env + task command: QREDEX_CDN_BUCKET=... ota run release:cdn:backfill --versions 1.0.0,1.0.1
+      This task requires `QREDEX_CDN_BUCKET` to be set.
+      The `versions` input is a comma-separated list of release versions.
+      Example script command: node scripts/backfill-cdn-history.mjs 1.0.0 1.0.1
     category: release
-    run: bun run release:cdn:backfill
+    run: npm run release:cdn:backfill
+    inputs:
+      versions:
+        description: Comma-separated release versions to backfill in CDN history
+        required: true
   release:cdn:dev:
     description: Prepare a development CDN release
     notes: |
       Use this to prepare the development CDN artifact.
+      Example: ota run release:cdn:dev
+      Typical flow:
+        ota run release:cdn:dev
+        ota run release:cdn:dev:upload
     category: release
-    run: bun run release:cdn:dev
+    run: npm run release:cdn:dev
   release:cdn:dev:upload:
     description: Upload the development CDN release
     notes: |
       Use this to publish the development CDN artifact.
+      Example: ota run release:cdn:dev:upload
+      Example env + task command: QREDEX_CDN_BUCKET=... ota run release:cdn:dev:upload
+      This task requires `QREDEX_CDN_BUCKET` to be set.
+      Typical flow:
+        ota run release:cdn:dev
+        ota run release:cdn:dev:upload
     category: release
-    run: bun run release:cdn:dev:upload
+    run: npm run release:cdn:dev:upload
   release:cdn:staging:
     description: Prepare a staging CDN release
     notes: |
       Use this to prepare the staging CDN artifact.
+      Example: ota run release:cdn:staging
+      Typical flow:
+        ota run release:cdn:staging
+        ota run release:cdn:staging:upload
     category: release
-    run: bun run release:cdn:staging
+    run: npm run release:cdn:staging
   release:cdn:staging:upload:
     description: Upload the staging CDN release
     notes: |
       Use this to publish the staging CDN artifact.
+      Example: ota run release:cdn:staging:upload
+      Example env + task command: QREDEX_CDN_BUCKET=... ota run release:cdn:staging:upload
+      This task requires `QREDEX_CDN_BUCKET` to be set.
+      Typical flow:
+        ota run release:cdn:staging
+        ota run release:cdn:staging:upload
     category: release
-    run: bun run release:cdn:staging:upload
+    run: npm run release:cdn:staging:upload
   release:cdn:upload:
     description: Upload the production CDN release
     notes: |
       Use this only when the production CDN artifact is ready.
+      Example: ota run release:cdn:upload
+      Example env + task command: QREDEX_CDN_BUCKET=... ota run release:cdn:upload
+      This task requires `QREDEX_CDN_BUCKET` to be set.
+      Typical flow:
+        ota run release:cdn
+        ota run release:cdn:upload
     category: release
-    run: bun run release:cdn:upload
+    run: npm run release:cdn:upload
   release:cdn:verify:
     description: Verify CDN history and published artifacts
     notes: |
       Use this to confirm the CDN release history is consistent.
+      Example: ota run release:cdn:verify
+      Example env + task command: QREDEX_CDN_BUCKET=... ota run release:cdn:verify
+      This task requires `QREDEX_CDN_BUCKET` to be set.
+      Typical flow:
+        ota run release:cdn:verify
     category: release
-    run: bun run release:cdn:verify
+    run: npm run release:cdn:verify
     safe_for_agent: true
   release:check:
     description: Run the release verification suite
     notes: |
       Use this as the release gate before publishing the package.
+      Example: ota run release:check
+      Typical flow:
+        ota run release:check
     category: release
-    run: bun run release:check
+    run: npm run release:check
     depends_on:
       - setup
     safe_for_agent: true
@@ -200,14 +257,25 @@ tasks:
     description: Bump the release version
     notes: |
       Use this when preparing a new release version.
+      Example: ota run release:version --version 1.2.3
+      The task forwards `--version` into `OTA_INPUT_VERSION` for scripts/set-release-version.mjs.
+      Typical flow:
+        ota run release:version --version 1.2.3
+        ota run release:check
+      Example script command: npm run release:version -- 1.2.3
+      Example script file: node scripts/set-release-version.mjs 1.2.3
     category: release
-    run: bun run release:version
+    run: npm run release:version
+    inputs:
+      version:
+        description: New release version to apply to the package set
+        required: true
   test:
     description: Run the unit test suite
     notes: |
       Use this for the standard unit test pass.
     category: test
-    run: bun run test
+    run: npm run test
     depends_on:
       - setup
     safe_for_agent: true
@@ -216,16 +284,16 @@ tasks:
     notes: |
       Use this when browser-backed validation is needed.
     category: test
-    run: bun run test:browser
+    run: npm run test:browser
     depends_on:
       - setup
     safe_for_agent: true
   test:bun:
     description: Run the Bun test path
     notes: |
-      Use this for the Bun-specific test surface.
+      Use this only when the Bun-specific test surface is required.
     category: test
-    run: bun run test:bun
+    run: npm run test:bun
     depends_on:
       - setup
     safe_for_agent: true
@@ -234,7 +302,7 @@ tasks:
     notes: |
       Use this when you want the interactive Vitest UI.
     category: test
-    run: bun run test:ui
+    run: npm run test:ui
     depends_on:
       - setup
     safe_for_agent: true
@@ -243,19 +311,19 @@ tasks:
     notes: |
       Use this for long-running local test feedback loops.
     category: test
-    run: bun run test:watch
+    run: npm run test:watch
   unlink:
     description: Remove the local Bun link
     notes: |
       Use this to detach the local package link after development work.
     category: dev
-    run: bun run unlink
+    run: npm run unlink
   ci:
     description: Run the standard agent verification suite
     notes: |
       Use this as the canonical local verification path before merging changes.
     category: test
-    run: bun run release:check
+    run: npm run release:check
     depends_on:
       - setup
     safe_for_agent: true
@@ -306,6 +374,6 @@ agent:
     Use `ota tasks` to discover runnable repo actions.
     Use `ota run setup` to prepare the repo.
     Use `ota run ci` to run the canonical verification path.
-    Use bun for the primary workflow in this repo.
+    Use npm for the primary workflow in this repo.
     Keep wrapper packages and the core browser agent aligned.
     Prefer release:check for confidence before publishing.
