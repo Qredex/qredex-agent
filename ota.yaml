@@ -16,11 +16,15 @@ tools:
 tasks:
   setup:
     description: Install agent dependencies
+    notes: |
+      Use this first after cloning or when dependencies change.
     category: setup
     run: bun install
     safe_for_agent: true
   build:
     description: Build the core package and wrappers
+    notes: |
+      Use this to verify the package and wrapper bundles still build cleanly.
     category: build
     run: bun run build
     depends_on:
@@ -28,6 +32,8 @@ tasks:
     safe_for_agent: true
   build:agent:
     description: Build the core browser agent artifacts
+    notes: |
+      Use this when you need the browser agent bundles specifically.
     category: build
     run: bun run build:agent
     depends_on:
@@ -35,6 +41,8 @@ tasks:
     safe_for_agent: true
   build:cdn:dev:
     description: Build the development CDN bundle
+    notes: |
+      Use this to produce the development CDN artifact.
     category: build
     run: bun run build:cdn:dev
     depends_on:
@@ -42,6 +50,8 @@ tasks:
     safe_for_agent: true
   build:dev:
     description: Build the development bundles
+    notes: |
+      Use this for local development bundle verification.
     category: build
     run: bun run build:dev
     depends_on:
@@ -49,6 +59,8 @@ tasks:
     safe_for_agent: true
   build:stage:
     description: Build the staging bundles
+    notes: |
+      Use this when preparing the staging bundle set.
     category: build
     run: bun run build:stage
     depends_on:
@@ -56,6 +68,8 @@ tasks:
     safe_for_agent: true
   build:wrappers:
     description: Build framework wrappers
+    notes: |
+      Use this when the framework wrapper packages need to be rebuilt.
     category: build
     run: bun run build:wrappers
     depends_on:
@@ -63,18 +77,26 @@ tasks:
     safe_for_agent: true
   dev:
     description: Start the agent development server
+    notes: |
+      Use this for local development and manual debugging.
     category: dev
     run: bun run dev
   example:
     description: Run the example harness
+    notes: |
+      Use this to exercise the example integration harness.
     category: dev
     run: bun run example
   example:serve:
     description: Serve the example harness
+    notes: |
+      Use this when you need to serve the example app directly.
     category: dev
     run: bun run example:serve
   format:
     description: Format the agent sources
+    notes: |
+      Use this before committing to keep source formatting consistent.
     category: test
     run: bun run format
     depends_on:
@@ -82,6 +104,8 @@ tasks:
     safe_for_agent: true
   format:check:
     description: Check agent formatting
+    notes: |
+      Use this as a quick formatting gate without rewriting files.
     category: test
     run: bun run format:check
     depends_on:
@@ -89,6 +113,8 @@ tasks:
     safe_for_agent: true
   lint:
     description: Lint the agent sources
+    notes: |
+      Use this to catch source issues before tests or releases.
     category: test
     run: bun run lint
     depends_on:
@@ -96,51 +122,75 @@ tasks:
     safe_for_agent: true
   preview:
     description: Preview the built agent bundle
+    notes: |
+      Use this to inspect the built package before release or publication.
     category: dev
     run: bun run preview
   publish:npm:
     description: Publish the npm package
+    notes: |
+      Use this only when you are ready to release the package publicly.
     category: release
     run: bun run publish:npm
   publish:npm:dry-run:
     description: Dry-run the npm publish flow
+    notes: |
+      Use this to validate the publish flow without publishing.
     category: release
     run: bun run publish:npm:dry-run
   release:cdn:
     description: Prepare the production CDN release
+    notes: |
+      Use this when preparing the production CDN artifact.
     category: release
     run: bun run release:cdn
   release:cdn:backfill:
     description: Backfill CDN history
+    notes: |
+      Use this for CDN history repair or backfill work.
     category: release
     run: bun run release:cdn:backfill
   release:cdn:dev:
     description: Prepare a development CDN release
+    notes: |
+      Use this to prepare the development CDN artifact.
     category: release
     run: bun run release:cdn:dev
   release:cdn:dev:upload:
     description: Upload the development CDN release
+    notes: |
+      Use this to publish the development CDN artifact.
     category: release
     run: bun run release:cdn:dev:upload
   release:cdn:staging:
     description: Prepare a staging CDN release
+    notes: |
+      Use this to prepare the staging CDN artifact.
     category: release
     run: bun run release:cdn:staging
   release:cdn:staging:upload:
     description: Upload the staging CDN release
+    notes: |
+      Use this to publish the staging CDN artifact.
     category: release
     run: bun run release:cdn:staging:upload
   release:cdn:upload:
     description: Upload the production CDN release
+    notes: |
+      Use this only when the production CDN artifact is ready.
     category: release
     run: bun run release:cdn:upload
   release:cdn:verify:
     description: Verify CDN history and published artifacts
+    notes: |
+      Use this to confirm the CDN release history is consistent.
     category: release
     run: bun run release:cdn:verify
     safe_for_agent: true
   release:check:
     description: Run the release verification suite
+    notes: |
+      Use this as the release gate before publishing the package.
     category: release
     run: bun run release:check
     depends_on:
@@ -148,10 +198,14 @@ tasks:
     safe_for_agent: true
   release:version:
     description: Bump the release version
+    notes: |
+      Use this when preparing a new release version.
     category: release
     run: bun run release:version
   test:
     description: Run the unit test suite
+    notes: |
+      Use this for the standard unit test pass.
     category: test
     run: bun run test
     depends_on:
@@ -159,6 +213,8 @@ tasks:
     safe_for_agent: true
   test:browser:
     description: Run browser-backed tests
+    notes: |
+      Use this when browser-backed validation is needed.
     category: test
     run: bun run test:browser
     depends_on:
@@ -166,6 +222,8 @@ tasks:
     safe_for_agent: true
   test:bun:
     description: Run the Bun test path
+    notes: |
+      Use this for the Bun-specific test surface.
     category: test
     run: bun run test:bun
     depends_on:
@@ -173,6 +231,8 @@ tasks:
     safe_for_agent: true
   test:ui:
     description: Run the Vitest UI
+    notes: |
+      Use this when you want the interactive Vitest UI.
     category: test
     run: bun run test:ui
     depends_on:
@@ -180,14 +240,20 @@ tasks:
     safe_for_agent: true
   test:watch:
     description: Run watch mode tests
+    notes: |
+      Use this for long-running local test feedback loops.
     category: test
     run: bun run test:watch
   unlink:
     description: Remove the local Bun link
+    notes: |
+      Use this to detach the local package link after development work.
     category: dev
     run: bun run unlink
   ci:
     description: Run the standard agent verification suite
+    notes: |
+      Use this as the canonical local verification path before merging changes.
     category: test
     run: bun run release:check
     depends_on:
