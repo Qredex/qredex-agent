@@ -288,15 +288,6 @@ tasks:
     depends_on:
       - setup
     safe_for_agent: true
-  test:bun:
-    description: Run the Bun test path
-    notes: |
-      Use this only when the Bun-specific test surface is required.
-    category: test
-    run: npm run test:bun
-    depends_on:
-      - setup
-    safe_for_agent: true
   test:ui:
     description: Run the Vitest UI
     notes: |
@@ -344,7 +335,6 @@ agent:
     - release:check
     - test
     - test:browser
-    - test:bun
     - test:ui
     - ci
   verify_after_changes:
