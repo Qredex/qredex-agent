@@ -1,6 +1,6 @@
 {
   "name": "@qredex/react",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "React wrapper for Qredex Agent",
   "type": "module",
   "sideEffects": false,
@@ -28,7 +28,7 @@
     "react"
   ],
   "dependencies": {
-    "@qredex/agent": "^1.1.4"
+    "@qredex/agent": "^1.1.5"
   },
   "devDependencies": {
     "@qredex/agent": "file:../.."
