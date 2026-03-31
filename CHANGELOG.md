@@ -32,7 +32,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bumped package versions to 1.1.5 and aligned wrapper dependency ranges ([171c2a1](https://github.com/Qredex/qredex-agent/commit/171c2a1))
+- Adopted Ota as the canonical repo task runner and aligned the agent contract, task guidance, and local workflow docs ([0a021d6](https://github.com/Qredex/qredex-agent/commit/0a021d6), [620b714](https://github.com/Qredex/qredex-agent/commit/620b714), [f0ecacc](https://github.com/Qredex/qredex-agent/commit/f0ecacc))
+- Migrated CI and release workflows to validate and execute Ota tasks, including Node.js 18/20/22 coverage and workflow updates for release and publish paths ([6b30afc](https://github.com/Qredex/qredex-agent/commit/6b30afc))
+- Updated release scripts to accept `OTA_INPUT_*` environment variables and improved release task usage guidance ([fe340fd](https://github.com/Qredex/qredex-agent/commit/fe340fd))
+- Removed the Bun-only test task from the Ota contract after standardizing on the npm-backed workflow ([326fe3d](https://github.com/Qredex/qredex-agent/commit/326fe3d))
+- Added npm keywords to the wrapper packages and kept package versions and dependency ranges aligned at `1.1.5` ([171c2a1](https://github.com/Qredex/qredex-agent/commit/171c2a1))
+
+### Fixed
+
+- Fixed the README link to the local development guide so it uses a repo-relative path instead of a workstation-specific filesystem path ([ce2113b](https://github.com/Qredex/qredex-agent/commit/ce2113b))
 
 ## [1.1.4] - 2026-03-17
 
@@ -82,9 +90,13 @@ This release focuses on infrastructure improvements and documentation fixes:
 
 ### Version 1.1.5
 
-This release updates package metadata only:
+This release focused on repo workflow standardization and release hygiene:
 
-- **Version Bump**: Moved all package manifests to 1.1.5 and kept wrapper dependency ranges aligned
+- **Ota Adoption**: Standardized the repo task contract and task runner guidance around Ota
+- **CI and Release Workflow**: Validated Ota tasks in CI and aligned release/publish workflows with the task contract
+- **Release Inputs**: Added `OTA_INPUT_*` support for release scripts and clarified task usage
+- **Package Metadata**: Bumped all manifests to `1.1.5`, aligned wrapper dependency ranges, and added npm keywords
+- **Docs Cleanup**: Fixed the README local docs link to stay repo-relative
 
 ### Version 1.1.3
 
