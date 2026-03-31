@@ -28,6 +28,12 @@ All notable changes to the Qredex Agent project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-03-31
+
+### Changed
+
+- Bumped package versions to 1.1.5 and aligned wrapper dependency ranges ([171c2a1](https://github.com/Qredex/qredex-agent/commit/171c2a1))
+
 ## [1.1.4] - 2026-03-17
 
 ### Changed
@@ -73,6 +79,12 @@ This release focuses on infrastructure improvements and documentation fixes:
 - **Node.js Compatibility**: Verified lint scripts work across Node.js 18-22
 - **Package Discovery**: Added keywords to improve npm discoverability
 - **Documentation**: Fixed broken relative path links in README
+
+### Version 1.1.5
+
+This release updates package metadata only:
+
+- **Version Bump**: Moved all package manifests to 1.1.5 and kept wrapper dependency ranges aligned
 
 ### Version 1.1.3
 
