@@ -28,16 +28,40 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 
-const version = process.env.OTA_INPUT_VERSION ?? process.argv[2];
+const versionInput = process.env.OTA_INPUT_VERSION ?? process.argv[2];
 
-if (!version) {
-  console.error('Usage: ota run release:version --version <x.y.z>');
-  console.error('Or: npm run release:version -- <x.y.z>');
+if (!versionInput) {
+  console.error('Usage: ota run release:version --version major|minor|patch|<x.y.z>');
+  console.error('Or: npm run release:version -- <major|minor|patch|x.y.z>');
   process.exit(1);
 }
 
+const rootPackagePath = resolve(rootDir, 'package.json');
+const rootPackageJson = JSON.parse(readFileSync(rootPackagePath, 'utf8'));
+const currentVersion = rootPackageJson.version;
+
+const bumpVersion = (current, selector) => {
+  const [major, minor, patchWithSuffix = '0'] = current.split('.');
+  const patch = Number.parseInt(patchWithSuffix, 10);
+
+  switch (selector) {
+    case 'major':
+      return `${Number.parseInt(major, 10) + 1}.0.0`;
+    case 'minor':
+      return `${major}.${Number.parseInt(minor, 10) + 1}.0`;
+    case 'patch':
+      return `${major}.${minor}.${patch + 1}`;
+    default:
+      return selector;
+  }
+};
+
+const version = ['major', 'minor', 'patch'].includes(versionInput)
+  ? bumpVersion(currentVersion, versionInput)
+  : versionInput.replace(/^v/, '');
+
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(version)) {
-  console.error(`Invalid semver version: ${version}`);
+  console.error(`Invalid semver version: ${versionInput}`);
   process.exit(1);
 }
 

@@ -257,18 +257,19 @@ tasks:
     description: Bump the release version
     notes: |
       Use this when preparing a new release version.
-      Example: ota run release:version --version 1.2.3
+      You can pass `major`, `minor`, `patch`, or an explicit semantic version.
+      Example: ota run release:version --version minor
       The task forwards `--version` into `OTA_INPUT_VERSION` for scripts/set-release-version.mjs.
       Typical flow:
-        ota run release:version --version 1.2.3
+        ota run release:version --version minor
         ota run release:check
-      Example script command: npm run release:version -- 1.2.3
-      Example script file: node scripts/set-release-version.mjs 1.2.3
+      Example script command: npm run release:version -- minor
+      Example script file: node scripts/set-release-version.mjs minor
     category: release
     run: npm run release:version
     inputs:
       version:
-        description: New release version to apply to the package set
+        description: Release bump selector or semantic version to apply to the package set
         required: true
   test:
     description: Run the unit test suite
@@ -321,6 +322,11 @@ tasks:
 agent:
   entrypoint: setup
   default_task: ci
+  bootstrap:
+    ota:
+      note: Only install ota if it is missing and installation is approved.
+      sh: curl -fsSL https://dist.ota.run/install.sh | sh
+      powershell: irm https://dist.ota.run/install.ps1 | iex
   safe_tasks:
     - setup
     - build

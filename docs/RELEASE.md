@@ -36,7 +36,7 @@ It verifies:
 ## NPM
 
 ```bash
-npm run release:version -- 1.0.1
+npm run release:version -- minor
 npm run release:check
 npm run publish:npm:dry-run
 npm run publish:npm
@@ -62,7 +62,7 @@ The publish script is rerunnable. If a package version is already on npm, the sc
 
 The automated release path is:
 
-1. run `npm run release:version -- <x.y.z>`
+1. run `npm run release:version -- <major|minor|patch|x.y.z>`
 2. commit and push the version change to `main`
 3. GitHub Actions creates tag `v<x.y.z>`
 4. the completed tag workflow triggers npm publish and CDN release workflows
