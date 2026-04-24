@@ -68,7 +68,7 @@ jobs:
       - name: Setup ota
         uses: ota-run/setup@v1
         with:
-          ota-version: 1.4.7
+          ota-version: 1.6.1
 
       - name: Validate ota contract
         run: ota validate
@@ -81,7 +81,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: npm ci
+        run: ota run ci --mode native --stream
 
       - name: Resolve release tag
         id: release
@@ -129,4 +129,4 @@ jobs:
 
       - name: Verify CDN history
         if: steps.release.outputs.should_release == 'true'
-        run: ota run release:cdn:verify
+        run: ota run release:cdn:verify 
