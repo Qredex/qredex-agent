@@ -356,6 +356,8 @@ tasks:
     category: test
     run: echo "Agent CI verification complete."
     depends_on:
+      - setup
+      - format:check
       - lint
       - test:browser
       - release:check

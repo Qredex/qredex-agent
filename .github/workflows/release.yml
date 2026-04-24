@@ -81,7 +81,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: ota run ci --mode native --stream
+        run: ota run ci --mode native --ephemeral --stream
 
       - name: Resolve release tag
         id: release
@@ -103,30 +103,14 @@ jobs:
         if: steps.release.outputs.should_release != 'true'
         run: echo "Skipping production CDN publish because this main commit did not create a production release tag."
 
-      - name: Lint
-        if: steps.release.outputs.should_release == 'true'
-        run: ota run lint
-
-      - name: Install Playwright browser
-        if: steps.release.outputs.should_release == 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Browser smoke test
-        if: steps.release.outputs.should_release == 'true'
-        run: ota run test:browser
-
-      - name: Release checks
-        if: steps.release.outputs.should_release == 'true'
-        run: ota run release:check
-
       - name: Prepare CDN release assets
         if: steps.release.outputs.should_release == 'true'
-        run: ota run release:cdn
+        run: ota run release:cdn --mode native --ephemeral
 
       - name: Upload CDN release assets
         if: steps.release.outputs.should_release == 'true'
-        run: ota run release:cdn:upload
+        run: ota run release:cdn:upload --mode native --ephemeral
 
       - name: Verify CDN history
         if: steps.release.outputs.should_release == 'true'
-        run: ota run release:cdn:verify 
+        run: ota run release:cdn:verify --mode native --ephemeral

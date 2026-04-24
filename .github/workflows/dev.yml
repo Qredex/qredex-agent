@@ -67,23 +67,11 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: ota run lint
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Browser smoke test
-        run: ota run test:browser
-
-      - name: Unit tests
-        run: ota run test
+      - name: Run canonical CI
+        run: ota run ci --ephemeral
 
       - name: Prepare dev CDN release assets
-        run: ota run release:cdn:dev
+        run: ota run release:cdn:dev --ephemeral
 
       - name: Upload dev CDN release assets
-        run: ota run release:cdn:dev:upload
+        run: ota run release:cdn:dev:upload --ephemeral

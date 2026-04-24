@@ -69,16 +69,13 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Verify CDN history
-        run: ota run release:cdn:verify
+        run: ota run release:cdn:verify --ephemeral
 
       - name: Backfill CDN history
         if: github.event.inputs.backfill_versions != ''
-        run: ota run release:cdn:backfill --versions "${{ github.event.inputs.backfill_versions }}"
+        run: ota run release:cdn:backfill --ephemeral --versions "${{ github.event.inputs.backfill_versions }}"
 
       - name: Verify CDN history after backfill
         if: github.event.inputs.backfill_versions != ''
-        run: ota run release:cdn:verify
+        run: ota run release:cdn:verify --ephemeral

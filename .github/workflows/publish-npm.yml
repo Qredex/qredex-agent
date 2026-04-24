@@ -80,9 +80,6 @@ jobs:
       - name: Setup npm CLI
         run: npm install --global npm@11.5.1
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Resolve release tag
         id: release
         run: |
@@ -108,7 +105,7 @@ jobs:
 
       - name: Publish packages to npm
         if: steps.release.outputs.should_publish == 'true'
-        run: ota run publish:npm
+        run: ota run publish:npm --ephemeral
         env:
           QREDEX_NPM_PROVENANCE: 'true'
 

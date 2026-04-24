@@ -66,17 +66,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: ota run lint
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Browser smoke test
-        run: ota run test:browser
-
-      - name: Release checks
-        run: ota run release:check
+      - name: Run canonical CI
+        run: ota run ci --ephemeral
