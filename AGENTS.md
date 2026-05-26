@@ -96,6 +96,32 @@ Use subagents for focused exploration and parallel research to keep the main con
 - Specify exactly what information should be returned
 - Launch multiple subagents concurrently for independent tasks
 
+## Subagent Delegation Policy
+
+Use subagents only when they improve quality, speed, or risk control.
+
+Spawn subagents when:
+- The task can be split into independent workstreams.
+- An independent review would materially reduce risk.
+- Research, testing, security review, or codebase inspection can happen in parallel.
+
+Do not spawn subagents when:
+- The task is trivial or narrowly scoped.
+- Multiple agents would duplicate the same work.
+- Coordination overhead exceeds the benefit.
+
+When using subagents:
+1. Give each subagent a narrow objective.
+2. Prefer read-only investigation unless edits are explicitly useful.
+3. Keep the main agent accountable for final decisions.
+4. Review and challenge subagent outputs before integrating them.
+5. Report what each subagent checked, what was accepted, and what was rejected.
+
+Default pattern:
+- One main implementation path.
+- One independent reviewer or test-design subagent when useful.
+- Avoid committee-style delegation.
+
 ## Model Usage Limit Discipline
 
 - **Treat Codex and other model/agent usage limits as a hard resource constraint.** Optimize for minimum usage without degrading correctness, safety, or architectural quality.
